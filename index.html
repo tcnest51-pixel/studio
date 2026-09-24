@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Studio IA Universel — 52 thèmes · Seedance</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
+<title>Studio IA Universel — 52 thèmes + Favoris + Historique + ZIP</title>
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     :root {
@@ -38,6 +37,7 @@
         z-index: 1000; opacity: 0;
         transition: transform 0.35s ease, opacity 0.35s ease;
         max-width: 90vw; text-align: center;
+        display: flex; align-items: center; gap: 0.5rem;
     }
     .toast.visible { transform: translateX(-50%) translateY(0); opacity: 1; }
     .toast.success { background: var(--success); }
@@ -116,13 +116,7 @@
         box-shadow: 0 0 0 2px var(--accent), 0 0 20px rgba(74,108,247,0.3);
         background: var(--panel-2);
     }
-    .theme-card .t-emoji {
-        font-size: 1.9rem;
-        display: block;
-        margin-bottom: 0.3rem;
-        line-height: 1;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
-    }
+    .theme-card .t-emoji { font-size: 1.5rem; display: block; margin-bottom: 0.2rem; }
     .theme-card .t-name { font-size: 0.68rem; font-weight: 600; line-height: 1.15; }
     .theme-card .t-desc { font-size: 0.55rem; opacity: 0.6; margin-top: 0.1rem; line-height: 1.15; }
     .theme-card .fav-btn {
@@ -139,7 +133,7 @@
         font-size: 0.78rem; color: var(--ink);
         margin-bottom: 1rem; line-height: 1.45;
     }
-    .theme-banner strong { color: var(--accent); font-size: 1.1rem; }
+    .theme-banner strong { color: var(--accent); }
 
     .section {
         background: var(--panel); border: 1px solid var(--border);
@@ -150,6 +144,7 @@
         padding: 0.9rem 1.1rem; cursor: pointer; user-select: none;
         display: flex; justify-content: space-between; align-items: center;
     }
+    .section-header:active { background: var(--panel-2); }
     .section-title {
         font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;
         color: var(--ink-dim); font-weight: 700;
@@ -157,7 +152,7 @@
     .section-title .badge {
         display: inline-block; margin-left: 0.4rem; padding: 0.1rem 0.4rem;
         background: var(--accent); color: #fff; border-radius: 10px;
-        font-size: 0.65rem;
+        font-size: 0.65rem; letter-spacing: 0;
     }
     .section-header .chevron { font-size: 0.7rem; color: var(--ink-faint); transition: transform 0.2s; }
     .section.open .section-header .chevron { transform: rotate(180deg); }
@@ -175,7 +170,7 @@
         width: 100%; padding: 0.85rem 1rem;
         border-radius: 8px; border: 1px solid var(--border);
         background: var(--panel-2); color: var(--ink);
-        font-family: ui-monospace, monospace;
+        font-family: ui-monospace, 'SF Mono', Menlo, monospace;
         font-size: 0.85rem; margin-bottom: 0.6rem;
     }
     .api-key-input:focus { outline: none; border-color: var(--accent); }
@@ -228,7 +223,7 @@
     .upload-zone.loading { pointer-events: none; opacity: 0.6; }
     .upload-zone input[type="file"] { display: none; }
     .upload-icon { font-size: 2.2rem; margin-bottom: 0.6rem; opacity: 0.7; }
-    .upload-text { font-size: 0.95rem; margin-bottom: 0.2rem; font-weight: 600; }
+    .upload-text { font-size: 0.95rem; color: var(--ink); margin-bottom: 0.2rem; font-weight: 600; }
     .upload-hint { font-size: 0.75rem; color: var(--ink-dim); }
     .images-grid {
         display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
@@ -250,6 +245,7 @@
         position: absolute; top: 4px; left: 4px;
         background: rgba(0,0,0,0.65); color: #fff;
         font-size: 9px; padding: 2px 5px; border-radius: 6px;
+        pointer-events: none;
     }
 
     .prompt-main {
@@ -279,9 +275,9 @@
         cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
     }
     .style-card.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .style-card .style-emoji { font-size: 1.3rem; flex-shrink: 0; }
+    .style-card .style-emoji { font-size: 1.2rem; flex-shrink: 0; }
     .style-card .style-name { font-size: 0.8rem; font-weight: 600; line-height: 1.2; }
-    .style-card .style-desc { font-size: 0.65rem; opacity: 0.75; margin-top: 0.1rem; }
+    .style-card .style-desc { font-size: 0.65rem; opacity: 0.75; margin-top: 0.1rem; line-height: 1.2; }
     .style-category-header {
         grid-column: 1 / -1;
         font-size: 0.7rem; font-weight: 700;
@@ -354,12 +350,13 @@
         background: var(--panel); font-size: 0.82rem;
     }
     .queue-item.pending { opacity: 0.5; }
+    .queue-item.creating { border-color: var(--warn); }
     .queue-item.processing { border-color: var(--accent); }
     .queue-item.done { border-color: var(--success); }
     .queue-item.failed { border-color: var(--error); }
-    .queue-item .q-icon { font-size: 1rem; width: 1.5rem; text-align: center; }
+    .queue-item .q-icon { font-size: 1rem; width: 1.5rem; text-align: center; flex-shrink: 0; }
     .queue-item .q-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .queue-item .q-status { font-size: 0.72rem; color: var(--ink-dim); }
+    .queue-item .q-status { font-size: 0.72rem; color: var(--ink-dim); text-align: right; flex-shrink: 0; }
 
     .gallery { margin-top: 1.5rem; }
     .gallery-grid {
@@ -379,9 +376,13 @@
 
     .history-section {
         background: var(--panel); border: 1px solid var(--border);
-        border-radius: var(--radius); margin-top: 1rem; overflow: hidden;
+        border-radius: var(--radius); margin-top: 1rem;
+        overflow: hidden;
     }
-    .history-toolbar { display: flex; gap: 0.4rem; flex-wrap: wrap; padding: 0 1.1rem 0.7rem; }
+    .history-toolbar {
+        display: flex; gap: 0.4rem; flex-wrap: wrap;
+        padding: 0 1.1rem 0.7rem;
+    }
     .history-toolbar button {
         flex: 1 1 auto; min-width: 100px;
         padding: 0.6rem 0.8rem; border-radius: 8px;
@@ -391,7 +392,11 @@
     }
     .history-toolbar button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
     .history-toolbar button.danger { background: transparent; color: var(--error); border-color: var(--error); }
-    .history-list { padding: 0 1.1rem 1rem; max-height: 500px; overflow-y: auto; }
+
+    .history-list {
+        padding: 0 1.1rem 1rem;
+        max-height: 500px; overflow-y: auto;
+    }
     .history-empty {
         text-align: center; padding: 1.5rem;
         color: var(--ink-dim); font-size: 0.8rem; font-style: italic;
@@ -407,19 +412,25 @@
         background: #000; overflow: hidden; flex-shrink: 0;
         display: flex; align-items: center; justify-content: center;
     }
-    .history-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .history-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .history-thumb .emoji { font-size: 1.4rem; }
     .history-info { flex: 1; min-width: 0; }
-    .history-title { font-size: 0.78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .history-title {
+        font-size: 0.78rem; font-weight: 600;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
     .history-meta { font-size: 0.65rem; color: var(--ink-dim); }
-    .history-actions { display: flex; gap: 0.25rem; }
+    .history-actions { display: flex; gap: 0.25rem; flex-shrink: 0; }
     .history-actions button {
         width: 32px; height: 32px; border-radius: 6px;
         border: 1px solid var(--border); background: var(--panel);
         color: var(--ink); font-size: 0.85rem;
         cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
-    .history-checkbox { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
+    .history-checkbox {
+        width: 20px; height: 20px; flex-shrink: 0;
+        accent-color: var(--accent); cursor: pointer;
+    }
 
     .status-bar {
         position: fixed; bottom: 0; left: 0; right: 0;
@@ -433,7 +444,7 @@
     .status-bar .spinner {
         width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.3);
         border-top-color: #fff; border-radius: 50%;
-        animation: spin 0.8s linear infinite;
+        animation: spin 0.8s linear infinite; flex-shrink: 0;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -455,7 +466,7 @@
     }
     .edit-modal-header .close-x {
         background: transparent; border: none; color: var(--ink-dim);
-        font-size: 1.4rem; cursor: pointer; line-height: 1;
+        font-size: 1.4rem; cursor: pointer; padding: 0 0.4rem; line-height: 1;
     }
     .edit-canvas-wrap {
         background: #000; border-radius: 8px; overflow: hidden;
@@ -474,7 +485,8 @@
     }
     .edit-slider-row {
         display: grid; grid-template-columns: 80px 1fr 40px;
-        gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;
+        gap: 0.5rem; align-items: center;
+        margin-bottom: 0.5rem; font-size: 0.72rem;
     }
     .edit-slider-row label { color: var(--ink-dim); font-weight: 600; font-size: 0.65rem; text-transform: uppercase; }
     .edit-slider-row input[type="range"] {
@@ -487,17 +499,30 @@
         width: 16px; height: 16px; border-radius: 50%;
         background: var(--accent); cursor: pointer;
     }
-    .edit-slider-row .val { color: var(--ink); font-weight: 700; text-align: right; font-size: 0.7rem; }
+    .edit-slider-row .val {
+        color: var(--ink); font-weight: 700; text-align: right;
+        font-size: 0.7rem; font-variant-numeric: tabular-nums;
+    }
     .edit-presets { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.7rem 0; }
     .edit-preset {
         padding: 0.4rem 0.7rem; border-radius: 16px;
         border: 1px solid var(--border); background: var(--panel-2);
         color: var(--ink-dim); font-size: 0.7rem; cursor: pointer;
     }
-    .edit-preset.selected { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 700; }
+    .edit-preset.selected {
+        background: var(--accent); color: #fff; border-color: var(--accent);
+        font-weight: 700;
+    }
     .edit-actions { display: flex; gap: 0.5rem; margin-top: 0.8rem; }
-    .edit-actions button { flex: 1; padding: 0.75rem; border-radius: 8px; font-family: inherit; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
-    .edit-btn-cancel { border: 1px solid var(--border); background: var(--panel-2); color: var(--ink-dim); }
+    .edit-actions button {
+        flex: 1; padding: 0.75rem; border-radius: 8px;
+        font-family: inherit; font-size: 0.85rem; font-weight: 700;
+        cursor: pointer;
+    }
+    .edit-btn-cancel {
+        border: 1px solid var(--border); background: var(--panel-2);
+        color: var(--ink-dim);
+    }
     .edit-btn-save { border: none; background: var(--accent); color: #fff; }
 
     #noSleepCanvas { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0.01; pointer-events: none; z-index: -1; }
@@ -508,7 +533,7 @@
 
 <header>
     <h1>Studio IA Universel</h1>
-    <p class="subtitle">52 thèmes · Seedance · Favoris · Historique</p>
+    <p class="subtitle">52 thèmes · Favoris · Historique · ZIP · Partage</p>
 </header>
 
 <div class="theme-filter">
@@ -522,19 +547,19 @@
 
 <div class="theme-banner" id="theme-banner">
     <strong>Le principe :</strong> Choisis un thème, ajoute tes photos, décris ta vision.
-    L'IA Seedance transforme chaque image en vidéo. Format portrait 9:16.
+    L'IA transforme chaque image en vidéo dans ce style. Format portrait 9:16.
 </div>
 
 <div class="api-panel" id="api-panel">
     <input type="password" class="api-key-input" id="api-key-input"
-           placeholder="Collez votre token Hugging Face ici (hf_...)" autocomplete="off" spellcheck="false">
-    <button type="button" class="api-save-btn" id="api-save-btn">Enregistrer le token</button>
+           placeholder="Collez votre clé API Agnes ici (sk-...)" autocomplete="off" spellcheck="false">
+    <button type="button" class="api-save-btn" id="api-save-btn">Enregistrer la clé</button>
     <div class="api-status-line" id="api-status-line">
         <span class="status-dot"></span>
-        <span id="api-status-text">Aucun token Hugging Face enregistré</span>
+        <span id="api-status-text">Aucune clé API enregistrée</span>
     </div>
     <div class="api-hint">
-        Token gratuit sur <a href="https://huggingface.co/settings/tokens" target="_blank">huggingface.co/settings/tokens</a> → New token (Write)
+        Clé gratuite sur <a href="https://platform.agnes-ai.com" target="_blank">platform.agnes-ai.com</a> → Settings → API Keys
     </div>
     <div class="stat-line" id="stat-line">
         <span>📊 Vitesse moyenne : <span id="stat-speed">en attente</span></span>
@@ -706,20 +731,28 @@
 <canvas id="noSleepCanvas" width="2" height="2"></canvas>
 <video id="noSleepVideo" playsinline muted loop></video>
 
-<script type="module">
-import { Client, handle_file } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
-
+<script>
 // ══════════════════════════════════════════════════════════════════
 // CONFIGURATION
 // ══════════════════════════════════════════════════════════════════
-const HF_SPACE = "dream2589632147/Dream-wan2-2-faster-Pro";
-const HF_API_NAME = "/generate_video";
-const HF_TOKEN_STORAGE = 'hf_token';
-const THEME_STORAGE = 'studio_theme';
-const WAKE_LOCK_PREF = 'studio_wakelock';
-const FAV_STORAGE = 'studio_favorites';
-const HISTORY_STORAGE = 'studio_history';
-const TIMING_CACHE_KEY = 'studio_timing';
+const API_BASE = 'https://apihub.agnes-ai.com/v1';
+const POLL_BASE = 'https://apihub.agnes-ai.com/agnesapi';
+const MODEL_VIDEO = 'agnes-video-v2.0';
+const FRAME_RATE = 24;
+
+let createIntervalMs = 62000;
+const CREATE_INTERVAL_MIN = 62000;
+const CREATE_INTERVAL_MAX = 90000;
+const CREATE_INTERVAL_SAFE = 75000;
+const POLL_INTERVAL_SEC = 8;
+const MAX_POLL_ATTEMPTS = 100;
+
+const TIMING_CACHE_KEY = 'agnes_timing_v4';
+const API_KEY_STORAGE = 'agnes_api_key';
+const THEME_STORAGE = 'agnes_theme';
+const WAKE_LOCK_PREF = 'agnes_wakelock';
+const FAV_STORAGE = 'agnes_favorites_v1';
+const HISTORY_STORAGE = 'agnes_history_v1';
 
 const MAX_VISIBLE_QUEUE = 30;
 const MAX_IMAGE_SIZE = 12 * 1024 * 1024;
@@ -735,436 +768,767 @@ const CATEGORIES = {
     creative: { name: 'Créatifs', emoji: '🎨' },
     business: { name: 'Business', emoji: '💼' },
     daily:    { name: 'Vie quotidienne', emoji: '🌍' },
-    action:   { name: 'Action', emoji: '⚔️' },
+    action:   { name: 'Action & Aventure', emoji: '⚔️' },
     ambiance: { name: 'Ambiances', emoji: '🌙' },
     niche:    { name: 'Niches', emoji: '💎' }
 };
 
 // ══════════════════════════════════════════════════════════════════
-// LES 52 THÈMES
+// 52 THÈMES
 // ══════════════════════════════════════════════════════════════════
 const THEMES = {
-    apocalypse: { name: 'Apocalypse', emoji: '☢️', desc: 'Fin du monde', cat: 'popular', accent: '#ff4500', accent2: '#b85a1a', banner: 'Scènes post-apocalyptiques : cendres, ruines, ciels rouges.', presets: [
-        { label: '☢️ Nucléaire', text: 'Décor post-nucléaire, ciel rouge sang, fumée, cendres, ruines.' },
-        { label: '🧟 Zombie', text: 'Post-apocalyptique zombie, ruines, voitures abandonnées, survie.' },
-        { label: '🔥 Incendie', text: 'Brasier géant, flammes, fumée noire, ciel orange.' },
-        { label: '👽 Alien', text: 'Invasion extraterrestre, vaisseaux, lumières vertes, chaos.' }
-    ], styles: [
-        { id: 'nuclear', name: 'Cendres', emoji: '☢️', desc: 'Gris', cat: 'ambiance', prompt: 'post-nuclear winter atmosphere, gray ash, desaturated tones, ruined world' },
-        { id: 'blood-sky', name: 'Ciel rouge', emoji: '🔴', desc: 'Rouge', cat: 'ambiance', prompt: 'blood-red apocalyptic sky, red sun, dark clouds, ominous' },
-        { id: 'ruins', name: 'Ruines', emoji: '🏚️', desc: 'Détruit', cat: 'transform', prompt: 'total destruction, collapsing buildings, twisted metal' }
-    ]},
-    tiktok: { name: 'TikTok Hook', emoji: '⚡', desc: 'Viral', cat: 'popular', accent: '#fe2c55', accent2: '#25f4ee', banner: 'Vidéos verticales pour capter l\'attention en 3 secondes.', presets: [
-        { label: '😱 Choc', text: 'Zoom rapide, contraste élevé, mouvement dynamique, énergie virale.' },
-        { label: '👀 Révélation', text: 'La caméra révèle le sujet, suspense, hook puissant.' }
-    ], styles: [
-        { id: 'hook-fast', name: 'Hook rapide', emoji: '⚡', desc: 'Zoom', cat: 'ambiance', prompt: 'fast dynamic zoom, high energy, viral TikTok hook' },
-        { id: 'loop', name: 'Boucle', emoji: '🔁', desc: 'Loop', cat: 'ambiance', prompt: 'perfect loop, seamless motion, hypnotic' }
-    ]},
-    anime: { name: 'Anime', emoji: '🌸', desc: 'Ghibli', cat: 'popular', accent: '#ff88aa', accent2: '#4a9e7a', banner: 'Scènes Anime : Ghibli, manga, cel shading.', presets: [
-        { label: '🌿 Ghibli', text: 'Style Studio Ghibli, aquarelle, nature, poétique.' },
-        { label: '⚔️ Shonen', text: 'Style anime shonen, énergie, mouvement, effets épiques.' }
-    ], styles: [
-        { id: 'ghibli-s', name: 'Ghibli', emoji: '🌿', desc: 'Aquarelle', cat: 'transform', prompt: 'Studio Ghibli anime style, Hayao Miyazaki, watercolor' },
-        { id: 'shonen', name: 'Shonen', emoji: '⚔️', desc: 'Action', cat: 'transform', prompt: 'shonen anime, dynamic action, speed lines' }
-    ]},
-    cinematic: { name: 'Cinématique', emoji: '🎬', desc: 'Look film', cat: 'popular', accent: '#d4a017', accent2: '#8a4a1a', banner: 'Plans cinématographiques : grain, profondeur, dramatique.', presets: [
-        { label: '🎬 Film', text: 'Look cinématographique, grain film, profondeur de champ.' },
-        { label: '🌅 Golden hour', text: 'Lumière dorée, ombres chaudes, reflets.' }
-    ], styles: [
-        { id: 'film', name: 'Film', emoji: '🎬', desc: 'Grain', cat: 'ambiance', prompt: 'cinematic film look, dramatic lighting, film grain' },
-        { id: 'golden', name: 'Golden', emoji: '🌅', desc: 'Chaud', cat: 'ambiance', prompt: 'golden hour, warm sunlight, amber glow' },
-        { id: 'noir', name: 'Film Noir', emoji: '🕵️', desc: 'Noir', cat: 'ambiance', prompt: 'film noir, high contrast black and white, chiaroscuro' }
-    ]},
-    horror: { name: 'Horreur', emoji: '👻', desc: 'Gothique', cat: 'popular', accent: '#8a1a1a', accent2: '#3a1a3a', banner: 'Scènes d\'horreur : gothique, ombres, brume.', presets: [
-        { label: '👻 Fantôme', text: 'Apparition fantomatique, brume, ambiance gothique.' },
-        { label: '🕯️ Maison hantée', text: 'Maison hantée, bougies, ombres mouvantes.' }
-    ], styles: [
-        { id: 'ghost', name: 'Fantôme', emoji: '👻', desc: 'Transparence', cat: 'ambiance', prompt: 'ghostly apparition, transparent figure, gothic horror' },
-        { id: 'haunted', name: 'Hantée', emoji: '🕯️', desc: 'Bougies', cat: 'ambiance', prompt: 'haunted house, flickering candles, moving shadows' }
-    ]},
-    fantasy: { name: 'Fantastique', emoji: '🐉', desc: 'Magie', cat: 'popular', accent: '#7b2d8e', accent2: '#4a9e7a', banner: 'Scènes fantastiques : dragons, magie, forêts.', presets: [
-        { label: '🐉 Dragon', text: 'Dragon volant, flammes, montagnes, épique.' },
-        { label: '🧙 Magie', text: 'Sort magique, particules, runes, mystique.' }
-    ], styles: [
-        { id: 'dragon-f', name: 'Dragon', emoji: '🐉', desc: 'Créature', cat: 'transform', prompt: 'epic fantasy dragon, scales, fire breath' },
-        { id: 'enchanted', name: 'Forêt', emoji: '🌲', desc: 'Lucioles', cat: 'ambiance', prompt: 'enchanted forest, fireflies, magical mist' }
-    ]},
-    cyberpunk: { name: 'Cyberpunk', emoji: '🌆', desc: 'Néon', cat: 'popular', accent: '#ff2d9f', accent2: '#25f4ee', banner: 'Scènes Cyberpunk : néons, pluie, hologrammes.', presets: [
-        { label: '🌃 Néon', text: 'Rue cyberpunk, néons rose et cyan, reflets.' },
-        { label: '🤖 Robot', text: 'Cyborg futuriste, implants, yeux lumineux.' }
-    ], styles: [
-        { id: 'neon-rain', name: 'Néon pluie', emoji: '🌧️', desc: 'Pluie', cat: 'ambiance', prompt: 'neon-soaked rainy street, pink and cyan, cyberpunk' },
-        { id: 'chrome', name: 'Chrome', emoji: '🤖', desc: 'Métal', cat: 'transform', prompt: 'chrome metallic, cybernetic implants, robotic' }
-    ]},
-    story: { name: 'Story / Ciné', emoji: '🎞️', desc: 'Narration', cat: 'popular', accent: '#c9a84a', accent2: '#4a6cf7', banner: 'Plans narratifs de cinéma : ouverture, flashback.', presets: [
-        { label: '🎬 Ouverture', text: 'Plan d\'ouverture cinématographique, caméra révèle.' },
-        { label: '💭 Flashback', text: 'Flashback, souvenir flou, lumière chaude, nostalgie.' },
-        { label: '🎭 Cliffhanger', text: 'Scène de fin, suspense, cliffhanger dramatique.' }
-    ], styles: [
-        { id: 'opening', name: 'Ouverture', emoji: '🎬', desc: 'Intro', cat: 'ambiance', prompt: 'cinematic opening shot, dramatic reveal, tension' },
-        { id: 'flashback', name: 'Flashback', emoji: '💭', desc: 'Souvenir', cat: 'ambiance', prompt: 'flashback scene, faded memory, warm nostalgic' },
-        { id: 'cliffhanger', name: 'Suspense', emoji: '🎭', desc: 'Fin', cat: 'ambiance', prompt: 'dramatic cliffhanger, intense gaze, suspense' }
-    ]},
-    portrait: { name: 'Portrait Vivant', emoji: '🧑‍🎤', desc: 'Respiration', cat: 'popular', accent: '#4a6cf7', accent2: '#7b8fff', banner: 'Portraits vivants : respiration, clignements.', presets: [
-        { label: '😌 Paisible', text: 'Portrait paisible, respiration lente, lumière douce.' },
-        { label: '🎭 Intense', text: 'Portrait intense, regard profond, dramatique.' }
-    ], styles: [
-        { id: 'breath', name: 'Respiration', emoji: '😌', desc: 'Souffle', cat: 'ambiance', prompt: 'slow breathing, chest rising, peaceful expression' },
-        { id: 'blink', name: 'Clignements', emoji: '👁️', desc: 'Yeux', cat: 'ambiance', prompt: 'natural blinking, subtle facial micro-expressions' }
-    ]},
-    videogame: { name: 'Jeu Vidéo', emoji: '🕹️', desc: 'AAA', cat: 'gaming', accent: '#00d4c8', accent2: '#4a6cf7', banner: 'Scènes de jeu vidéo AAA : cinématique épique.', presets: [
-        { label: '🎬 Cinématique', text: 'Cinématique AAA, éclairage épique, caméra hollywoodienne.' },
-        { label: '⚔️ Action', text: 'Scène d\'action, combat, particules, mouvement rapide.' }
-    ], styles: [
-        { id: 'aaa-cinema', name: 'Cinématique', emoji: '🎬', desc: 'Blockbuster', cat: 'ambiance', prompt: 'AAA video game cinematic, epic lighting, blockbuster' },
-        { id: 'action-vg', name: 'Action', emoji: '⚔️', desc: 'Combat', cat: 'ambiance', prompt: 'action video game, combat, particle effects' }
-    ]},
-    fortnite: { name: 'Fortnite', emoji: '🎮', desc: 'Battle Royale', cat: 'gaming', accent: '#00d4ff', accent2: '#9b30ff', banner: 'Scènes Fortnite : Victory Royale, drop, zone.', presets: [
-        { label: '🏆 Victory', text: 'Victory Royale, couleurs vives, célébration, hype.' },
-        { label: '🪂 Drop', text: 'Drop depuis le bus, parachute, île en dessous.' },
-        { label: '🌪️ Zone', text: 'Tempête qui approche, tension, survie.' }
-    ], styles: [
-        { id: 'victory', name: 'Victory', emoji: '🏆', desc: 'Victoire', cat: 'ambiance', prompt: 'Fortnite Victory Royale, vibrant colors, hype energy' },
-        { id: 'fortnite-style', name: 'Style', emoji: '🌈', desc: 'Cartoon', cat: 'transform', prompt: 'Fortnite stylized cartoon graphics, cel-shaded' }
-    ]},
-    dbd: { name: 'Dead by Daylight', emoji: '🔪', desc: 'Horreur', cat: 'gaming', accent: '#c0392b', accent2: '#4a1a1a', banner: 'Scènes DBD : brume, survivants, tueurs.', presets: [
-        { label: '🔪 Tueur', text: 'Tueur DBD, brume, arme, horreur asymétrique.' },
-        { label: '🏃 Survivant', text: 'Survivant en fuite, brume, panique, lampe.' },
-        { label: '🌫️ Brume', text: 'Brume DBD, entité, silhouettes menaçantes.' }
-    ], styles: [
-        { id: 'dbd-fog', name: 'Brume', emoji: '🌫️', desc: 'Fog', cat: 'ambiance', prompt: 'Dead by Daylight fog, thick mist, asymmetric horror' },
-        { id: 'dbd-killer', name: 'Tueur', emoji: '🔪', desc: 'Menace', cat: 'ambiance', prompt: 'DBD killer, menacing presence, dark weapon' },
-        { id: 'dbd-entity', name: 'Entité', emoji: '🕷️', desc: 'Cauchemar', cat: 'ambiance', prompt: 'DBD entity, spider claws, nightmare realm' }
-    ]},
-    pixel: { name: 'Pixel Art', emoji: '👾', desc: '8/16 bits', cat: 'gaming', accent: '#ff6b1a', accent2: '#4a9e7a', banner: 'Pixel art rétro gaming : 8/16 bits, sprites.', presets: [
-        { label: '👾 8 bits', text: 'Pixel art 8 bits, sprite rétro, palette NES.' },
-        { label: '🕹️ 16 bits', text: 'Pixel art 16 bits, Super Nintendo, couleurs vives.' },
-        { label: '🎮 Arcade', text: 'Pixel art arcade, écran CRT, scanlines.' }
-    ], styles: [
-        { id: 'pixel-8', name: '8 bits', emoji: '👾', desc: 'NES', cat: 'transform', prompt: '8-bit pixel art, NES sprite, retro video game' },
-        { id: 'pixel-16', name: '16 bits', emoji: '🕹️', desc: 'SNES', cat: 'transform', prompt: '16-bit pixel art, Super Nintendo, retro RPG' },
-        { id: 'pixel-arcade', name: 'Arcade', emoji: '🎮', desc: 'CRT', cat: 'transform', prompt: 'arcade pixel art, CRT screen, scanlines' }
-    ]},
-    youtube: { name: 'YouTube', emoji: '▶️', desc: 'Créateur', cat: 'gaming', accent: '#ff0000', accent2: '#ff4444', banner: 'Miniatures YouTube : clickbait, contraste.', presets: [
-        { label: '🔥 Clickbait', text: 'Miniature YouTube, contraste, effet clickbait.' },
-        { label: '📹 Vlog', text: 'Vlog YouTube, lumière naturelle, caméra à l\'épaule.' }
-    ], styles: [
-        { id: 'thumbnail', name: 'Miniature', emoji: '🔥', desc: 'Clickbait', cat: 'ambiance', prompt: 'YouTube thumbnail, high contrast, saturated' },
-        { id: 'vlog-style', name: 'Vlog', emoji: '📹', desc: 'Naturel', cat: 'ambiance', prompt: 'vlog aesthetic, natural lighting, handheld' }
-    ]},
-    twitch: { name: 'Twitch', emoji: '🎮', desc: 'Streaming', cat: 'gaming', accent: '#9146ff', accent2: '#c8a0ff', banner: 'Streaming Twitch : overlays, alertes, néons.', presets: [
-        { label: '🎮 Live', text: 'Setup Twitch, néons violets, RGB, énergie de live.' },
-        { label: '🚨 Alerte', text: 'Alerte Twitch, animation flashy, particules, hype.' }
-    ], styles: [
-        { id: 'stream-setup', name: 'Setup', emoji: '🎮', desc: 'RGB', cat: 'ambiance', prompt: 'Twitch streamer setup, RGB lights, purple neon' },
-        { id: 'alert-anim', name: 'Alerte', emoji: '🚨', desc: 'Hype', cat: 'ambiance', prompt: 'Twitch alert, flashy particles, hype energy' }
-    ]},
-    bollywood: { name: 'Bollywood', emoji: '💃', desc: 'Couleurs', cat: 'creative', accent: '#ffb800', accent2: '#ff2d6f', banner: 'Scènes Bollywood : couleurs vives, pétales.', presets: [
-        { label: '🌺 Fête', text: 'Danse Bollywood, safran et rose, pétales, lumière dorée.' },
-        { label: '🕌 Temple', text: 'Danse Kathak, temple, bougies, encens.' }
-    ], styles: [
-        { id: 'classic-bol', name: 'Classique', emoji: '💃', desc: 'Safran', cat: 'ambiance', prompt: 'classic Bollywood, saffron and gold, festive' },
-        { id: 'royal', name: 'Royal', emoji: '👑', desc: 'Pourpre', cat: 'ambiance', prompt: 'royal Indian palace, purple and gold, regal' }
-    ]},
-    wuxia: { name: 'Wuxia', emoji: '🎋', desc: 'Arts martiaux', cat: 'creative', accent: '#4a9e7a', accent2: '#2a4a6a', banner: 'Scènes Wuxia : combats aériens, bambous.', presets: [
-        { label: '🎋 Bambous', text: 'Combat dans les bambous, pétales, brume, fluides.' },
-        { label: '🌸 Cerisiers', text: 'Danse des épées sous cerisiers, pétales roses, poésie.' }
-    ], styles: [
-        { id: 'ink', name: 'Peinture encre', emoji: '🖌️', desc: 'Monochrome', cat: 'ambiance', prompt: 'Chinese ink painting, monochrome, calligraphic' },
-        { id: 'jade', name: 'Jade', emoji: '💚', desc: 'Jade', cat: 'ambiance', prompt: 'jade green and gold, misty, ancient Chinese' }
-    ]},
-    retro: { name: 'Rétro / VHS', emoji: '📼', desc: 'Années 80', cat: 'creative', accent: '#ff2d9f', accent2: '#25f4ee', banner: 'Scènes rétro : VHS, synthwave, Super 8.', presets: [
-        { label: '📼 VHS', text: 'Look VHS années 80, grain, scanlines.' },
-        { label: '🌈 Synthwave', text: 'Synthwave, néons roses et cyan, grille, sunset.' }
-    ], styles: [
-        { id: 'vhs', name: 'VHS', emoji: '📼', desc: 'Grain', cat: 'ambiance', prompt: '80s VHS aesthetic, grain, scanlines, tape distortion' },
-        { id: 'synthwave', name: 'Synthwave', emoji: '🌈', desc: 'Néon', cat: 'ambiance', prompt: 'synthwave, pink and cyan neon, grid, retro-futuristic' }
-    ]},
-    painting: { name: 'Peinture vivante', emoji: '🖼️', desc: 'Van Gogh', cat: 'creative', accent: '#c9a84a', accent2: '#8a4a1a', banner: 'Tableaux classiques animés : Van Gogh, Monet.', presets: [
-        { label: '🌻 Van Gogh', text: 'Peinture Van Gogh, tourbillons, couleurs vives.' },
-        { label: '🌊 Monet', text: 'Peinture Monet, impressionnisme, reflets d\'eau.' },
-        { label: '✨ Klimt', text: 'Peinture Klimt, motifs dorés, ornement.' }
-    ], styles: [
-        { id: 'van-gogh', name: 'Van Gogh', emoji: '🌻', desc: 'Tourbillons', cat: 'transform', prompt: 'Van Gogh, swirling brushstrokes, impasto' },
-        { id: 'monet', name: 'Monet', emoji: '🌊', desc: 'Impressionnisme', cat: 'transform', prompt: 'Monet Impressionist, soft brushstrokes, water' },
-        { id: 'klimt', name: 'Klimt', emoji: '✨', desc: 'Or', cat: 'transform', prompt: 'Gustav Klimt, gold leaf, Art Nouveau' }
-    ]},
-    statue: { name: 'Statue antique', emoji: '🏛️', desc: 'Grèce', cat: 'creative', accent: '#d4d4c8', accent2: '#8a8a7a', banner: 'Image devient statue grecque ou romaine.', presets: [
-        { label: '🏛️ Marbre', text: 'Statue marbre grecque, posture classique, musée.' },
-        { label: '⚱️ Bronze', text: 'Statue bronze antique, patine, reflets, romaine.' }
-    ], styles: [
-        { id: 'marble', name: 'Marbre', emoji: '🏛️', desc: 'Blanc', cat: 'transform', prompt: 'ancient Greek marble statue, stone texture' },
-        { id: 'bronze', name: 'Bronze', emoji: '⚱️', desc: 'Métal', cat: 'transform', prompt: 'ancient bronze statue, patina, Roman sculpture' }
-    ]},
-    minimal: { name: 'Minimaliste', emoji: '⬜', desc: 'Bauhaus', cat: 'creative', accent: '#f5f5f5', accent2: '#4a6cf7', banner: 'Design minimaliste : aplats, formes, Bauhaus.', presets: [
-        { label: '⬜ Bauhaus', text: 'Design Bauhaus, formes géométriques, primaires.' },
-        { label: '⚫ Minimal', text: 'Design minimaliste, noir et blanc, espace négatif.' }
-    ], styles: [
-        { id: 'bauhaus', name: 'Bauhaus', emoji: '⬜', desc: 'Formes', cat: 'transform', prompt: 'Bauhaus design, geometric shapes, primary colors' },
-        { id: 'minimalism', name: 'Minimal', emoji: '⚫', desc: 'Épuré', cat: 'transform', prompt: 'minimalist design, black and white, clean' }
-    ]},
-    popart: { name: 'Pop Art', emoji: '🎭', desc: 'Warhol', cat: 'creative', accent: '#ff2d6f', accent2: '#ffb800', banner: 'Pop Art coloré : Warhol, Lichtenstein.', presets: [
-        { label: '🎨 Warhol', text: 'Pop Art Warhol, couleurs vives, répétition.' },
-        { label: '💥 Lichtenstein', text: 'Pop Art Lichtenstein, points Ben-Day, BD.' }
-    ], styles: [
-        { id: 'warhol', name: 'Warhol', emoji: '🎨', desc: 'Répétition', cat: 'transform', prompt: 'Andy Warhol Pop Art, vibrant colors, silkscreen' },
-        { id: 'lichtenstein', name: 'Lichtenstein', emoji: '💥', desc: 'Ben-Day', cat: 'transform', prompt: 'Roy Lichtenstein, Ben-Day dots, comic book' }
-    ]},
-    cosmic: { name: 'Cosmique', emoji: '🌌', desc: 'Espace', cat: 'creative', accent: '#4a1a8a', accent2: '#ff88aa', banner: 'Image flotte dans l\'espace : nébuleuses.', presets: [
-        { label: '🌌 Nébuleuse', text: 'Image dans une nébuleuse, étoiles, gaz cosmique.' },
-        { label: '🪐 Planète', text: 'Image avec planètes, anneaux, lunes.' }
-    ], styles: [
-        { id: 'nebula', name: 'Nébuleuse', emoji: '🌌', desc: 'Cosmos', cat: 'ambiance', prompt: 'cosmic nebula, gas clouds, stars, deep space' },
-        { id: 'planet', name: 'Planète', emoji: '🪐', desc: 'Space', cat: 'ambiance', prompt: 'planet in space, rings, moons, interstellar' }
-    ]},
-    glitch: { name: 'Glitch', emoji: '🧊', desc: 'Corruption', cat: 'creative', accent: '#00ff88', accent2: '#ff00aa', banner: 'Corruption numérique, art expérimental.', presets: [
-        { label: '📺 Glitch', text: 'Glitch numérique, distorsion, RGB split, cyber.' },
-        { label: '💾 Datamosh', text: 'Datamosh, compression artifacts, mouvement liquide.' }
-    ], styles: [
-        { id: 'glitch-gl', name: 'Glitch', emoji: '📺', desc: 'RGB', cat: 'ambiance', prompt: 'digital glitch, RGB split, distortion' },
-        { id: 'datamosh', name: 'Datamosh', emoji: '💾', desc: 'Artifacts', cat: 'ambiance', prompt: 'datamosh effect, compression artifacts, liquid' }
-    ]},
-    pastel: { name: 'Pastel / Kawaii', emoji: '🌸', desc: 'Mignon', cat: 'creative', accent: '#ffb8d0', accent2: '#b8d0ff', banner: 'Couleurs douces, univers mignon, kawaii.', presets: [
-        { label: '🌸 Kawaii', text: 'Style kawaii, couleurs pastel, ambiance mignonne.' },
-        { label: '☁️ Pastel', text: 'Palette pastel, couleurs douces, rêveur.' }
-    ], styles: [
-        { id: 'kawaii', name: 'Kawaii', emoji: '🌸', desc: 'Mignon', cat: 'ambiance', prompt: 'kawaii aesthetic, pastel colors, cute, soft' },
-        { id: 'pastel-dream', name: 'Pastel', emoji: '☁️', desc: 'Rêveur', cat: 'ambiance', prompt: 'soft pastel palette, dreamy diffused light' }
-    ]},
-    dreamcore: { name: 'Dreamcore', emoji: '🦋', desc: 'Onirique', cat: 'creative', accent: '#88c8ff', accent2: '#d0a0ff', banner: 'Esthétique onirique étrange, surréaliste.', presets: [
-        { label: '🦋 Dreamcore', text: 'Dreamcore, onirique étrange, couleurs douces.' },
-        { label: '👁️ Weirdcore', text: 'Weirdcore, étrange, malaise, surréaliste.' }
-    ], styles: [
-        { id: 'dreamcore-s', name: 'Dreamcore', emoji: '🦋', desc: 'Rêve', cat: 'ambiance', prompt: 'dreamcore, surreal dreamlike, soft colors, uncanny' },
-        { id: 'weirdcore', name: 'Weirdcore', emoji: '👁️', desc: 'Étrange', cat: 'ambiance', prompt: 'weirdcore, unsettling surreal, Y2K nostalgia' }
-    ]},
-    circus: { name: 'Cirque / Carnaval', emoji: '🎪', desc: 'Forain', cat: 'creative', accent: '#c0392b', accent2: '#d4a017', banner: 'Cirque et carnaval : couleurs, magie.', presets: [
-        { label: '🎪 Cirque', text: 'Ambiance cirque, chapiteau, lumières, clowns.' },
-        { label: '🎭 Carnaval', text: 'Carnaval vénitien, masques, plumes, couleurs.' }
-    ], styles: [
-        { id: 'circus', name: 'Cirque', emoji: '🎪', desc: 'Chapiteau', cat: 'ambiance', prompt: 'circus atmosphere, big top tent, dramatic lights' },
-        { id: 'carnival', name: 'Carnaval', emoji: '🎭', desc: 'Masques', cat: 'ambiance', prompt: 'Venetian carnival, ornate masks, feathers' }
-    ]},
-    business: { name: 'Business', emoji: '💼', desc: 'Corporate', cat: 'business', accent: '#4a6cf7', accent2: '#2a4a8a', banner: 'Vidéos business : présentation, témoignage.', presets: [
-        { label: '💼 Présentation', text: 'Présentation produit, rotation, zoom, studio.' },
-        { label: '🎤 Témoignage', text: 'Témoignage client, portrait qui parle, citation.' },
-        { label: '🚀 Startup', text: 'Annonce startup, dynamisme, innovation, équipe.' }
-    ], styles: [
-        { id: 'corporate', name: 'Corporate', emoji: '💼', desc: 'Pro', cat: 'ambiance', prompt: 'corporate video, professional lighting, clean' },
-        { id: 'product', name: 'Produit', emoji: '📦', desc: 'Packshot', cat: 'ambiance', prompt: 'product showcase, studio lighting, rotating' }
-    ]},
-    realestate: { name: 'Immobilier', emoji: '🏠', desc: 'Visite', cat: 'business', accent: '#c9a84a', accent2: '#4a6cf7', banner: 'Visites virtuelles de biens immobiliers.', presets: [
-        { label: '🏠 Villa', text: 'Villa de luxe, piscine, jardin, lumière dorée.' },
-        { label: '🏙️ Appartement', text: 'Appartement moderne, vue ville, intérieur design.' }
-    ], styles: [
-        { id: 'real-estate', name: 'Visite', emoji: '🏠', desc: 'Mouvement', cat: 'ambiance', prompt: 'real estate walkthrough, smooth camera, architectural' },
-        { id: 'luxury', name: 'Luxe', emoji: '✨', desc: 'Prestige', cat: 'ambiance', prompt: 'luxury real estate, elegant interior, warm light' }
-    ]},
-    education: { name: 'Éducation', emoji: '🎓', desc: 'Science', cat: 'business', accent: '#2d8a4e', accent2: '#4a6cf7', banner: 'Vidéos éducatives : schémas, formules.', presets: [
-        { label: '🔬 Science', text: 'Explication scientifique, schéma animé, ADN.' },
-        { label: '📐 Maths', text: 'Formes géométriques, équations, démonstration.' },
-        { label: '🌍 Géographie', text: 'Carte qui se déploie, relief 3D, exploration.' }
-    ], styles: [
-        { id: 'scientific', name: 'Scientifique', emoji: '🔬', desc: 'Schéma', cat: 'ambiance', prompt: 'scientific visualization, animated diagram, molecular' },
-        { id: 'documentary-edu', name: 'Documentaire', emoji: '🎙️', desc: 'Vulgarisation', cat: 'ambiance', prompt: 'educational documentary, informative visuals' }
-    ]},
-    medical: { name: 'Médical', emoji: '💊', desc: 'Anatomie', cat: 'business', accent: '#4a9e7a', accent2: '#4a6cf7', banner: 'Vidéos médicales : anatomie, ADN, clinique.', presets: [
-        { label: '💊 Anatomie', text: 'Corps humain, anatomie, organes, pédagogie.' },
-        { label: '🧬 ADN', text: 'Double hélice ADN, molécules, microscopie.' }
-    ], styles: [
-        { id: 'anatomy', name: 'Anatomie', emoji: '💊', desc: 'Corps', cat: 'ambiance', prompt: 'anatomical visualization, human body, medical' },
-        { id: 'microscopy', name: 'Microscopie', emoji: '🔬', desc: 'Cellulaire', cat: 'ambiance', prompt: 'microscopic view, cellular structures, medical' }
-    ]},
-    food: { name: 'Food / Cuisine', emoji: '🍕', desc: 'Gastronomie', cat: 'daily', accent: '#ff6b1a', accent2: '#c9a84a', banner: 'Vidéos food : gastronomie, street food.', presets: [
-        { label: '🍽️ Gastronomique', text: 'Plat gastronomique, dressage, vapeur, chaud.' },
-        { label: '🍔 Street food', text: 'Street food, burger juteux, friture, urbain.' },
-        { label: '🍰 Dessert', text: 'Dessert, chocolat qui coule, sucre, gourmandise.' }
-    ], styles: [
-        { id: 'gourmet', name: 'Gastronomique', emoji: '🍽️', desc: 'Haut de gamme', cat: 'ambiance', prompt: 'gourmet food plating, steam, warm light, fine dining' },
-        { id: 'street-food', name: 'Street food', emoji: '🍔', desc: 'Urbain', cat: 'ambiance', prompt: 'street food scene, sizzling, urban, vibrant' },
-        { id: 'dessert', name: 'Dessert', emoji: '🍰', desc: 'Sucré', cat: 'ambiance', prompt: 'dessert close-up, melting chocolate, sweet' }
-    ]},
-    cafe: { name: 'Café / Coffee', emoji: '☕', desc: 'Cosy', cat: 'daily', accent: '#8a5a3a', accent2: '#d4a017', banner: 'Ambiance café cosy : latte art, vapeur.', presets: [
-        { label: '☕ Latte art', text: 'Latte art, mousse de lait, café fumant, cosy.' },
-        { label: '🥐 Petit-déj', text: 'Petit-déjeuner, croissants, jus, lumière matinale.' }
-    ], styles: [
-        { id: 'cozy-cafe', name: 'Cosy', emoji: '☕', desc: 'Chaleureux', cat: 'ambiance', prompt: 'cozy coffee shop, warm atmosphere, steam' },
-        { id: 'morning', name: 'Matin', emoji: '🌅', desc: 'Lumineux', cat: 'ambiance', prompt: 'morning coffee, soft natural light, breakfast' }
-    ]},
-    plants: { name: 'Plantes', emoji: '🌿', desc: 'Jardin', cat: 'daily', accent: '#2d8a4e', accent2: '#8a5a3a', banner: 'Nature, croissance, fleurs, jungle urbaine.', presets: [
-        { label: '🌱 Croissance', text: 'Plante qui pousse, time-lapse, feuilles.' },
-        { label: '🌸 Fleurs', text: 'Fleurs qui s\'ouvrent, pétales, pollen, douce.' }
-    ], styles: [
-        { id: 'growth', name: 'Croissance', emoji: '🌱', desc: 'Time-lapse', cat: 'ambiance', prompt: 'plant growth time-lapse, leaves unfurling, botanical' },
-        { id: 'bloom', name: 'Floraison', emoji: '🌸', desc: 'Fleurs', cat: 'ambiance', prompt: 'flowers blooming, petals opening, pollen, garden' }
-    ]},
-    pets: { name: 'Animaux', emoji: '🐾', desc: 'Chats', cat: 'daily', accent: '#c9a84a', accent2: '#8a5a3a', banner: 'Animaux : chats, chiens, animaux sauvages.', presets: [
-        { label: '🐱 Chat', text: 'Chat mignon, mouvement de queue, yeux brillants.' },
-        { label: '🐶 Chien', text: 'Chien joyeux, queue qui remue, énergie positive.' },
-        { label: '🦁 Sauvage', text: 'Animal sauvage, lion, tigre, savane, puissance.' }
-    ], styles: [
-        { id: 'cute-pet', name: 'Mignon', emoji: '🐾', desc: 'Adorable', cat: 'ambiance', prompt: 'cute pet portrait, playful motion, warm light' },
-        { id: 'wildlife', name: 'Sauvage', emoji: '🦁', desc: 'Nature', cat: 'ambiance', prompt: 'wildlife animal, majestic pose, natural environment' }
-    ]},
-    bookstagram: { name: 'Bookstagram', emoji: '📚', desc: 'Lecture', cat: 'daily', accent: '#8a5a3a', accent2: '#c9a84a', banner: 'Ambiance lecture, bibliothèques, cozy.', presets: [
-        { label: '📖 Lecture', text: 'Ambiance lecture, livre, page qui tourne, cosy.' },
-        { label: '📚 Bibliothèque', text: 'Bibliothèque ancienne, livres, échelle, studieux.' }
-    ], styles: [
-        { id: 'book-cozy', name: 'Cozy', emoji: '📖', desc: 'Chaleureux', cat: 'ambiance', prompt: 'cozy reading, book, warm light, tea, peaceful' },
-        { id: 'library', name: 'Bibliothèque', emoji: '📚', desc: 'Classique', cat: 'ambiance', prompt: 'old library, books, wooden shelves, studious' }
-    ]},
-    wedding: { name: 'Mariage', emoji: '💍', desc: 'Événementiel', cat: 'daily', accent: '#ffc8d0', accent2: '#c9a84a', banner: 'Vidéos de mariage : cérémonie, danse.', presets: [
-        { label: '💍 Cérémonie', text: 'Cérémonie de mariage, émotion, larmes de joie.' },
-        { label: '💃 Première danse', text: 'Première danse, couple, mouvement fluide, magie.' }
-    ], styles: [
-        { id: 'wedding-cine', name: 'Cinématique', emoji: '💍', desc: 'Film', cat: 'ambiance', prompt: 'cinematic wedding film, romantic lighting, slow motion' },
-        { id: 'romantic', name: 'Romantique', emoji: '💐', desc: 'Doux', cat: 'ambiance', prompt: 'romantic wedding, soft light, flowers, elegant' }
-    ]},
-    nature: { name: 'Nature Vivante', emoji: '🌲', desc: 'Paysages', cat: 'daily', accent: '#2d8a4e', accent2: '#4a9e7a', banner: 'Paysages vivants : vent, nuages, eau.', presets: [
-        { label: '🌲 Forêt', text: 'Forêt vivante, feuilles qui bougent, lumière.' },
-        { label: '🌊 Océan', text: 'Océan agité, vagues, embruns, coucher de soleil.' },
-        { label: '🏔️ Montagne', text: 'Montagne brumeuse, nuages, lumière dorée, silence.' }
-    ], styles: [
-        { id: 'wind', name: 'Vent', emoji: '🌬️', desc: 'Brise', cat: 'ambiance', prompt: 'gentle wind, leaves rustling, grass moving' },
-        { id: 'water', name: 'Eau', emoji: '🌊', desc: 'Vagues', cat: 'ambiance', prompt: 'living water, waves, ripples, reflections, marine' },
-        { id: 'sunbeams', name: 'Soleil', emoji: '☀️', desc: 'Particules', cat: 'ambiance', prompt: 'sunbeams, floating particles, warm golden light' }
-    ]},
-    aesthetic: { name: 'Aesthetic / Mood', emoji: '🌙', desc: 'Tendance', cat: 'daily', accent: '#88c8ff', accent2: '#d0a0ff', banner: 'Esthétique tendance : cozy, cottagecore.', presets: [
-        { label: '🕯️ Cozy', text: 'Ambiance cozy, bougies, plaid, pluie dehors.' },
-        { label: '🍄 Cottagecore', text: 'Cottagecore, campagne, fleurs, champêtre.' },
-        { label: '📜 Dark Academia', text: 'Dark academia, bibliothèque, livres, bougies.' }
-    ], styles: [
-        { id: 'cozy-aes', name: 'Cozy', emoji: '🕯️', desc: 'Chaleureux', cat: 'ambiance', prompt: 'cozy aesthetic, warm light, candles, blanket' },
-        { id: 'cottagecore', name: 'Cottagecore', emoji: '🍄', desc: 'Champêtre', cat: 'ambiance', prompt: 'cottagecore, countryside, wild flowers, pastoral' },
-        { id: 'dark-academia', name: 'Dark Academia', emoji: '📜', desc: 'Studieux', cat: 'ambiance', prompt: 'dark academia, library, old books, candles, moody' }
-    ]},
-    sport: { name: 'Sport / Fitness', emoji: '💪', desc: 'Énergie', cat: 'action', accent: '#ff4500', accent2: '#c9a84a', banner: 'Sport et fitness : énergie, mouvement.', presets: [
-        { label: '💪 Musculation', text: 'Musculation, salle, effort, sueur, intensité.' },
-        { label: '🏃 Course', text: 'Course à pied, vitesse, foulée, détermination.' },
-        { label: '🧘 Yoga', text: 'Yoga, postures, respiration, sérénité.' }
-    ], styles: [
-        { id: 'workout', name: 'Workout', emoji: '💪', desc: 'Intensité', cat: 'ambiance', prompt: 'intense workout, sweat, effort, gym, powerful' },
-        { id: 'sports-action', name: 'Action sport', emoji: '⚽', desc: 'Énergie', cat: 'ambiance', prompt: 'sports action, dynamic movement, slow motion' }
-    ]},
-    auto: { name: 'Automobile', emoji: '🚗', desc: 'Voitures', cat: 'action', accent: '#c0392b', accent2: '#2a2a2a', banner: 'Voitures, motos, course : reflets, vitesse.', presets: [
-        { label: '🏎️ Sportive', text: 'Voiture sportive, reflets, ronronnement, vitesse.' },
-        { label: '🏍️ Moto', text: 'Moto, virage, roue arrière, vitesse, sensation.' },
-        { label: '🚙 Classique', text: 'Voiture classique vintage, chrome, élégance.' }
-    ], styles: [
-        { id: 'car-showcase', name: 'Showcase', emoji: '🚗', desc: 'Présentation', cat: 'ambiance', prompt: 'car showcase, glossy reflections, studio lighting' },
-        { id: 'car-action', name: 'Action', emoji: '🏎️', desc: 'Vitesse', cat: 'ambiance', prompt: 'car racing, dynamic speed, motion blur' }
-    ]},
-    music: { name: 'Musique', emoji: '🎸', desc: 'Scène', cat: 'action', accent: '#8a1a8a', accent2: '#ff6b1a', banner: 'Musique : guitare, piano, scène, concert.', presets: [
-        { label: '🎸 Concert', text: 'Concert, foule, lumières, guitare, énergie.' },
-        { label: '🎹 Piano', text: 'Piano, doigts, touches, émotion, lumière douce.' },
-        { label: '🎤 Clip', text: 'Clip musical, artiste, effets visuels, rythmé.' }
-    ], styles: [
-        { id: 'live-concert', name: 'Concert', emoji: '🎸', desc: 'Live', cat: 'ambiance', prompt: 'live concert, stage lights, crowd, energy' },
-        { id: 'music-video', name: 'Clip', emoji: '🎤', desc: 'Clip', cat: 'ambiance', prompt: 'music video, artistic visuals, choreographed' }
-    ]},
-    pirate: { name: 'Pirates', emoji: '🏴‍☠️', desc: 'Aventure', cat: 'action', accent: '#8a5a3a', accent2: '#c9a84a', banner: 'Pirates : navires, trésors, tempêtes.', presets: [
-        { label: '🏴‍☠️ Navire', text: 'Navire pirate, voiles, mer agitée, tempête.' },
-        { label: '💎 Trésor', text: 'Trésor, coffre, or, bijoux, lumière, découverte.' }
-    ], styles: [
-        { id: 'pirate-ship', name: 'Navire', emoji: '🏴‍☠️', desc: 'Maritime', cat: 'ambiance', prompt: 'pirate ship, sails, rough sea, storm' },
-        { id: 'treasure', name: 'Trésor', emoji: '💎', desc: 'Découverte', cat: 'ambiance', prompt: 'treasure discovery, gold, jewels, glowing light' }
-    ]},
-    superhero: { name: 'Super-héros', emoji: '🦸', desc: 'Comics', cat: 'action', accent: '#ff0000', accent2: '#ffb800', banner: 'Super-héros : comics, Marvel/DC, pouvoirs.', presets: [
-        { label: '🦸 Héros', text: 'Super-héros, costume, cape, pose héroïque.' },
-        { label: '⚡ Pouvoir', text: 'Super-pouvoir, éclairs, énergie, spectaculaire.' }
-    ], styles: [
-        { id: 'comic-style', name: 'Comics', emoji: '🦸', desc: 'Comics', cat: 'transform', prompt: 'comic book superhero, bold outlines, dynamic pose' },
-        { id: 'superpower', name: 'Pouvoir', emoji: '⚡', desc: 'Effets', cat: 'ambiance', prompt: 'superpower activation, energy effects, glowing aura' }
-    ]},
-    meditation: { name: 'Méditation', emoji: '🧘', desc: 'Zen', cat: 'ambiance', accent: '#c9a84a', accent2: '#88c8ff', banner: 'Méditation : zen, chakras, aura, mandala.', presets: [
-        { label: '🧘 Méditation', text: 'Méditation, respiration, sérénité, lumière douce.' },
-        { label: '✨ Aura', text: 'Aura colorée, énergie, chakras, spirituel.' },
-        { label: '🔮 Mandala', text: 'Mandala, formes géométriques, spirituel, symétrie.' }
-    ], styles: [
-        { id: 'zen', name: 'Zen', emoji: '🧘', desc: 'Paisible', cat: 'ambiance', prompt: 'zen meditation, peaceful, soft light, calm' },
-        { id: 'aura', name: 'Aura', emoji: '✨', desc: 'Énergie', cat: 'ambiance', prompt: 'colorful aura, spiritual energy, chakras, glow' }
-    ]},
-    museum: { name: 'Art / Musée', emoji: '🎨', desc: 'Exposition', cat: 'ambiance', accent: '#c9a84a', accent2: '#4a2a1a', banner: 'Image devient œuvre d\'art exposée dans un musée.', presets: [
-        { label: '🖼️ Musée', text: 'Image exposée dans un musée, cadre, éclairage.' },
-        { label: '🎨 Galerie', text: 'Galerie d\'art moderne, ambiance, découverte.' }
-    ], styles: [
-        { id: 'museum', name: 'Musée', emoji: '🖼️', desc: 'Cadre', cat: 'ambiance', prompt: 'artwork in museum, elegant frame, gallery lighting' },
-        { id: 'gallery', name: 'Galerie', emoji: '🎨', desc: 'Moderne', cat: 'ambiance', prompt: 'modern art gallery, minimal lighting, exhibition' }
-    ]},
-    castles: { name: 'Châteaux', emoji: '🏰', desc: 'Patrimoine', cat: 'ambiance', accent: '#8a5a3a', accent2: '#c9a84a', banner: 'Châteaux français, ruines, vieilles pierres.', presets: [
-        { label: '🏰 Château', text: 'Château français, tourelles, jardins, histoire.' },
-        { label: '⚔️ Médiéval', text: 'Château médiéval, chevaliers, tournois, épique.' }
-    ], styles: [
-        { id: 'castle', name: 'Château', emoji: '🏰', desc: 'Prestige', cat: 'ambiance', prompt: 'French château, towers, gardens, historic elegance' },
-        { id: 'medieval', name: 'Médiéval', emoji: '⚔️', desc: 'Épique', cat: 'ambiance', prompt: 'medieval castle, knights, epic atmosphere' }
-    ]},
-    astronomy: { name: 'Astronomie', emoji: '🌌', desc: 'Étoiles', cat: 'ambiance', accent: '#4a1a8a', accent2: '#c9a84a', banner: 'Planètes, galaxies, constellations.', presets: [
-        { label: '⭐ Étoiles', text: 'Ciel étoilé, Voie lactée, constellations.' },
-        { label: '🪐 Planètes', text: 'Système solaire, planètes, anneaux, orbites.' }
-    ], styles: [
-        { id: 'starry-sky', name: 'Ciel étoilé', emoji: '⭐', desc: 'Étoiles', cat: 'ambiance', prompt: 'starry night sky, Milky Way, constellations' },
-        { id: 'solar-system', name: 'Système solaire', emoji: '🪐', desc: 'Planètes', cat: 'ambiance', prompt: 'solar system, planets, orbits, space exploration' }
-    ]},
-    ai: { name: 'IA / Futurisme', emoji: '🤖', desc: 'Tech', cat: 'niche', accent: '#00d4ff', accent2: '#4a1a8a', banner: 'IA, robots, cyborgs, singularité.', presets: [
-        { label: '🤖 Robot', text: 'Robot futuriste, métal, yeux lumineux, IA.' },
-        { label: '🧠 IA', text: 'Intelligence artificielle, réseau de neurones.' }
-    ], styles: [
-        { id: 'robot', name: 'Robot', emoji: '🤖', desc: 'Mécano', cat: 'ambiance', prompt: 'futuristic robot, technology, glowing eyes, AI' },
-        { id: 'neural', name: 'Neural', emoji: '🧠', desc: 'Réseau', cat: 'ambiance', prompt: 'neural network, AI, glowing nodes, digital' }
-    ]},
-    royal: { name: 'Royauté', emoji: '👑', desc: 'Royalcore', cat: 'niche', accent: '#c9a84a', accent2: '#8a1a4a', banner: 'Couronnes, palais, robes, royauté.', presets: [
-        { label: '👑 Palais', text: 'Palais royal, or, marbre, lustres, prestige.' },
-        { label: '💎 Couronne', text: 'Couronne, joyaux, or, pierreries, royauté.' }
-    ], styles: [
-        { id: 'palace', name: 'Palais', emoji: '👑', desc: 'Or', cat: 'ambiance', prompt: 'royal palace, gold, marble, chandeliers, regal' },
-        { id: 'crown', name: 'Couronne', emoji: '💎', desc: 'Joyaux', cat: 'ambiance', prompt: 'royal crown, jewels, gold, precious stones' }
-    ]},
-    witch: { name: 'Sorcière', emoji: '🧙', desc: 'Witchcore', cat: 'niche', accent: '#7b2d8e', accent2: '#2d8a4e', banner: 'Potions, chaudron, grimoire, forêt mystique.', presets: [
-        { label: '🧙 Sorcière', text: 'Sorcière, chapeau, balai, potions, mystique.' },
-        { label: '🔮 Potion', text: 'Potion magique, chaudron, fumée, ingrédients.' }
-    ], styles: [
-        { id: 'witch', name: 'Sorcière', emoji: '🧙', desc: 'Mystique', cat: 'ambiance', prompt: 'witch aesthetic, hat, broom, potions, mystical' },
-        { id: 'potion', name: 'Potion', emoji: '🔮', desc: 'Magie', cat: 'ambiance', prompt: 'magic potion, cauldron, smoke, arcane ritual' }
-    ]},
-    darkfantasy: { name: 'Dark Fantasy', emoji: '🖤', desc: 'Sombre', cat: 'niche', accent: '#4a1a1a', accent2: '#7b2d8e', banner: 'Dark fantasy : sombre, gothique, épique.', presets: [
-        { label: '⚔️ Chevalier noir', text: 'Chevalier noir, armure, épée, sombre, épique.' },
-        { label: '😈 Démon', text: 'Démon, cornes, ailes, feu, sombre, puissance.' }
-    ], styles: [
-        { id: 'dark-knight', name: 'Chevalier', emoji: '⚔️', desc: 'Guerrier', cat: 'ambiance', prompt: 'dark fantasy knight, black armor, sword, epic grim' },
-        { id: 'demon', name: 'Démon', emoji: '😈', desc: 'Démoniaque', cat: 'ambiance', prompt: 'dark fantasy demon, horns, wings, fire, sinister' }
-    ]},
-    space: { name: 'Cosmique II', emoji: '🌠', desc: 'Galaxie', cat: 'niche', accent: '#4a1a8a', accent2: '#ff88aa', banner: 'Image flotte dans l\'espace : nébuleuses.', presets: [
-        { label: '🌠 Étoile filante', text: 'Étoile filante, ciel nocturne, vœu, magie.' },
-        { label: '🕳️ Trou noir', text: 'Trou noir, distorsion, lumière aspirée, mystère.' }
-    ], styles: [
-        { id: 'shooting-star', name: 'Étoile filante', emoji: '🌠', desc: 'Météore', cat: 'ambiance', prompt: 'shooting star, meteor shower, night sky, magical' },
-        { id: 'blackhole', name: 'Trou noir', emoji: '🕳️', desc: 'Distorsion', cat: 'ambiance', prompt: 'black hole, gravitational distortion, cosmic mystery' }
-    ]}
+    // POPULAIRES
+    apocalypse: {
+        name: 'Apocalypse', emoji: '☢️', desc: 'Fin du monde', cat: 'popular',
+        accent: '#ff4500', accent2: '#b85a1a',
+        banner: 'Scènes post-apocalyptiques : cendres, ruines, ciels rouges, survie.',
+        presets: [
+            { label: '☢️ Nucléaire', text: 'Décor post-nucléaire, ciel rouge sang, fumée épaisse, cendres, bâtiments en ruines.' },
+            { label: '🧟 Zombie', text: 'Post-apocalyptique zombie, ruines, voitures abandonnées, survie.' },
+            { label: '🔥 Incendie', text: 'Brasier géant, flammes immenses, fumée noire, ciel orange.' },
+            { label: '👽 Alien', text: 'Invasion extraterrestre, vaisseaux, lumières vertes, destruction.' }
+        ],
+        styles: [
+            { id: 'nuclear', name: 'Cendres', emoji: '☢️', desc: 'Gris, cendres', cat: 'ambiance', prompt: 'post-nuclear winter atmosphere, gray ash falling, desaturated cold tones, ruined world' },
+            { id: 'blood-sky', name: 'Ciel rouge', emoji: '🔴', desc: 'Ciel rouge', cat: 'ambiance', prompt: 'blood-red apocalyptic sky, red sun, dark clouds, ominous mood' },
+            { id: 'ruins', name: 'Ruines', emoji: '🏚️', desc: 'Bâtiments détruits', cat: 'transform', prompt: 'total destruction: collapsing buildings, broken concrete, twisted metal' }
+        ]
+    },
+    tiktok: {
+        name: 'TikTok Hook', emoji: '⚡', desc: 'Viral vertical', cat: 'popular',
+        accent: '#fe2c55', accent2: '#25f4ee',
+        banner: 'Vidéos verticales pour capter l\'attention en 3 secondes.',
+        presets: [
+            { label: '😱 Choc', text: 'Zoom rapide sur le sujet, contraste élevé, mouvement dynamique, énergie virale.' },
+            { label: '👀 Révélation', text: 'La caméra révèle progressivement le sujet, suspense, hook puissant.' }
+        ],
+        styles: [
+            { id: 'hook-fast', name: 'Hook rapide', emoji: '⚡', desc: 'Zoom', cat: 'ambiance', prompt: 'fast dynamic zoom, high energy, viral TikTok hook' },
+            { id: 'loop', name: 'Boucle', emoji: '🔁', desc: 'Loop', cat: 'ambiance', prompt: 'perfect loop, seamless motion, hypnotic repeating movement' }
+        ]
+    },
+    anime: {
+        name: 'Anime', emoji: '🌸', desc: 'Ghibli, manga', cat: 'popular',
+        accent: '#ff88aa', accent2: '#4a9e7a',
+        banner: 'Scènes Anime : Ghibli, manga, cel shading.',
+        presets: [
+            { label: '🌿 Ghibli', text: 'Style Studio Ghibli, peinture aquarelle, nature, poétique.' },
+            { label: '⚔️ Shonen', text: 'Style anime shonen, énergie, mouvement, effets épiques.' }
+        ],
+        styles: [
+            { id: 'ghibli-s', name: 'Ghibli', emoji: '🌿', desc: 'Aquarelle', cat: 'transform', prompt: 'Studio Ghibli anime style, Hayao Miyazaki aesthetic, watercolor backgrounds' },
+            { id: 'shonen', name: 'Shonen', emoji: '⚔️', desc: 'Action', cat: 'transform', prompt: 'shonen anime style, dynamic action, speed lines, vibrant colors' },
+            { id: 'anime-cinema', name: 'Cinéma', emoji: '🎬', desc: 'Shinkai', cat: 'transform', prompt: 'Makoto Shinkai anime style, cinematic lighting, vibrant sunset colors' }
+        ]
+    },
+    cinematic: {
+        name: 'Cinématique', emoji: '🎬', desc: 'Look film', cat: 'popular',
+        accent: '#d4a017', accent2: '#8a4a1a',
+        banner: 'Plans cinématographiques : grain, profondeur, éclairage dramatique.',
+        presets: [
+            { label: '🎬 Film', text: 'Look cinématographique, grain film, profondeur de champ.' },
+            { label: '🌅 Golden hour', text: 'Lumière dorée, longues ombres chaudes, reflets.' }
+        ],
+        styles: [
+            { id: 'film', name: 'Film', emoji: '🎬', desc: 'Grain', cat: 'ambiance', prompt: 'cinematic film look, dramatic lighting, subtle film grain' },
+            { id: 'golden', name: 'Golden Hour', emoji: '🌅', desc: 'Chaud', cat: 'ambiance', prompt: 'golden hour warm sunlight, soft amber glow, long shadows' },
+            { id: 'noir', name: 'Film Noir', emoji: '🕵️', desc: 'Noir', cat: 'ambiance', prompt: 'film noir, high contrast black and white, chiaroscuro' }
+        ]
+    },
+    horror: {
+        name: 'Horreur', emoji: '👻', desc: 'Sombre, gothique', cat: 'popular',
+        accent: '#8a1a1a', accent2: '#3a1a3a',
+        banner: 'Scènes d\'horreur : gothique, ombres, brume.',
+        presets: [
+            { label: '👻 Fantôme', text: 'Apparition fantomatique, brume, ambiance gothique.' },
+            { label: '🕯️ Maison hantée', text: 'Maison hantée, bougies, ombres mouvantes, peur.' }
+        ],
+        styles: [
+            { id: 'ghost', name: 'Fantôme', emoji: '👻', desc: 'Transparence', cat: 'ambiance', prompt: 'ghostly apparition, transparent figure, misty atmosphere, gothic horror' },
+            { id: 'haunted', name: 'Maison hantée', emoji: '🕯️', desc: 'Bougies', cat: 'ambiance', prompt: 'haunted house, flickering candles, moving shadows, gothic horror' }
+        ]
+    },
+    fantasy: {
+        name: 'Fantastique', emoji: '🐉', desc: 'Magie, dragons', cat: 'popular',
+        accent: '#7b2d8e', accent2: '#4a9e7a',
+        banner: 'Scènes fantastiques : dragons, magie, forêts enchantées.',
+        presets: [
+            { label: '🐉 Dragon', text: 'Dragon volant, flammes, montagnes, ambiance épique.' },
+            { label: '🧙 Magie', text: 'Sort magique, particules lumineuses, runes, mystique.' }
+        ],
+        styles: [
+            { id: 'dragon-f', name: 'Dragon', emoji: '🐉', desc: 'Créature', cat: 'transform', prompt: 'epic fantasy dragon, scales, fire breath, stormy sky' },
+            { id: 'enchanted', name: 'Forêt', emoji: '🌲', desc: 'Lucioles', cat: 'ambiance', prompt: 'enchanted forest, glowing fireflies, magical mist, fairy tale' }
+        ]
+    },
+    cyberpunk: {
+        name: 'Cyberpunk', emoji: '🌆', desc: 'Néon futuriste', cat: 'popular',
+        accent: '#ff2d9f', accent2: '#25f4ee',
+        banner: 'Scènes Cyberpunk : néons, pluie, hologrammes.',
+        presets: [
+            { label: '🌃 Néon', text: 'Rue cyberpunk, néons rose et cyan, reflets sur sol mouillé.' },
+            { label: '🤖 Robot', text: 'Cyborg futuriste, implants, yeux lumineux, néons.' }
+        ],
+        styles: [
+            { id: 'neon-rain', name: 'Néon pluie', emoji: '🌧️', desc: 'Pluie néon', cat: 'ambiance', prompt: 'neon-soaked rainy street, pink and cyan reflections, cyberpunk night' },
+            { id: 'chrome', name: 'Chrome', emoji: '🤖', desc: 'Métal', cat: 'transform', prompt: 'chrome metallic aesthetic, cybernetic implants, robotic features' }
+        ]
+    },
+    story: {
+        name: 'Story / Ciné', emoji: '🎞️', desc: 'Narration film', cat: 'popular',
+        accent: '#c9a84a', accent2: '#4a6cf7',
+        banner: 'Plans narratifs de cinéma : ouverture, flashback, cliffhanger.',
+        presets: [
+            { label: '🎬 Ouverture', text: 'Plan d\'ouverture cinématographique, caméra révèle le sujet, tension.' },
+            { label: '💭 Flashback', text: 'Flashback, souvenir flou, lumière chaude, nostalgie.' },
+            { label: '🎭 Cliffhanger', text: 'Scène de fin, suspense, cliffhanger dramatique.' }
+        ],
+        styles: [
+            { id: 'opening', name: 'Ouverture', emoji: '🎬', desc: 'Intro', cat: 'ambiance', prompt: 'cinematic opening shot, dramatic reveal, narrative tension' },
+            { id: 'flashback', name: 'Flashback', emoji: '💭', desc: 'Souvenir', cat: 'ambiance', prompt: 'flashback scene, faded memory, warm nostalgic tone, dreamy' },
+            { id: 'cliffhanger', name: 'Cliffhanger', emoji: '🎭', desc: 'Suspense', cat: 'ambiance', prompt: 'dramatic cliffhanger scene, intense gaze, suspense' }
+        ]
+    },
+    portrait: {
+        name: 'Portrait Vivant', emoji: '🧑‍🎤', desc: 'Respiration', cat: 'popular',
+        accent: '#4a6cf7', accent2: '#7b8fff',
+        banner: 'Portraits vivants : respiration, clignements, micro-mouvements.',
+        presets: [
+            { label: '😌 Paisible', text: 'Portrait paisible, respiration lente, lumière douce.' },
+            { label: '🎭 Intense', text: 'Portrait intense, regard profond, éclairage dramatique.' }
+        ],
+        styles: [
+            { id: 'breath', name: 'Respiration', emoji: '😌', desc: 'Souffle', cat: 'ambiance', prompt: 'slow breathing, chest rising and falling, peaceful expression' },
+            { id: 'blink', name: 'Clignements', emoji: '👁️', desc: 'Yeux', cat: 'ambiance', prompt: 'natural blinking, subtle facial micro-expressions' }
+        ]
+    },
+    // GAMING
+    videogame: {
+        name: 'Jeu Vidéo', emoji: '🕹️', desc: 'AAA cinématique', cat: 'gaming',
+        accent: '#00d4c8', accent2: '#4a6cf7',
+        banner: 'Scènes de jeu vidéo AAA : cinématique épique, effets.',
+        presets: [
+            { label: '🎬 Cinématique', text: 'Cinématique AAA, éclairage épique, caméra hollywoodienne.' },
+            { label: '⚔️ Action', text: 'Scène d\'action, combat, particules, mouvement rapide.' }
+        ],
+        styles: [
+            { id: 'aaa-cinema', name: 'Cinématique', emoji: '🎬', desc: 'Blockbuster', cat: 'ambiance', prompt: 'AAA video game cinematic, epic lighting, blockbuster atmosphere' },
+            { id: 'action-vg', name: 'Action', emoji: '⚔️', desc: 'Combat', cat: 'ambiance', prompt: 'action video game scene, combat, particle effects' }
+        ]
+    },
+    fortnite: {
+        name: 'Fortnite', emoji: '🎮', desc: 'Battle Royale', cat: 'gaming',
+        accent: '#00d4ff', accent2: '#9b30ff',
+        banner: 'Scènes Fortnite : Victory Royale, drop, zone.',
+        presets: [
+            { label: '🏆 Victory Royale', text: 'Victory Royale, couleurs vives, célébration, hype.' },
+            { label: '🪂 Drop', text: 'Drop depuis le bus, parachute, île en dessous.' },
+            { label: '🌪️ Zone', text: 'Tempête qui approche, tension, survie.' }
+        ],
+        styles: [
+            { id: 'victory', name: 'Victory', emoji: '🏆', desc: 'Victoire', cat: 'ambiance', prompt: 'Fortnite Victory Royale celebration, vibrant colors, hype energy' },
+            { id: 'fortnite-style', name: 'Style Fortnite', emoji: '🌈', desc: 'Cartoon', cat: 'transform', prompt: 'Fortnite stylized cartoon graphics, vibrant colors, cel-shaded' }
+        ]
+    },
+    dbd: {
+        name: 'Dead by Daylight', emoji: '🔪', desc: 'Horreur asymétrique', cat: 'gaming',
+        accent: '#c0392b', accent2: '#4a1a1a',
+        banner: 'Scènes DBD : brume, survivants, tueurs.',
+        presets: [
+            { label: '🔪 Tueur', text: 'Tueur DBD, brume, arme, horreur asymétrique.' },
+            { label: '🏃 Survivant', text: 'Survivant en fuite, brume, panique, lampe.' },
+            { label: '🌫️ Brume', text: 'Brume DBD, entité, silhouettes menaçantes.' }
+        ],
+        styles: [
+            { id: 'dbd-fog', name: 'Brume', emoji: '🌫️', desc: 'Fog', cat: 'ambiance', prompt: 'Dead by Daylight fog, thick mist, asymmetric horror' },
+            { id: 'dbd-killer', name: 'Tueur', emoji: '🔪', desc: 'Menace', cat: 'ambiance', prompt: 'DBD killer, menacing presence, dark weapon, threatening shadow' },
+            { id: 'dbd-entity', name: 'Entité', emoji: '🕷️', desc: 'Cauchemar', cat: 'ambiance', prompt: 'DBD entity, spider-like claws, nightmare realm, cosmic horror' }
+        ]
+    },
+    pixel: {
+        name: 'Pixel Art', emoji: '👾', desc: '8/16 bits', cat: 'gaming',
+        accent: '#ff6b1a', accent2: '#4a9e7a',
+        banner: 'Pixel art rétro gaming : 8/16 bits, sprites, arcade.',
+        presets: [
+            { label: '👾 8 bits', text: 'Pixel art 8 bits, sprite rétro, palette NES.' },
+            { label: '🕹️ 16 bits', text: 'Pixel art 16 bits, style Super Nintendo, couleurs vives.' },
+            { label: '🎮 Arcade', text: 'Pixel art arcade, écran CRT, scanlines.' }
+        ],
+        styles: [
+            { id: 'pixel-8', name: '8 bits', emoji: '👾', desc: 'NES', cat: 'transform', prompt: '8-bit pixel art, NES sprite style, retro video game' },
+            { id: 'pixel-16', name: '16 bits', emoji: '🕹️', desc: 'SNES', cat: 'transform', prompt: '16-bit pixel art, Super Nintendo style, retro RPG' },
+            { id: 'pixel-arcade', name: 'Arcade', emoji: '🎮', desc: 'CRT', cat: 'transform', prompt: 'arcade pixel art, CRT screen effect, scanlines' }
+        ]
+    },
+    youtube: {
+        name: 'YouTube', emoji: '▶️', desc: 'Créateur vidéo', cat: 'gaming',
+        accent: '#ff0000', accent2: '#ff4444',
+        banner: 'Miniatures YouTube accrocheuses : clickbait, contraste.',
+        presets: [
+            { label: '🔥 Clickbait', text: 'Miniature YouTube accrocheuse, contraste, effet clickbait.' },
+            { label: '📹 Vlog', text: 'Ambiance vlog YouTube, lumière naturelle, caméra à l\'épaule.' }
+        ],
+        styles: [
+            { id: 'thumbnail', name: 'Miniature', emoji: '🔥', desc: 'Clickbait', cat: 'ambiance', prompt: 'YouTube thumbnail style, high contrast, saturated, attention-grabbing' },
+            { id: 'vlog-style', name: 'Vlog', emoji: '📹', desc: 'Naturel', cat: 'ambiance', prompt: 'vlog aesthetic, natural lighting, handheld camera feel' }
+        ]
+    },
+    twitch: {
+        name: 'Twitch', emoji: '🎮', desc: 'Streaming live', cat: 'gaming',
+        accent: '#9146ff', accent2: '#c8a0ff',
+        banner: 'Streaming Twitch : overlays, alertes, néons.',
+        presets: [
+            { label: '🎮 Live', text: 'Setup Twitch, néons violets, RGB, énergie de live.' },
+            { label: '🚨 Alerte', text: 'Alerte Twitch, animation flashy, particules, hype.' }
+        ],
+        styles: [
+            { id: 'stream-setup', name: 'Setup Stream', emoji: '🎮', desc: 'RGB', cat: 'ambiance', prompt: 'Twitch streamer setup, RGB lights, purple neon, gaming desk' },
+            { id: 'alert-anim', name: 'Alerte', emoji: '🚨', desc: 'Hype', cat: 'ambiance', prompt: 'Twitch alert animation, flashy particles, hype energy' }
+        ]
+    },
+    // CRÉATIFS
+    bollywood: {
+        name: 'Bollywood', emoji: '💃', desc: 'Couleurs, danse', cat: 'creative',
+        accent: '#ffb800', accent2: '#ff2d6f',
+        banner: 'Scènes Bollywood : couleurs vives, pétales, lumière dorée.',
+        presets: [
+            { label: '🌺 Fête', text: 'Danse Bollywood, safran et rose, pétales, lumière dorée.' },
+            { label: '🕌 Temple', text: 'Danse Kathak, temple, bougies, encens, mouvements lents.' }
+        ],
+        styles: [
+            { id: 'classic-bol', name: 'Classique', emoji: '💃', desc: 'Safran', cat: 'ambiance', prompt: 'classic Bollywood scene, saffron and gold tones, festive lighting' },
+            { id: 'royal', name: 'Royal', emoji: '👑', desc: 'Pourpre', cat: 'ambiance', prompt: 'royal Indian palace, purple and gold, regal atmosphere' }
+        ]
+    },
+    wuxia: {
+        name: 'Wuxia', emoji: '🎋', desc: 'Arts martiaux', cat: 'creative',
+        accent: '#4a9e7a', accent2: '#2a4a6a',
+        banner: 'Scènes Wuxia : combats aériens, bambous, brume.',
+        presets: [
+            { label: '🎋 Bambous', text: 'Combat dans les bambous, pétales, brume, mouvements fluides.' },
+            { label: '🌸 Cerisiers', text: 'Danse des épées sous les cerisiers, pétales roses, poésie.' }
+        ],
+        styles: [
+            { id: 'ink', name: 'Peinture encre', emoji: '🖌️', desc: 'Monochrome', cat: 'ambiance', prompt: 'Chinese ink painting, monochrome, calligraphic brushstrokes' },
+            { id: 'jade', name: 'Jade', emoji: '💚', desc: 'Jade, or', cat: 'ambiance', prompt: 'jade green and gold tones, misty atmosphere, ancient Chinese' }
+        ]
+    },
+    retro: {
+        name: 'Rétro / VHS', emoji: '📼', desc: 'Années 80', cat: 'creative',
+        accent: '#ff2d9f', accent2: '#25f4ee',
+        banner: 'Scènes rétro : VHS, synthwave, Super 8.',
+        presets: [
+            { label: '📼 VHS', text: 'Look VHS années 80, grain, scanlines, couleurs saturées.' },
+            { label: '🌈 Synthwave', text: 'Synthwave, néons roses et cyan, grille, coucher de soleil.' }
+        ],
+        styles: [
+            { id: 'vhs', name: 'VHS', emoji: '📼', desc: 'Grain', cat: 'ambiance', prompt: '80s VHS aesthetic, grain, scanlines, tape distortion' },
+            { id: 'synthwave', name: 'Synthwave', emoji: '🌈', desc: 'Néon', cat: 'ambiance', prompt: 'synthwave aesthetic, pink and cyan neon, grid, retro-futuristic' }
+        ]
+    },
+    painting: {
+        name: 'Peinture vivante', emoji: '🖼️', desc: 'Van Gogh, Monet', cat: 'creative',
+        accent: '#c9a84a', accent2: '#8a4a1a',
+        banner: 'Tableaux classiques animés : Van Gogh, Monet, Klimt.',
+        presets: [
+            { label: '🌻 Van Gogh', text: 'Peinture Van Gogh, tourbillons, couleurs vives, empâtement.' },
+            { label: '🌊 Monet', text: 'Peinture Monet, impressionnisme, reflets d\'eau, lumière.' },
+            { label: '✨ Klimt', text: 'Peinture Klimt, motifs dorés, ornement, élégance.' }
+        ],
+        styles: [
+            { id: 'van-gogh', name: 'Van Gogh', emoji: '🌻', desc: 'Tourbillons', cat: 'transform', prompt: 'Van Gogh painting style, swirling brushstrokes, impasto, vibrant colors' },
+            { id: 'monet', name: 'Monet', emoji: '🌊', desc: 'Impressionnisme', cat: 'transform', prompt: 'Monet Impressionist painting, soft brushstrokes, water reflections' },
+            { id: 'klimt', name: 'Klimt', emoji: '✨', desc: 'Or', cat: 'transform', prompt: 'Gustav Klimt painting, gold leaf, ornate patterns, Art Nouveau' }
+        ]
+    },
+    statue: {
+        name: 'Statue antique', emoji: '🏛️', desc: 'Grèce, Rome', cat: 'creative',
+        accent: '#d4d4c8', accent2: '#8a8a7a',
+        banner: 'Image devient statue grecque ou romaine qui prend vie.',
+        presets: [
+            { label: '🏛️ Marbre', text: 'Statue de marbre grecque, posture classique, musée.' },
+            { label: '⚱️ Bronze', text: 'Statue de bronze antique, patine, reflets, romaine.' }
+        ],
+        styles: [
+            { id: 'marble', name: 'Marbre', emoji: '🏛️', desc: 'Blanc', cat: 'transform', prompt: 'ancient Greek marble statue, stone texture, classical pose' },
+            { id: 'bronze', name: 'Bronze', emoji: '⚱️', desc: 'Métal', cat: 'transform', prompt: 'ancient bronze statue, patina, golden reflections, Roman sculpture' }
+        ]
+    },
+    minimal: {
+        name: 'Minimaliste', emoji: '⬜', desc: 'Bauhaus', cat: 'creative',
+        accent: '#f5f5f5', accent2: '#4a6cf7',
+        banner: 'Design minimaliste : aplats, formes géométriques, Bauhaus.',
+        presets: [
+            { label: '⬜ Bauhaus', text: 'Design Bauhaus, formes géométriques, couleurs primaires.' },
+            { label: '⚫ Minimal', text: 'Design minimaliste, noir et blanc, espace négatif.' }
+        ],
+        styles: [
+            { id: 'bauhaus', name: 'Bauhaus', emoji: '⬜', desc: 'Formes', cat: 'transform', prompt: 'Bauhaus design, geometric shapes, primary colors, minimalist' },
+            { id: 'minimalism', name: 'Minimalisme', emoji: '⚫', desc: 'Épuré', cat: 'transform', prompt: 'minimalist design, black and white, simple shapes, clean' }
+        ]
+    },
+    popart: {
+        name: 'Pop Art', emoji: '🎭', desc: 'Warhol', cat: 'creative',
+        accent: '#ff2d6f', accent2: '#ffb800',
+        banner: 'Pop Art coloré : Warhol, Lichtenstein.',
+        presets: [
+            { label: '🎨 Warhol', text: 'Pop Art Warhol, couleurs vives, répétition, sérigraphie.' },
+            { label: '💥 Lichtenstein', text: 'Pop Art Lichtenstein, points Ben-Day, contours épais, BD.' }
+        ],
+        styles: [
+            { id: 'warhol', name: 'Warhol', emoji: '🎨', desc: 'Répétition', cat: 'transform', prompt: 'Andy Warhol Pop Art style, vibrant colors, silkscreen, repeated' },
+            { id: 'lichtenstein', name: 'Lichtenstein', emoji: '💥', desc: 'Ben-Day', cat: 'transform', prompt: 'Roy Lichtenstein Pop Art, Ben-Day dots, thick outlines, comic' }
+        ]
+    },
+    cosmic: {
+        name: 'Cosmique', emoji: '🌌', desc: 'Espace', cat: 'creative',
+        accent: '#4a1a8a', accent2: '#ff88aa',
+        banner: 'Image flotte dans l\'espace : nébuleuses, planètes.',
+        presets: [
+            { label: '🌌 Nébuleuse', text: 'Image dans une nébuleuse colorée, étoiles, gaz cosmique.' },
+            { label: '🪐 Planète', text: 'Image avec planètes, anneaux, lunes, interstellaire.' }
+        ],
+        styles: [
+            { id: 'nebula', name: 'Nébuleuse', emoji: '🌌', desc: 'Cosmos', cat: 'ambiance', prompt: 'cosmic nebula background, colorful gas clouds, stars, deep space' },
+            { id: 'planet', name: 'Planète', emoji: '🪐', desc: 'Space', cat: 'ambiance', prompt: 'planet in space, rings, moons, interstellar background' }
+        ]
+    },
+    glitch: {
+        name: 'Glitch / Datamosh', emoji: '🧊', desc: 'Corruption', cat: 'creative',
+        accent: '#00ff88', accent2: '#ff00aa',
+        banner: 'Corruption numérique, art expérimental.',
+        presets: [
+            { label: '📺 Glitch', text: 'Glitch numérique, distorsion, RGB split, cyber.' },
+            { label: '💾 Datamosh', text: 'Datamosh, compression artifacts, mouvement liquide.' }
+        ],
+        styles: [
+            { id: 'glitch-gl', name: 'Glitch', emoji: '📺', desc: 'RGB', cat: 'ambiance', prompt: 'digital glitch, RGB split, distortion, experimental cyber' },
+            { id: 'datamosh', name: 'Datamosh', emoji: '💾', desc: 'Artifacts', cat: 'ambiance', prompt: 'datamosh effect, compression artifacts, liquid motion' }
+        ]
+    },
+    pastel: {
+        name: 'Pastel / Kawaii', emoji: '🌸', desc: 'Doux, mignon', cat: 'creative',
+        accent: '#ffb8d0', accent2: '#b8d0ff',
+        banner: 'Couleurs douces, univers mignon, kawaii.',
+        presets: [
+            { label: '🌸 Kawaii', text: 'Style kawaii, couleurs pastel, ambiance mignonne.' },
+            { label: '☁️ Pastel', text: 'Palette pastel, couleurs douces, ambiance rêveuse.' }
+        ],
+        styles: [
+            { id: 'kawaii', name: 'Kawaii', emoji: '🌸', desc: 'Mignon', cat: 'ambiance', prompt: 'kawaii aesthetic, pastel colors, cute atmosphere, soft palette' },
+            { id: 'pastel-dream', name: 'Pastel', emoji: '☁️', desc: 'Rêveur', cat: 'ambiance', prompt: 'soft pastel color palette, dreamy diffused light, gentle' }
+        ]
+    },
+    dreamcore: {
+        name: 'Dreamcore', emoji: '🦋', desc: 'Étrange, onirique', cat: 'creative',
+        accent: '#88c8ff', accent2: '#d0a0ff',
+        banner: 'Esthétique onirique étrange, surréaliste.',
+        presets: [
+            { label: '🦋 Dreamcore', text: 'Dreamcore, onirique étrange, couleurs douces, surréaliste.' },
+            { label: '👁️ Weirdcore', text: 'Weirdcore, étrange, malaise, surréaliste.' }
+        ],
+        styles: [
+            { id: 'dreamcore-s', name: 'Dreamcore', emoji: '🦋', desc: 'Rêve', cat: 'ambiance', prompt: 'dreamcore aesthetic, surreal dreamlike, soft colors, uncanny' },
+            { id: 'weirdcore', name: 'Weirdcore', emoji: '👁️', desc: 'Étrange', cat: 'ambiance', prompt: 'weirdcore aesthetic, unsettling surreal, Y2K nostalgia, uncanny' }
+        ]
+    },
+    circus: {
+        name: 'Cirque / Carnaval', emoji: '🎪', desc: 'Forain', cat: 'creative',
+        accent: '#c0392b', accent2: '#d4a017',
+        banner: 'Cirque et carnaval : couleurs, magie, acrobaties.',
+        presets: [
+            { label: '🎪 Cirque', text: 'Ambiance cirque, chapiteau, lumières, clowns, acrobates.' },
+            { label: '🎭 Carnaval', text: 'Carnaval vénitien, masques, plumes, couleurs.' }
+        ],
+        styles: [
+            { id: 'circus', name: 'Cirque', emoji: '🎪', desc: 'Chapiteau', cat: 'ambiance', prompt: 'circus atmosphere, big top tent, dramatic lights, performers' },
+            { id: 'carnival', name: 'Carnaval', emoji: '🎭', desc: 'Masques', cat: 'ambiance', prompt: 'Venetian carnival, ornate masks, feathers, costumes, mysterious' }
+        ]
+    },
+    // BUSINESS
+    business: {
+        name: 'Business', emoji: '💼', desc: 'Corporate', cat: 'business',
+        accent: '#4a6cf7', accent2: '#2a4a8a',
+        banner: 'Vidéos business : présentation, témoignage, annonce.',
+        presets: [
+            { label: '💼 Présentation', text: 'Présentation produit, rotation, zoom, éclairage studio.' },
+            { label: '🎤 Témoignage', text: 'Témoignage client, portrait qui parle, citation, corporate.' },
+            { label: '🚀 Startup', text: 'Annonce startup, dynamisme, innovation, équipe, vision.' }
+        ],
+        styles: [
+            { id: 'corporate', name: 'Corporate', emoji: '💼', desc: 'Pro', cat: 'ambiance', prompt: 'corporate video, professional lighting, clean composition' },
+            { id: 'product', name: 'Produit', emoji: '📦', desc: 'Packshot', cat: 'ambiance', prompt: 'product showcase, studio lighting, rotating display' }
+        ]
+    },
+    realestate: {
+        name: 'Immobilier', emoji: '🏠', desc: 'Visite virtuelle', cat: 'business',
+        accent: '#c9a84a', accent2: '#4a6cf7',
+        banner: 'Visites virtuelles de biens immobiliers.',
+        presets: [
+            { label: '🏠 Villa', text: 'Villa de luxe, piscine, jardin, lumière dorée.' },
+            { label: '🏙️ Appartement', text: 'Appartement moderne, vue ville, intérieur design.' }
+        ],
+        styles: [
+            { id: 'real-estate', name: 'Visite', emoji: '🏠', desc: 'Mouvement', cat: 'ambiance', prompt: 'real estate walkthrough, smooth camera, architectural showcase' },
+            { id: 'luxury', name: 'Luxe', emoji: '✨', desc: 'Prestige', cat: 'ambiance', prompt: 'luxury real estate, elegant interior, warm lighting' }
+        ]
+    },
+    education: {
+        name: 'Éducation', emoji: '🎓', desc: 'Science, savoir', cat: 'business',
+        accent: '#2d8a4e', accent2: '#4a6cf7',
+        banner: 'Vidéos éducatives : schémas, formules, vulgarisation.',
+        presets: [
+            { label: '🔬 Science', text: 'Explication scientifique, schéma animé, particules, ADN.' },
+            { label: '📐 Maths', text: 'Formes géométriques, équations, démonstration.' },
+            { label: '🌍 Géographie', text: 'Carte qui se déploie, relief 3D, exploration.' }
+        ],
+        styles: [
+            { id: 'scientific', name: 'Scientifique', emoji: '🔬', desc: 'Schéma', cat: 'ambiance', prompt: 'scientific visualization, animated diagram, molecular structures' },
+            { id: 'documentary-edu', name: 'Documentaire', emoji: '🎙️', desc: 'Vulgarisation', cat: 'ambiance', prompt: 'educational documentary, informative visuals, professional' }
+        ]
+    },
+    medical: {
+        name: 'Médical', emoji: '💊', desc: 'Anatomie', cat: 'business',
+        accent: '#4a9e7a', accent2: '#4a6cf7',
+        banner: 'Vidéos médicales : anatomie, ADN, clinique.',
+        presets: [
+            { label: '💊 Anatomie', text: 'Corps humain, anatomie, organes, pédagogie.' },
+            { label: '🧬 ADN', text: 'Double hélice ADN, molécules, microscopie.' }
+        ],
+        styles: [
+            { id: 'anatomy', name: 'Anatomie', emoji: '💊', desc: 'Corps', cat: 'ambiance', prompt: 'anatomical visualization, human body, medical illustration' },
+            { id: 'microscopy', name: 'Microscopie', emoji: '🔬', desc: 'Cellulaire', cat: 'ambiance', prompt: 'microscopic view, cellular structures, medical research' }
+        ]
+    },
+    // VIE QUOTIDIENNE
+    food: {
+        name: 'Food / Cuisine', emoji: '🍕', desc: 'Gastronomie', cat: 'daily',
+        accent: '#ff6b1a', accent2: '#c9a84a',
+        banner: 'Vidéos food : gastronomie, street food, desserts.',
+        presets: [
+            { label: '🍽️ Gastronomique', text: 'Plat gastronomique, dressage, vapeur, lumière chaude.' },
+            { label: '🍔 Street food', text: 'Street food, burger juteux, friture, urbain.' },
+            { label: '🍰 Dessert', text: 'Dessert, chocolat qui coule, sucre, gourmandise.' }
+        ],
+        styles: [
+            { id: 'gourmet', name: 'Gastronomique', emoji: '🍽️', desc: 'Haut de gamme', cat: 'ambiance', prompt: 'gourmet food plating, steam, warm lighting, fine dining' },
+            { id: 'street-food', name: 'Street food', emoji: '🍔', desc: 'Urbain', cat: 'ambiance', prompt: 'street food scene, sizzling, urban atmosphere, vibrant' },
+            { id: 'dessert', name: 'Dessert', emoji: '🍰', desc: 'Sucré', cat: 'ambiance', prompt: 'dessert close-up, melting chocolate, sugar, sweet' }
+        ]
+    },
+    cafe: {
+        name: 'Café / Coffee', emoji: '☕', desc: 'Cosy, latte', cat: 'daily',
+        accent: '#8a5a3a', accent2: '#d4a017',
+        banner: 'Ambiance café cosy : latte art, vapeur, matin.',
+        presets: [
+            { label: '☕ Latte art', text: 'Latte art, mousse de lait, café fumant, ambiance cosy.' },
+            { label: '🥐 Petit-déj', text: 'Petit-déjeuner, croissants, jus, lumière matinale.' }
+        ],
+        styles: [
+            { id: 'cozy-cafe', name: 'Cosy', emoji: '☕', desc: 'Chaleureux', cat: 'ambiance', prompt: 'cozy coffee shop, warm atmosphere, steam, latte art' },
+            { id: 'morning', name: 'Matin', emoji: '🌅', desc: 'Lumineux', cat: 'ambiance', prompt: 'morning coffee scene, soft natural light, breakfast table' }
+        ]
+    },
+    plants: {
+        name: 'Plantes', emoji: '🌿', desc: 'Jardin, nature', cat: 'daily',
+        accent: '#2d8a4e', accent2: '#8a5a3a',
+        banner: 'Nature, croissance, fleurs, jungle urbaine.',
+        presets: [
+            { label: '🌱 Croissance', text: 'Plante qui pousse, time-lapse, feuilles qui s\'ouvrent.' },
+            { label: '🌸 Fleurs', text: 'Fleurs qui s\'ouvrent, pétales, pollen, lumière douce.' }
+        ],
+        styles: [
+            { id: 'growth', name: 'Croissance', emoji: '🌱', desc: 'Time-lapse', cat: 'ambiance', prompt: 'plant growth time-lapse, leaves unfurling, botanical' },
+            { id: 'bloom', name: 'Floraison', emoji: '🌸', desc: 'Fleurs', cat: 'ambiance', prompt: 'flowers blooming, petals opening, pollen, garden' }
+        ]
+    },
+    pets: {
+        name: 'Animaux', emoji: '🐾', desc: 'Chats, chiens', cat: 'daily',
+        accent: '#c9a84a', accent2: '#8a5a3a',
+        banner: 'Animaux : chats, chiens, animaux sauvages.',
+        presets: [
+            { label: '🐱 Chat', text: 'Chat mignon, mouvement de queue, yeux qui brillent.' },
+            { label: '🐶 Chien', text: 'Chien joyeux, queue qui remue, énergie positive.' },
+            { label: '🦁 Sauvage', text: 'Animal sauvage, lion, tigre, savane, puissance.' }
+        ],
+        styles: [
+            { id: 'cute-pet', name: 'Mignon', emoji: '🐾', desc: 'Adorable', cat: 'ambiance', prompt: 'cute pet portrait, playful motion, warm lighting' },
+            { id: 'wildlife', name: 'Sauvage', emoji: '🦁', desc: 'Nature', cat: 'ambiance', prompt: 'wildlife animal, majestic pose, natural environment' }
+        ]
+    },
+    bookstagram: {
+        name: 'Bookstagram', emoji: '📚', desc: 'Lecture, cozy', cat: 'daily',
+        accent: '#8a5a3a', accent2: '#c9a84a',
+        banner: 'Ambiance lecture, bibliothèques, cozy.',
+        presets: [
+            { label: '📖 Lecture', text: 'Ambiance lecture, livre, page qui tourne, lumière chaude.' },
+            { label: '📚 Bibliothèque', text: 'Bibliothèque ancienne, livres, échelle, studieux.' }
+        ],
+        styles: [
+            { id: 'book-cozy', name: 'Cozy', emoji: '📖', desc: 'Chaleureux', cat: 'ambiance', prompt: 'cozy reading atmosphere, book, warm light, tea, peaceful' },
+            { id: 'library', name: 'Bibliothèque', emoji: '📚', desc: 'Classique', cat: 'ambiance', prompt: 'old library, books, wooden shelves, studious atmosphere' }
+        ]
+    },
+    wedding: {
+        name: 'Mariage', emoji: '💍', desc: 'Événementiel', cat: 'daily',
+        accent: '#ffc8d0', accent2: '#c9a84a',
+        banner: 'Vidéos de mariage : cérémonie, danse, souvenirs.',
+        presets: [
+            { label: '💍 Cérémonie', text: 'Cérémonie de mariage, émotion, larmes de joie, lumière dorée.' },
+            { label: '💃 Première danse', text: 'Première danse, couple, mouvement fluide, magie.' }
+        ],
+        styles: [
+            { id: 'wedding-cine', name: 'Cinématique', emoji: '💍', desc: 'Film mariage', cat: 'ambiance', prompt: 'cinematic wedding film, romantic lighting, slow motion, emotional' },
+            { id: 'romantic', name: 'Romantique', emoji: '💐', desc: 'Doux', cat: 'ambiance', prompt: 'romantic wedding, soft light, flowers, elegant details' }
+        ]
+    },
+    nature: {
+        name: 'Nature Vivante', emoji: '🌲', desc: 'Paysages animés', cat: 'daily',
+        accent: '#2d8a4e', accent2: '#4a9e7a',
+        banner: 'Paysages vivants : vent, nuages, eau, lumière.',
+        presets: [
+            { label: '🌲 Forêt', text: 'Forêt vivante, feuilles qui bougent, lumière à travers les arbres.' },
+            { label: '🌊 Océan', text: 'Océan agité, vagues, embruns, coucher de soleil.' },
+            { label: '🏔️ Montagne', text: 'Montagne brumeuse, nuages, lumière dorée, silence.' }
+        ],
+        styles: [
+            { id: 'wind', name: 'Vent', emoji: '🌬️', desc: 'Brise', cat: 'ambiance', prompt: 'gentle wind, leaves rustling, grass moving, atmospheric' },
+            { id: 'water', name: 'Eau', emoji: '🌊', desc: 'Vagues', cat: 'ambiance', prompt: 'living water, waves, ripples, reflections, marine' },
+            { id: 'sunbeams', name: 'Soleil', emoji: '☀️', desc: 'Particules', cat: 'ambiance', prompt: 'sunbeams through trees, floating particles, golden light' }
+        ]
+    },
+    aesthetic: {
+        name: 'Aesthetic / Mood', emoji: '🌙', desc: 'Tendance', cat: 'daily',
+        accent: '#88c8ff', accent2: '#d0a0ff',
+        banner: 'Esthétique tendance : cozy, cottagecore, dark academia.',
+        presets: [
+            { label: '🕯️ Cozy', text: 'Ambiance cozy, bougies, plaid, pluie dehors, chaleur.' },
+            { label: '🍄 Cottagecore', text: 'Cottagecore, campagne, fleurs sauvages, ambiance champêtre.' },
+            { label: '📜 Dark Academia', text: 'Dark academia, bibliothèque, livres, bougies, sombre.' }
+        ],
+        styles: [
+            { id: 'cozy-aes', name: 'Cozy', emoji: '🕯️', desc: 'Chaleureux', cat: 'ambiance', prompt: 'cozy aesthetic, warm light, candles, blanket, peaceful' },
+            { id: 'cottagecore', name: 'Cottagecore', emoji: '🍄', desc: 'Champêtre', cat: 'ambiance', prompt: 'cottagecore aesthetic, countryside, wild flowers, pastoral' },
+            { id: 'dark-academia', name: 'Dark Academia', emoji: '📜', desc: 'Studieux', cat: 'ambiance', prompt: 'dark academia aesthetic, library, old books, candles, moody' }
+        ]
+    },
+    // ACTION
+    sport: {
+        name: 'Sport / Fitness', emoji: '💪', desc: 'Énergie', cat: 'action',
+        accent: '#ff4500', accent2: '#c9a84a',
+        banner: 'Sport et fitness : énergie, mouvement, motivation.',
+        presets: [
+            { label: '💪 Musculation', text: 'Musculation, salle, effort, sueur, muscles, intensité.' },
+            { label: '🏃 Course', text: 'Course à pied, vitesse, foulée, paysage, détermination.' },
+            { label: '🧘 Yoga', text: 'Yoga, postures, respiration, sérénité, lumière douce.' }
+        ],
+        styles: [
+            { id: 'workout', name: 'Workout', emoji: '💪', desc: 'Intensité', cat: 'ambiance', prompt: 'intense workout, sweat, effort, gym atmosphere, powerful' },
+            { id: 'sports-action', name: 'Action sport', emoji: '⚽', desc: 'Énergie', cat: 'ambiance', prompt: 'sports action, dynamic movement, slow motion impact' }
+        ]
+    },
+    auto: {
+        name: 'Automobile', emoji: '🚗', desc: 'Voitures, motos', cat: 'action',
+        accent: '#c0392b', accent2: '#2a2a2a',
+        banner: 'Voitures, motos, course : reflets, mouvement.',
+        presets: [
+            { label: '🏎️ Sportive', text: 'Voiture sportive, reflets, ronronnement, mouvement.' },
+            { label: '🏍️ Moto', text: 'Moto, virage, roue arrière, vitesse, sensation.' },
+            { label: '🚙 Classique', text: 'Voiture classique vintage, chrome, élégance, reflets.' }
+        ],
+        styles: [
+            { id: 'car-showcase', name: 'Showcase', emoji: '🚗', desc: 'Présentation', cat: 'ambiance', prompt: 'car showcase, glossy reflections, studio lighting, automotive' },
+            { id: 'car-action', name: 'Action', emoji: '🏎️', desc: 'Vitesse', cat: 'ambiance', prompt: 'car racing, dynamic speed, motion blur, adrenaline' }
+        ]
+    },
+    music: {
+        name: 'Musique', emoji: '🎸', desc: 'Instruments, scène', cat: 'action',
+        accent: '#8a1a8a', accent2: '#ff6b1a',
+        banner: 'Musique : guitare, piano, scène, concert.',
+        presets: [
+            { label: '🎸 Concert', text: 'Concert, foule, lumières, guitare, énergie, live.' },
+            { label: '🎹 Piano', text: 'Piano, doigts, touches, émotion, lumière douce.' },
+            { label: '🎤 Clip', text: 'Clip musical, artiste, effets visuels, rythmé.' }
+        ],
+        styles: [
+            { id: 'live-concert', name: 'Concert', emoji: '🎸', desc: 'Live', cat: 'ambiance', prompt: 'live concert, stage lights, crowd, energy, music' },
+            { id: 'music-video', name: 'Clip', emoji: '🎤', desc: 'Clip', cat: 'ambiance', prompt: 'music video style, artistic visuals, choreographed movement' }
+        ]
+    },
+    pirate: {
+        name: 'Pirates', emoji: '🏴‍☠️', desc: 'Aventure, mer', cat: 'action',
+        accent: '#8a5a3a', accent2: '#c9a84a',
+        banner: 'Pirates : navires, trésors, tempêtes.',
+        presets: [
+            { label: '🏴‍☠️ Navire', text: 'Navire pirate, voiles, mer agitée, tempête, aventure.' },
+            { label: '💎 Trésor', text: 'Trésor, coffre, or, bijoux, lumière, découverte.' }
+        ],
+        styles: [
+            { id: 'pirate-ship', name: 'Navire', emoji: '🏴‍☠️', desc: 'Maritime', cat: 'ambiance', prompt: 'pirate ship, sails, rough sea, storm, maritime' },
+            { id: 'treasure', name: 'Trésor', emoji: '💎', desc: 'Découverte', cat: 'ambiance', prompt: 'treasure discovery, gold, jewels, glowing light, adventure' }
+        ]
+    },
+    superhero: {
+        name: 'Super-héros', emoji: '🦸', desc: 'Comics', cat: 'action',
+        accent: '#ff0000', accent2: '#ffb800',
+        banner: 'Super-héros : comics, Marvel/DC, super-pouvoirs.',
+        presets: [
+            { label: '🦸 Héros', text: 'Super-héros, costume, cape, pose héroïque, pouvoir.' },
+            { label: '⚡ Pouvoir', text: 'Super-pouvoir, éclairs, énergie, effets spectaculaires.' }
+        ],
+        styles: [
+            { id: 'comic-style', name: 'Comics', emoji: '🦸', desc: 'Comics', cat: 'transform', prompt: 'comic book superhero style, bold outlines, dynamic pose' },
+            { id: 'superpower', name: 'Pouvoir', emoji: '⚡', desc: 'Effets', cat: 'ambiance', prompt: 'superpower activation, energy effects, glowing aura' }
+        ]
+    },
+    // AMBIANCES
+    meditation: {
+        name: 'Méditation', emoji: '🧘', desc: 'Zen, spirituel', cat: 'ambiance',
+        accent: '#c9a84a', accent2: '#88c8ff',
+        banner: 'Méditation : zen, chakras, aura, mandala.',
+        presets: [
+            { label: '🧘 Méditation', text: 'Méditation, respiration, sérénité, lumière douce, paix.' },
+            { label: '✨ Aura', text: 'Aura colorée, énergie, chakras, spirituel.' },
+            { label: '🔮 Mandala', text: 'Mandala, formes géométriques, spirituel, symétrie.' }
+        ],
+        styles: [
+            { id: 'zen', name: 'Zen', emoji: '🧘', desc: 'Paisible', cat: 'ambiance', prompt: 'zen meditation atmosphere, peaceful, soft light, calm' },
+            { id: 'aura', name: 'Aura', emoji: '✨', desc: 'Énergie', cat: 'ambiance', prompt: 'colorful aura, spiritual energy, chakras, ethereal glow' }
+        ]
+    },
+    museum: {
+        name: 'Art / Musée', emoji: '🎨', desc: 'Exposition', cat: 'ambiance',
+        accent: '#c9a84a', accent2: '#4a2a1a',
+        banner: 'Image devient œuvre d\'art exposée dans un musée.',
+        presets: [
+            { label: '🖼️ Musée', text: 'Image exposée dans un musée, cadre, éclairage.' },
+            { label: '🎨 Galerie', text: 'Galerie d\'art moderne, ambiance, découverte.' }
+        ],
+        styles: [
+            { id: 'museum', name: 'Musée', emoji: '🖼️', desc: 'Cadre', cat: 'ambiance', prompt: 'artwork in museum, elegant frame, gallery lighting' },
+            { id: 'gallery', name: 'Galerie', emoji: '🎨', desc: 'Moderne', cat: 'ambiance', prompt: 'modern art gallery, minimal lighting, exhibition' }
+        ]
+    },
+    castles: {
+        name: 'Châteaux', emoji: '🏰', desc: 'Patrimoine', cat: 'ambiance',
+        accent: '#8a5a3a', accent2: '#c9a84a',
+        banner: 'Châteaux français, ruines, vieilles pierres.',
+        presets: [
+            { label: '🏰 Château', text: 'Château français, tourelles, jardins, histoire.' },
+            { label: '⚔️ Médiéval', text: 'Château médiéval, chevaliers, tournois, épique.' }
+        ],
+        styles: [
+            { id: 'castle', name: 'Château', emoji: '🏰', desc: 'Prestige', cat: 'ambiance', prompt: 'French château, towers, gardens, historic elegance' },
+            { id: 'medieval', name: 'Médiéval', emoji: '⚔️', desc: 'Épique', cat: 'ambiance', prompt: 'medieval castle, knights, epic atmosphere, grandeur' }
+        ]
+    },
+    astronomy: {
+        name: 'Astronomie', emoji: '🌌', desc: 'Étoiles, planètes', cat: 'ambiance',
+        accent: '#4a1a8a', accent2: '#c9a84a',
+        banner: 'Planètes, galaxies, constellations.',
+        presets: [
+            { label: '⭐ Étoiles', text: 'Ciel étoilé, Voie lactée, constellations, immensité.' },
+            { label: '🪐 Planètes', text: 'Système solaire, planètes, anneaux, orbites.' }
+        ],
+        styles: [
+            { id: 'starry-sky', name: 'Ciel étoilé', emoji: '⭐', desc: 'Étoiles', cat: 'ambiance', prompt: 'starry night sky, Milky Way, constellations, cosmic silence' },
+            { id: 'solar-system', name: 'Système solaire', emoji: '🪐', desc: 'Planètes', cat: 'ambiance', prompt: 'solar system, planets, orbits, space exploration' }
+        ]
+    },
+    // NICHES
+    ai: {
+        name: 'IA / Futurisme', emoji: '🤖', desc: 'Tech, robots', cat: 'niche',
+        accent: '#00d4ff', accent2: '#4a1a8a',
+        banner: 'IA, robots, cyborgs, singularité.',
+        presets: [
+            { label: '🤖 Robot', text: 'Robot futuriste, métal, yeux lumineux, IA.' },
+            { label: '🧠 IA', text: 'Intelligence artificielle, réseau de neurones, futur.' }
+        ],
+        styles: [
+            { id: 'robot', name: 'Robot', emoji: '🤖', desc: 'Mécano', cat: 'ambiance', prompt: 'futuristic robot, technology, glowing eyes, AI aesthetic' },
+            { id: 'neural', name: 'Neural', emoji: '🧠', desc: 'Réseau', cat: 'ambiance', prompt: 'neural network visualization, AI, glowing nodes' }
+        ]
+    },
+    royal: {
+        name: 'Royauté', emoji: '👑', desc: 'Royalcore', cat: 'niche',
+        accent: '#c9a84a', accent2: '#8a1a4a',
+        banner: 'Couronnes, palais, robes, royauté.',
+        presets: [
+            { label: '👑 Palais', text: 'Palais royal, or, marbre, lustres, prestige.' },
+            { label: '💎 Couronne', text: 'Couronne, joyaux, or, pierreries, royauté.' }
+        ],
+        styles: [
+            { id: 'palace', name: 'Palais', emoji: '👑', desc: 'Or', cat: 'ambiance', prompt: 'royal palace, gold, marble, chandeliers, regal' },
+            { id: 'crown', name: 'Couronne', emoji: '💎', desc: 'Joyaux', cat: 'ambiance', prompt: 'royal crown, jewels, gold, precious stones, majestic' }
+        ]
+    },
+    witch: {
+        name: 'Sorcière', emoji: '🧙', desc: 'Witchcore', cat: 'niche',
+        accent: '#7b2d8e', accent2: '#2d8a4e',
+        banner: 'Potions, chaudron, grimoire, forêt mystique.',
+        presets: [
+            { label: '🧙 Sorcière', text: 'Sorcière, chapeau, balai, potions, mystique.' },
+            { label: '🔮 Potion', text: 'Potion magique, chaudron, fumée, ingrédients.' }
+        ],
+        styles: [
+            { id: 'witch', name: 'Sorcière', emoji: '🧙', desc: 'Mystique', cat: 'ambiance', prompt: 'witch aesthetic, hat, broom, potions, mystical' },
+            { id: 'potion', name: 'Potion', emoji: '🔮', desc: 'Magie', cat: 'ambiance', prompt: 'magic potion brewing, cauldron, smoke, arcane ritual' }
+        ]
+    },
+    darkfantasy: {
+        name: 'Dark Fantasy', emoji: '🖤', desc: 'Sombre, épique', cat: 'niche',
+        accent: '#4a1a1a', accent2: '#7b2d8e',
+        banner: 'Dark fantasy : sombre, gothique, épique.',
+        presets: [
+            { label: '⚔️ Chevalier noir', text: 'Chevalier noir, armure, épée, sombre, épique.' },
+            { label: '😈 Démon', text: 'Démon, cornes, ailes, feu, sombre, puissance.' }
+        ],
+        styles: [
+            { id: 'dark-knight', name: 'Chevalier noir', emoji: '⚔️', desc: 'Guerrier', cat: 'ambiance', prompt: 'dark fantasy knight, black armor, sword, epic grim' },
+            { id: 'demon', name: 'Démon', emoji: '😈', desc: 'Démoniaque', cat: 'ambiance', prompt: 'dark fantasy demon, horns, wings, fire, sinister epic' }
+        ]
+    },
+    space: {
+        name: 'Cosmique II', emoji: '🌠', desc: 'Galaxie', cat: 'niche',
+        accent: '#4a1a8a', accent2: '#ff88aa',
+        banner: 'Image flotte dans l\'espace : nébuleuses, étoiles filantes.',
+        presets: [
+            { label: '🌠 Étoile filante', text: 'Étoile filante, ciel nocturne, vœu, magie, cosmos.' },
+            { label: '🕳️ Trou noir', text: 'Trou noir, distorsion, lumière aspirée, mystère.' }
+        ],
+        styles: [
+            { id: 'shooting-star', name: 'Étoile filante', emoji: '🌠', desc: 'Météore', cat: 'ambiance', prompt: 'shooting star, meteor shower, night sky, magical cosmic' },
+            { id: 'blackhole', name: 'Trou noir', emoji: '🕳️', desc: 'Distorsion', cat: 'ambiance', prompt: 'black hole, gravitational distortion, cosmic mystery' }
+        ]
+    }
 };
 
 // ══════════════════════════════════════════════════════════════════
 // PRESETS MOUVEMENTS
 // ══════════════════════════════════════════════════════════════════
 const RANDOM_ACTIONS = [
-    'the subject slowly raises a hand toward the camera',
-    'a single tear rolls down the subject\'s cheek in slow motion',
+    'the subject slowly raises a hand toward the camera, fingers trembling slightly',
+    'a single tear rolls down the subject\'s cheek in extreme slow motion',
     'the subject turns their head slowly, eyes closing, breathing softly',
     'the subject\'s hair moves gently in an imperceptible breeze',
-    'the subject stands still, only their chest rising and falling',
-    'the subject\'s eyes open slowly, revealing an intense gaze',
-    'the subject extends a hand as if reaching for something',
+    'the subject stands still, only their chest rising and falling with breath',
+    'the subject\'s eyes open slowly, revealing an intense gaze directly at the camera',
+    'the subject extends a hand as if reaching for something just out of frame',
+    'the subject lifts their chin slightly, a silent gesture of presence',
     'the subject walks slowly toward the camera, each step deliberate'
 ];
+
 const RANDOM_CAMERA = [
-    'slow dolly-in, camera gliding forward',
-    'static locked-off frame, subject moves within borders',
-    'handheld, slight tremor, camera breathing',
+    'slow dolly-in, camera gliding forward almost imperceptibly',
+    'static locked-off frame, subject moves within fixed borders',
+    'handheld, slight tremor, camera breathing with the subject',
     'slow pan following the subject\'s movement',
     'subtle parallax movement revealing depth',
+    'high angle looking down, subject appears small and vulnerable',
     'low angle looking up, subject appears powerful',
-    'camera drifts backward slowly, revealing more'
+    'camera drifts backward slowly, revealing a bit more of the environment'
 ];
+
 const RANDOM_LIGHTING = [
     'soft diffused natural light',
     'warm golden hour backlight',
@@ -1173,15 +1537,17 @@ const RANDOM_LIGHTING = [
     'cool moonlight atmosphere',
     'cinematic rim lighting emphasizing the silhouette'
 ];
+
 const INTENSITY_PRESETS = {
-    subtle: 'very subtle movement, barely perceptible change',
-    moderate: 'moderate movement, clear but controlled motion',
-    strong: 'strong dynamic movement, energetic motion'
+    subtle: 'very subtle movement, barely perceptible change, minimal animation',
+    moderate: 'moderate movement, clear but controlled motion, balanced energy',
+    strong: 'strong dynamic movement, energetic motion, pronounced physical action'
 };
+
 const FRAMING_PRESETS = {
-    close: 'extreme close-up framing, intimate and intense',
-    medium: 'medium shot, subject framed from waist up',
-    wide: 'wide shot, subject framed with environment visible'
+    close: 'extreme close-up framing, tight on the subject, intimate and intense',
+    medium: 'medium shot, subject framed from waist up, balanced composition',
+    wide: 'wide shot, subject framed with the environment visible'
 };
 
 // ══════════════════════════════════════════════════════════════════
@@ -1199,8 +1565,9 @@ const state = {
     mainPrompt: '',
     framing: 'random',
     intensity: 'moderate',
-    duration: 5,
+    durationFrames: 153,
     isLoadingImages: false,
+    creationAttemptsSinceLastError: 0,
     filterCat: 'all',
     searchQuery: ''
 };
@@ -1229,6 +1596,10 @@ function setStatus(text) {
     if (text) { bar.classList.add('visible'); txt.textContent = text; }
     else bar.classList.remove('visible');
 }
+
+// ══════════════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════════════
 let toastTimeout = null;
 function showToast(message, type = 'success', duration = 2500) {
     const toast = document.getElementById('toast');
@@ -1286,7 +1657,8 @@ function startCanvasStream() {
         }, 1000);
         video.srcObject = canvasStream;
         video.muted = true; video.playsInline = true;
-        const p = video.play(); if (p && p.catch) p.catch(() => {});
+        const p = video.play();
+        if (p && p.catch) p.catch(() => {});
         return true;
     } catch (e) { return false; }
 }
@@ -1300,9 +1672,13 @@ async function activateWakeLock() {
     let success = false;
     if (isWakeLockSupported()) success = await requestWakeLockAPI();
     if (!success) success = startCanvasStream();
+    if (!success && !canvasStream) success = startCanvasStream();
     return success;
 }
-async function deactivateWakeLock() { await releaseWakeLockAPI(); stopCanvasStream(); }
+async function deactivateWakeLock() {
+    await releaseWakeLockAPI();
+    stopCanvasStream();
+}
 function updateWakeStatus() {
     const el = document.getElementById('wake-status');
     const txt = document.getElementById('wake-status-text');
@@ -1313,50 +1689,74 @@ function updateWakeStatus() {
     if (!hasAny) { el.classList.add('warn'); txt.textContent = '⚠️ Non supporté'; btn.style.display = 'none'; return; }
     btn.style.display = 'inline-block';
     const isActive = wakeLockSentinel !== null || canvasStream !== null;
-    if (wakeLockEnabled && isActive) { el.classList.add('active'); txt.textContent = '✅ Écran allumé'; btn.textContent = 'Désactiver'; }
-    else if (wakeLockEnabled && !isActive) { el.classList.add('warn'); txt.textContent = '⏳ En attente'; btn.textContent = 'Désactiver'; }
-    else { txt.textContent = '💤 Veille auto'; btn.textContent = 'Garder l\'écran allumé'; }
+    if (wakeLockEnabled && isActive) {
+        el.classList.add('active'); txt.textContent = '✅ Écran allumé'; btn.textContent = 'Désactiver';
+    } else if (wakeLockEnabled && !isActive) {
+        el.classList.add('warn'); txt.textContent = '⏳ En attente'; btn.textContent = 'Désactiver';
+    } else {
+        txt.textContent = '💤 Veille automatique'; btn.textContent = 'Garder l\'écran allumé';
+    }
 }
 async function toggleWakeLock() {
     if (wakeLockEnabled) {
         wakeLockEnabled = false;
         await deactivateWakeLock();
         try { localStorage.setItem(WAKE_LOCK_PREF, '0'); } catch (e) {}
-        showToast('Veille réactivée', 'warn');
+        showToast('Veille automatique réactivée', 'warn');
     } else {
         wakeLockEnabled = true;
         const ok = await activateWakeLock();
         try { localStorage.setItem(WAKE_LOCK_PREF, '1'); } catch (e) {}
-        showToast(ok ? 'Écran va rester allumé' : 'Activation manuelle', ok ? 'success' : 'warn');
+        showToast(ok ? 'Écran va rester allumé' : 'Activation manuelle nécessaire', ok ? 'success' : 'warn');
     }
     updateWakeStatus();
 }
 document.addEventListener('visibilitychange', async () => {
     if (document.visibilityState === 'visible' && wakeLockEnabled) {
-        await activateWakeLock(); updateWakeStatus();
+        await activateWakeLock();
+        updateWakeStatus();
     }
 });
 async function ensureWakeLockActive() {
     if (!wakeLockEnabled) return;
-    if (wakeLockSentinel === null && canvasStream === null) { await activateWakeLock(); updateWakeStatus(); }
+    if (wakeLockSentinel === null && canvasStream === null) {
+        await activateWakeLock();
+        updateWakeStatus();
+    }
 }
 
 // ══════════════════════════════════════════════════════════════════
 // CACHE DES TEMPS
 // ══════════════════════════════════════════════════════════════════
-function loadTimingCache() { try { return JSON.parse(localStorage.getItem(TIMING_CACHE_KEY) || '{}'); } catch (e) { return {}; } }
-function saveTimingCache(c) { try { localStorage.setItem(TIMING_CACHE_KEY, JSON.stringify(c)); } catch (e) {} }
-function recordGenerationTime(durationMs) {
+function loadTimingCache() {
+    try { return JSON.parse(localStorage.getItem(TIMING_CACHE_KEY) || '{}'); }
+    catch (e) { return {}; }
+}
+function saveTimingCache(cache) {
+    try { localStorage.setItem(TIMING_CACHE_KEY, JSON.stringify(cache)); } catch (e) {}
+}
+function recordGenerationTime(numFrames, durationMs) {
     const cache = loadTimingCache();
-    if (!cache.all) cache.all = [];
-    cache.all.push(durationMs);
-    if (cache.all.length > 20) cache.all = cache.all.slice(-20);
+    const key = String(numFrames);
+    if (!cache[key]) cache[key] = [];
+    cache[key].push(durationMs);
+    if (cache[key].length > 10) cache[key] = cache[key].slice(-10);
     saveTimingCache(cache);
     updateTimingDisplay();
 }
+function estimateGenerationTime(numFrames) {
+    const cache = loadTimingCache();
+    const samples = cache[String(numFrames)];
+    if (samples && samples.length > 0) {
+        const sorted = [...samples].sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        return sorted.length % 2 === 0 ? (sorted[mid-1] + sorted[mid]) / 2 : sorted[mid];
+    }
+    return 30000 + numFrames * 500;
+}
 function updateTimingDisplay() {
     const cache = loadTimingCache();
-    const all = cache.all || [];
+    const all = Object.values(cache).flat();
     const speedEl = document.getElementById('stat-speed');
     const samplesEl = document.getElementById('stat-samples');
     if (!speedEl || !samplesEl) return;
@@ -1367,47 +1767,47 @@ function updateTimingDisplay() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// TOKEN HUGGING FACE
+// CLÉ API
 // ══════════════════════════════════════════════════════════════════
-function getHFToken() {
-    try { return (localStorage.getItem(HF_TOKEN_STORAGE) || '').trim(); }
+function getApiKey() {
+    try { return (localStorage.getItem(API_KEY_STORAGE) || '').trim(); }
     catch (e) { return ''; }
 }
-function saveHFToken() {
+function saveApiKey() {
     const input = document.getElementById('api-key-input');
     if (!input) return;
     const key = input.value.trim();
     if (!key) {
-        try { localStorage.removeItem(HF_TOKEN_STORAGE); } catch (e) {}
+        try { localStorage.removeItem(API_KEY_STORAGE); } catch (e) {}
         updateApiPanel();
-        showToast('Token supprimé', 'warn');
+        showToast('Clé supprimée', 'warn');
         return;
     }
-    if (!key.startsWith('hf_')) {
-        if (!confirm('Le token ne commence pas par "hf_". Sauvegarder ?')) return;
+    if (!key.startsWith('sk-')) {
+        if (!confirm('La clé ne commence pas par "sk-". Sauvegarder quand même ?')) return;
     }
     try {
-        localStorage.setItem(HF_TOKEN_STORAGE, key);
+        localStorage.setItem(API_KEY_STORAGE, key);
         updateApiPanel();
-        showToast('Token Hugging Face enregistré ✓', 'success');
+        showToast('Clé API enregistrée ✓', 'success');
         input.blur();
-    } catch (e) { showToast('Erreur', 'error'); }
+    } catch (e) { showToast('Erreur lors de la sauvegarde', 'error'); }
 }
 function updateApiPanel() {
     const panel = document.getElementById('api-panel');
     const input = document.getElementById('api-key-input');
     const statusLine = document.getElementById('api-status-line');
     const statusText = document.getElementById('api-status-text');
-    const key = getHFToken();
+    const key = getApiKey();
     if (!panel || !input || !statusLine || !statusText) return;
     if (key) {
         panel.classList.add('ok'); statusLine.classList.add('ok');
-        statusText.textContent = 'Token HF actif · ' + key.slice(0, 8) + '…' + key.slice(-4);
+        statusText.textContent = 'Clé API active · ' + key.slice(0, 8) + '…' + key.slice(-4);
         input.value = key; input.placeholder = '';
     } else {
         panel.classList.remove('ok'); statusLine.classList.remove('ok');
-        statusText.textContent = 'Aucun token Hugging Face enregistré';
-        input.value = ''; input.placeholder = 'Collez votre token Hugging Face (hf_...)';
+        statusText.textContent = 'Aucune clé API enregistrée';
+        input.value = ''; input.placeholder = 'Collez votre clé API ici (sk-...)';
     }
     updateGenerateBtn();
 }
@@ -1415,7 +1815,7 @@ function updateGenerateBtn() {
     const btn = document.getElementById('generate-btn');
     if (!btn) return;
     const hasImages = state.images.length > 0;
-    const hasKey = !!getHFToken();
+    const hasKey = !!getApiKey();
     const theme = THEMES[state.theme];
     btn.disabled = !hasImages || !hasKey || state.isRunning || state.isLoadingImages;
     if (state.isLoadingImages) btn.textContent = 'Chargement… (' + state.images.length + ')';
@@ -1423,7 +1823,7 @@ function updateGenerateBtn() {
         const total = state.queue.length;
         const done = state.completed + state.failed;
         btn.textContent = 'Génération… (' + done + '/' + total + ')';
-    } else if (!hasKey) btn.textContent = 'Ajoutez votre token Hugging Face';
+    } else if (!hasKey) btn.textContent = 'Ajoutez votre clé API';
     else if (!hasImages) btn.textContent = 'Ajoutez des photos';
     else btn.textContent = 'Générer ' + state.images.length + ' vidéo' + (state.images.length > 1 ? 's' : '') + ' ' + theme.emoji;
 }
@@ -1448,7 +1848,8 @@ function generateThumbnail(dataUri) {
                 const ratio = img.height / img.width;
                 canvas.width = THUMBNAIL_MAX_WIDTH;
                 canvas.height = Math.round(THUMBNAIL_MAX_WIDTH * ratio);
-                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 resolve(canvas.toDataURL('image/jpeg', 0.7));
             } catch (e) { resolve(dataUri); }
         };
@@ -1499,7 +1900,7 @@ function renderImages() {
     grid.innerHTML = state.images.map(img =>
         '<div class="image-card" data-edit="' + img.id + '">' +
             '<span class="edit-badge">✏️</span>' +
-            '<img src="' + (img.thumbnail || img.dataUri) + '" alt="">' +
+            '<img src="' + (img.thumbnail || img.dataUri) + '" alt="" loading="lazy">' +
             '<button class="remove-btn" data-remove="' + img.id + '">✕</button>' +
         '</div>'
     ).join('');
@@ -1520,12 +1921,22 @@ function renderImages() {
 // ══════════════════════════════════════════════════════════════════
 // FAVORIS
 // ══════════════════════════════════════════════════════════════════
-function loadFavorites() { try { return JSON.parse(localStorage.getItem(FAV_STORAGE) || '[]'); } catch (e) { return []; } }
-function saveFavorites(l) { try { localStorage.setItem(FAV_STORAGE, JSON.stringify(l)); } catch (e) {} }
-function toggleFavorite(id) {
+function loadFavorites() {
+    try { return JSON.parse(localStorage.getItem(FAV_STORAGE) || '[]'); }
+    catch (e) { return []; }
+}
+function saveFavorites(list) {
+    try { localStorage.setItem(FAV_STORAGE, JSON.stringify(list)); } catch (e) {}
+}
+function toggleFavorite(themeId) {
     let favs = loadFavorites();
-    if (favs.includes(id)) { favs = favs.filter(x => x !== id); showToast('Retiré des favoris', 'warn', 1200); }
-    else { favs.push(id); showToast('Ajouté aux favoris ⭐', 'success', 1200); }
+    if (favs.includes(themeId)) {
+        favs = favs.filter(id => id !== themeId);
+        showToast('Retiré des favoris', 'warn', 1200);
+    } else {
+        favs.push(themeId);
+        showToast('Ajouté aux favoris ⭐', 'success', 1200);
+    }
     saveFavorites(favs);
     renderFavorites();
     renderThemes();
@@ -1534,7 +1945,10 @@ function renderFavorites() {
     const bar = document.getElementById('fav-bar');
     if (!bar) return;
     const favs = loadFavorites().filter(id => THEMES[id]);
-    if (!favs.length) { bar.innerHTML = '<span class="fav-empty">⭐ Aucun favori — cliquez sur l\'étoile d\'un thème</span>'; return; }
+    if (!favs.length) {
+        bar.innerHTML = '<span class="fav-empty">⭐ Aucun favori — cliquez sur l\'étoile d\'un thème</span>';
+        return;
+    }
     bar.innerHTML = favs.map(id => {
         const t = THEMES[id];
         return '<div class="fav-chip" data-fav="' + id + '">' +
@@ -1549,21 +1963,27 @@ function renderFavorites() {
         });
     });
     bar.querySelectorAll('[data-remove-fav]').forEach(el => {
-        el.addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(el.dataset.removeFav); });
+        el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleFavorite(el.dataset.removeFav);
+        });
     });
 }
 
 // ══════════════════════════════════════════════════════════════════
 // HISTORIQUE
 // ══════════════════════════════════════════════════════════════════
-function loadHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_STORAGE) || '[]'); } catch (e) { return []; } }
-function saveHistory(l) {
+function loadHistory() {
+    try { return JSON.parse(localStorage.getItem(HISTORY_STORAGE) || '[]'); }
+    catch (e) { return []; }
+}
+function saveHistory(list) {
     try {
-        if (l.length > MAX_HISTORY) l = l.slice(0, MAX_HISTORY);
-        localStorage.setItem(HISTORY_STORAGE, JSON.stringify(l));
+        if (list.length > MAX_HISTORY) list = list.slice(0, MAX_HISTORY);
+        localStorage.setItem(HISTORY_STORAGE, JSON.stringify(list));
     } catch (e) {}
 }
-function addToHistory(videoUrl, themeId, prompt, thumb) {
+function addToHistory(videoUrl, themeId, prompt, imageThumb) {
     const history = loadHistory();
     history.unshift({
         id: Date.now() + Math.random(),
@@ -1571,7 +1991,7 @@ function addToHistory(videoUrl, themeId, prompt, thumb) {
         themeName: THEMES[themeId]?.name || themeId,
         themeEmoji: THEMES[themeId]?.emoji || '🎬',
         prompt: (prompt || '').slice(0, 200),
-        thumb: thumb || '',
+        thumb: imageThumb || '',
         timestamp: Date.now(),
         selected: false
     });
@@ -1585,21 +2005,22 @@ function clearHistory() {
     showToast('Historique vidé', 'warn');
 }
 function deleteHistoryItem(id) {
-    saveHistory(loadHistory().filter(h => h.id !== id));
+    const history = loadHistory().filter(h => h.id !== id);
+    saveHistory(history);
     renderHistory();
 }
 function toggleHistorySelect(id) {
-    const h = loadHistory();
-    const it = h.find(x => x.id === id);
-    if (it) it.selected = !it.selected;
-    saveHistory(h);
+    const history = loadHistory();
+    const item = history.find(h => h.id === id);
+    if (item) item.selected = !item.selected;
+    saveHistory(history);
     renderHistory();
 }
 function selectAllHistory() {
-    const h = loadHistory();
-    const allSel = h.every(x => x.selected);
-    h.forEach(x => x.selected = !allSel);
-    saveHistory(h);
+    const history = loadHistory();
+    const allSelected = history.every(h => h.selected);
+    history.forEach(h => h.selected = !allSelected);
+    saveHistory(history);
     renderHistory();
 }
 function renderHistory() {
@@ -1608,14 +2029,17 @@ function renderHistory() {
     if (!list) return;
     const history = loadHistory();
     if (count) count.textContent = history.length;
-    if (!history.length) { list.innerHTML = '<div class="history-empty">Aucune vidéo dans l\'historique</div>'; return; }
+    if (!history.length) {
+        list.innerHTML = '<div class="history-empty">Aucune vidéo dans l\'historique</div>';
+        return;
+    }
     list.innerHTML = history.map(h => {
         const date = new Date(h.timestamp);
         const dateStr = date.toLocaleDateString('fr-FR') + ' ' + date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
         return '<div class="history-item">' +
             '<input type="checkbox" class="history-checkbox" data-check="' + h.id + '" ' + (h.selected ? 'checked' : '') + '>' +
             '<div class="history-thumb">' +
-                (h.thumb ? '<img src="' + h.thumb + '">' : '<span class="emoji">' + h.themeEmoji + '</span>') +
+                (h.thumb ? '<img src="' + h.thumb + '" alt="">' : '<span class="emoji">' + h.themeEmoji + '</span>') +
             '</div>' +
             '<div class="history-info">' +
                 '<div class="history-title">' + h.themeEmoji + ' ' + esc(h.themeName) + '</div>' +
@@ -1628,10 +2052,18 @@ function renderHistory() {
             '</div>' +
         '</div>';
     }).join('');
-    list.querySelectorAll('[data-check]').forEach(el => el.addEventListener('change', () => toggleHistorySelect(parseFloat(el.dataset.check))));
-    list.querySelectorAll('[data-share]').forEach(el => el.addEventListener('click', () => shareHistoryItem(parseFloat(el.dataset.share))));
-    list.querySelectorAll('[data-download]').forEach(el => el.addEventListener('click', () => downloadHistoryItem(parseFloat(el.dataset.download))));
-    list.querySelectorAll('[data-delete]').forEach(el => el.addEventListener('click', () => deleteHistoryItem(parseFloat(el.dataset.delete))));
+    list.querySelectorAll('[data-check]').forEach(el => {
+        el.addEventListener('change', () => toggleHistorySelect(parseFloat(el.dataset.check)));
+    });
+    list.querySelectorAll('[data-share]').forEach(el => {
+        el.addEventListener('click', () => shareHistoryItem(parseFloat(el.dataset.share)));
+    });
+    list.querySelectorAll('[data-download]').forEach(el => {
+        el.addEventListener('click', () => downloadHistoryItem(parseFloat(el.dataset.download)));
+    });
+    list.querySelectorAll('[data-delete]').forEach(el => {
+        el.addEventListener('click', () => deleteHistoryItem(parseFloat(el.dataset.delete)));
+    });
 }
 function downloadHistoryItem(id) {
     const item = loadHistory().find(h => h.id === id);
@@ -1651,6 +2083,15 @@ function downloadHistoryItem(id) {
 // ══════════════════════════════════════════════════════════════════
 async function shareVideo(videoUrl, title) {
     try {
+        if (navigator.share && navigator.canShare) {
+            const res = await fetch(videoUrl);
+            const blob = await res.blob();
+            const file = new File([blob], 'studio-ia.mp4', { type: 'video/mp4' });
+            if (navigator.canShare({ files: [file] })) {
+                await navigator.share({ files: [file], title: title || 'Studio IA', text: 'Regarde ma vidéo IA !' });
+                return;
+            }
+        }
         if (navigator.share) {
             await navigator.share({ title: title || 'Studio IA', text: 'Regarde ma vidéo IA !', url: videoUrl });
             return;
@@ -1672,7 +2113,7 @@ function shareHistoryItem(id) {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// EXPORT ZIP
+// EXPORT ZIP (natif)
 // ══════════════════════════════════════════════════════════════════
 const CRC_TABLE = (() => {
     const table = new Uint32Array(256);
@@ -1782,10 +2223,14 @@ async function exportHistoryZip() {
     showToast('✓ ZIP créé (' + files.length + ' vidéos)', 'success');
 }
 async function shareSelection() {
-    const selected = loadHistory().filter(h => h.selected);
+    const history = loadHistory();
+    const selected = history.filter(h => h.selected);
     if (!selected.length) { showToast('Sélectionnez au moins une vidéo', 'warn'); return; }
-    if (selected.length === 1) shareVideo(selected[0].videoUrl, 'Vidéo ' + selected[0].themeName);
-    else await exportHistoryZip();
+    if (selected.length === 1) {
+        shareVideo(selected[0].videoUrl, 'Vidéo ' + selected[0].themeName);
+    } else {
+        await exportHistoryZip();
+    }
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1858,7 +2303,10 @@ function renderThemes() {
         });
     });
     grid.querySelectorAll('[data-fav-toggle]').forEach(el => {
-        el.addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(el.dataset.favToggle); });
+        el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleFavorite(el.dataset.favToggle);
+        });
     });
 }
 function setTheme(id) {
@@ -1870,14 +2318,14 @@ function setTheme(id) {
     document.documentElement.style.setProperty('--accent', theme.accent);
     document.documentElement.style.setProperty('--accent-2', theme.accent2);
     document.getElementById('theme-banner').innerHTML =
-        '<strong>' + theme.emoji + ' ' + esc(theme.name) + '</strong><br>' + esc(theme.banner);
+        '<strong>' + theme.emoji + ' ' + esc(theme.name) + ' :</strong> ' + esc(theme.banner);
     document.getElementById('section-style-title').innerHTML =
         '🎨 ' + theme.emoji + ' Style ' + esc(theme.name) + ' <span class="badge">optionnel</span>';
     renderThemes();
     renderPromptPresets();
     renderStyles();
     updateGenerateBtn();
-    showToast('Thème ' + theme.name, 'success', 1200);
+    showToast('Thème ' + theme.name + ' activé', 'success', 1500);
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1978,46 +2426,100 @@ function buildPrompt() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// API HUGGING FACE SEEDANCE
+// API
 // ══════════════════════════════════════════════════════════════════
-let hfClient = null;
-
-async function initHFClient() {
-    if (hfClient) return hfClient;
-    const token = getHFToken();
-    if (!token) throw new Error('Token Hugging Face manquant');
-    try {
-        hfClient = await Client.connect(HF_SPACE, { token: token });
-        log('Client Hugging Face connecté');
-        return hfClient;
-    } catch (e) {
-        log('Erreur connexion HF: ' + e.message);
-        throw new Error('Impossible de se connecter. Vérifiez votre token.');
+async function apiFetch(url, options = {}, label = 'API') {
+    for (let attempt = 0; attempt < 7; attempt++) {
+        if (state.stopRequested) throw new Error('Arrêt demandé');
+        try {
+            const res = await fetch(url, options);
+            if (res.status === 429) {
+                state.creationAttemptsSinceLastError = 0;
+                if (createIntervalMs < CREATE_INTERVAL_SAFE) createIntervalMs = Math.min(createIntervalMs + 8000, CREATE_INTERVAL_MAX);
+                const wait = [15, 30, 45, 60, 90, 120, 180][Math.min(attempt, 6)];
+                setStatus('L\'IA se prépare… (' + wait + 's)');
+                await sleep(wait * 1000);
+                continue;
+            }
+            if (res.status === 503) {
+                const wait = [5, 10, 15, 20, 30, 45][Math.min(attempt, 5)];
+                setStatus('Vidéo en préparation… (' + wait + 's)');
+                await sleep(wait * 1000);
+                continue;
+            }
+            if (res.ok && createIntervalMs > CREATE_INTERVAL_MIN) {
+                state.creationAttemptsSinceLastError++;
+                if (state.creationAttemptsSinceLastError >= 3) {
+                    createIntervalMs = Math.max(createIntervalMs - 4000, CREATE_INTERVAL_MIN);
+                    state.creationAttemptsSinceLastError = 0;
+                }
+            }
+            return res;
+        } catch (e) {
+            if (e.message === 'Arrêt demandé') throw e;
+            const wait = [3, 5, 8, 12, 20, 30][Math.min(attempt, 5)];
+            setStatus('Connexion… (' + wait + 's)');
+            await sleep(wait * 1000);
+        }
     }
+    return fetch(url, options);
 }
-
-async function generateVideoHuggingFace(imageDataUri, prompt) {
-    const client = await initHFClient();
-    const res = await fetch(imageDataUri);
-    const blob = await res.blob();
-    const file = new File([blob], 'image.jpg', { type: 'image/jpeg' });
-    log('Appel Seedance, prompt ' + prompt.length + ' caractères');
-    const result = await client.predict(HF_API_NAME, [
-        handle_file(file), prompt, 5, "9:16", 0
-    ]);
-    log('Réponse: ' + JSON.stringify(result).slice(0, 300));
-    let videoUrl = null;
-    if (result && result.data) {
-        if (typeof result.data[0] === 'string' && result.data[0].startsWith('http')) videoUrl = result.data[0];
-        else if (result.data[0] && result.data[0].url) videoUrl = result.data[0].url;
-    } else if (typeof result === 'string' && result.startsWith('http')) {
-        videoUrl = result;
+async function createVideoTask(imageDataUri, prompt) {
+    const body = {
+        model: MODEL_VIDEO, prompt, image: imageDataUri,
+        num_frames: state.durationFrames, frame_rate: FRAME_RATE
+    };
+    const res = await apiFetch(API_BASE + '/videos', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + getApiKey(), 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    }, 'Création');
+    if (!res.ok) {
+        const err = await res.text();
+        throw new Error('HTTP ' + res.status + ' — ' + err.slice(0, 200));
     }
-    if (!videoUrl) {
-        console.error('Structure inattendue:', result);
-        throw new Error('URL vidéo introuvable dans la réponse.');
+    const data = await res.json();
+    const videoId = data.video_id || data.id || data.task_id;
+    if (!videoId) throw new Error('Pas de video_id retourné');
+    return videoId;
+}
+async function pollVideo(videoId, onProgress) {
+    const estimatedMs = estimateGenerationTime(state.durationFrames);
+    const estimatedSec = estimatedMs / 1000;
+    let remaining = Math.max(20, Math.floor(estimatedSec * 0.8));
+    while (remaining > 0) {
+        if (state.stopRequested) throw new Error('Arrêt demandé');
+        onProgress('Création… — ' + remaining + 's');
+        await sleep(1000);
+        remaining--;
     }
-    return videoUrl;
+    for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
+        if (state.stopRequested) throw new Error('Arrêt demandé');
+        if (attempt > 0) {
+            let r = POLL_INTERVAL_SEC;
+            while (r > 0) {
+                if (state.stopRequested) throw new Error('Arrêt demandé');
+                onProgress('L\'image prend vie… — ' + r + 's');
+                await sleep(1000);
+                r--;
+            }
+        }
+        const url = POLL_BASE + '?video_id=' + encodeURIComponent(videoId) + '&model_name=' + encodeURIComponent(MODEL_VIDEO);
+        const res = await apiFetch(url, { method: 'GET', headers: { 'Authorization': 'Bearer ' + getApiKey() } }, 'Polling');
+        const d = await res.json();
+        const status = d.status || 'unknown';
+        const progress = d.progress || 0;
+        onProgress('Création… — ' + progress + '%');
+        if (status === 'completed' || status === 'succeeded' || status === 'done') {
+            const videoUrl = (d.metadata && d.metadata.url) || d.url || (d.output && d.output.url);
+            if (!videoUrl) throw new Error('Terminé mais pas d\'URL');
+            return videoUrl;
+        }
+        if (status === 'failed' || status === 'error' || status === 'cancelled') {
+            throw new Error('Échec (' + status + ')');
+        }
+    }
+    throw new Error('Délai maximal dépassé');
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -2029,14 +2531,21 @@ function renderQueue() {
     queueEl.style.display = 'block';
     const total = state.queue.length;
     const done = state.completed + state.failed;
+    const inProgress = state.queue.filter(q => q.status === 'processing').length;
+    const pending = total - done - inProgress;
+    const estGen = estimateGenerationTime(state.durationFrames) / 1000;
+    const eta = pending > 0
+        ? (pending * (createIntervalMs / 1000)) + estGen
+        : (inProgress * estGen / Math.max(inProgress, 1));
     let html = '<div class="queue-summary">' +
         '<span class="progress-text">Progression : ' + done + '/' + total + '</span>' +
-        '<span class="eta-text">' + (done < total ? 'En cours…' : 'Terminé') + '</span>' +
+        '<span class="eta-text">' + (done < total ? '≈ ' + formatEta(eta) + ' restant' : 'Terminé') + '</span>' +
         '</div>';
     const theme = THEMES[state.theme];
     html += state.queue.slice(0, MAX_VISIBLE_QUEUE).map(item => {
         let icon = '○', statusText = 'En attente', cls = 'pending';
-        if (item.status === 'processing') { icon = theme.emoji; statusText = 'En cours…'; cls = 'processing'; }
+        if (item.status === 'creating') { icon = '◐'; statusText = 'Préparation…'; cls = 'creating'; }
+        else if (item.status === 'processing') { icon = theme.emoji; statusText = item.progress || 'En cours…'; cls = 'processing'; }
         else if (item.status === 'done') { icon = '●'; statusText = 'Terminé'; cls = 'done'; }
         else if (item.status === 'failed') { icon = '✕'; statusText = 'Échec'; cls = 'failed'; }
         return '<div class="queue-item ' + cls + '">' +
@@ -2073,10 +2582,54 @@ function addToGallery(videoUrl, label) {
 // ══════════════════════════════════════════════════════════════════
 // PIPELINE
 // ══════════════════════════════════════════════════════════════════
+async function createTaskOnly(item) {
+    item.status = 'creating';
+    item.progress = 'Préparation…';
+    renderQueue();
+    const prompt = buildPrompt();
+    item.prompt = prompt;
+    const videoId = await createVideoTask(item.image.dataUri, prompt);
+    item.videoId = videoId;
+    item.startTime = Date.now();
+    item.status = 'processing';
+    item.progress = 'En cours…';
+    renderQueue();
+    return videoId;
+}
+async function pollTaskAndDisplay(item) {
+    try {
+        const videoUrl = await pollVideo(item.videoId, (prog) => {
+            item.progress = prog;
+            renderQueue();
+        });
+        const elapsed = Date.now() - item.startTime;
+        recordGenerationTime(state.durationFrames, elapsed);
+        item.status = 'done';
+        item.videoUrl = videoUrl;
+        item.progress = 'Terminé';
+        state.completed++;
+        renderQueue();
+        updateGenerateBtn();
+        addToGallery(videoUrl, 'Vidéo ' + (item.imageIndex + 1));
+        addToHistory(videoUrl, state.theme, item.prompt, item.image.thumbnail);
+    } catch (e) {
+        if (e.message === 'Arrêt demandé') {
+            item.status = 'failed';
+            item.progress = 'Arrêté';
+        } else {
+            log('[Image ' + (item.imageIndex + 1) + '] ' + e.message);
+            item.status = 'failed';
+            item.progress = 'Échec';
+            state.failed++;
+        }
+        renderQueue();
+        updateGenerateBtn();
+    }
+}
 async function startGeneration() {
     if (state.isRunning || !state.images.length) return;
-    if (!getHFToken()) {
-        showToast('Ajoutez d\'abord votre token Hugging Face', 'error');
+    if (!getApiKey()) {
+        showToast('Ajoutez d\'abord votre clé API', 'error');
         document.getElementById('api-key-input').focus();
         return;
     }
@@ -2088,9 +2641,11 @@ async function startGeneration() {
     state.stopRequested = false;
     state.completed = 0;
     state.failed = 0;
+    state.creationAttemptsSinceLastError = 0;
+    createIntervalMs = CREATE_INTERVAL_MIN;
     state.queue = state.images.map((img, i) => ({
         imageIndex: i, image: img, status: 'pending', progress: null,
-        videoUrl: null, prompt: null, startTime: null
+        videoId: null, videoUrl: null, prompt: null, startTime: null
     }));
     document.getElementById('gallery-grid').innerHTML = '';
     document.getElementById('gallery').style.display = 'none';
@@ -2100,42 +2655,36 @@ async function startGeneration() {
     renderQueue();
     updateGenerateBtn();
     const totalStart = Date.now();
-    for (let i = 0; i < state.queue.length; i++) {
-        if (state.stopRequested) break;
-        const item = state.queue[i];
-        item.status = 'processing';
-        item.progress = 'Génération en cours…';
-        item.startTime = Date.now();
-        renderQueue();
-        try {
-            const prompt = buildPrompt();
-            item.prompt = prompt;
-            setStatus('Génération ' + (i + 1) + '/' + state.queue.length + '…');
-            const videoUrl = await generateVideoHuggingFace(item.image.dataUri, prompt);
-            if (state.stopRequested) { item.status = 'failed'; item.progress = 'Arrêté'; break; }
-            const elapsed = Date.now() - item.startTime;
-            recordGenerationTime(elapsed);
-            item.status = 'done';
-            item.videoUrl = videoUrl;
-            item.progress = 'Terminé';
-            state.completed++;
-            addToGallery(videoUrl, 'Vidéo ' + (i + 1));
-            addToHistory(videoUrl, state.theme, prompt, item.image.thumbnail);
-            renderQueue();
-            updateGenerateBtn();
-        } catch (e) {
-            log('Erreur sur image ' + (i + 1) + ': ' + e.message);
-            item.status = 'failed';
-            item.progress = 'Échec';
-            state.failed++;
-            renderQueue();
-            updateGenerateBtn();
-            if (e.message.includes('token')) {
-                showToast('Problème token Hugging Face', 'error');
-                break;
+    const pollingTasks = [];
+    try {
+        for (let i = 0; i < state.queue.length; i++) {
+            if (state.stopRequested) break;
+            const item = state.queue[i];
+            try {
+                await createTaskOnly(item);
+                pollingTasks.push(pollTaskAndDisplay(item));
+            } catch (e) {
+                if (e.message === 'Arrêt demandé') break;
+                item.status = 'failed';
+                item.progress = 'Échec';
+                state.failed++;
+                renderQueue();
+                updateGenerateBtn();
+            }
+            if (i < state.queue.length - 1 && !state.stopRequested) {
+                const waitSec = Math.ceil(createIntervalMs / 1000);
+                for (let r = waitSec; r > 0; r--) {
+                    if (state.stopRequested) break;
+                    setStatus('Respiration… — Image ' + (i + 2) + '/' + state.queue.length + ' dans ' + r + 's');
+                    await sleep(1000);
+                }
             }
         }
-    }
+        if (pollingTasks.length > 0) {
+            setStatus('Finalisation…');
+            await Promise.allSettled(pollingTasks);
+        }
+    } catch (e) { log('Erreur globale : ' + e.message); }
     const totalElapsed = (Date.now() - totalStart) / 1000;
     const theme = THEMES[state.theme];
     const summary = state.stopRequested
@@ -2157,7 +2706,7 @@ function stopGeneration() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ÉDITEUR D'IMAGE
+// ÉDITEUR IMAGE
 // ══════════════════════════════════════════════════════════════════
 const EDIT_PRESETS = [
     { id: 'none', name: 'Aucun', filter: '' },
@@ -2183,13 +2732,15 @@ function openEditModal(imageId) {
         brightness: 100, contrast: 100, saturation: 100, blur: 0, sepia: 0,
         preset: 'none', sourceImage: null, naturalW: 0, naturalH: 0
     };
-    ['brightness', 'contrast', 'saturation'].forEach(k => {
-        document.getElementById('edit-' + k).value = 100;
-        document.getElementById('edit-' + k + '-val').textContent = '100';
-    });
+    document.getElementById('edit-brightness').value = 100;
+    document.getElementById('edit-contrast').value = 100;
+    document.getElementById('edit-saturation').value = 100;
     document.getElementById('edit-blur').value = 0;
-    document.getElementById('edit-blur-val').textContent = '0';
     document.getElementById('edit-sepia').value = 0;
+    document.getElementById('edit-brightness-val').textContent = '100';
+    document.getElementById('edit-contrast-val').textContent = '100';
+    document.getElementById('edit-saturation-val').textContent = '100';
+    document.getElementById('edit-blur-val').textContent = '0';
     document.getElementById('edit-sepia-val').textContent = '0';
     const img = new Image();
     img.onload = () => {
@@ -2285,13 +2836,15 @@ function resetEdit() {
     editState.rotation = 0; editState.flipH = false; editState.flipV = false;
     editState.brightness = 100; editState.contrast = 100; editState.saturation = 100;
     editState.blur = 0; editState.sepia = 0; editState.preset = 'none';
-    ['brightness', 'contrast', 'saturation'].forEach(k => {
-        document.getElementById('edit-' + k).value = 100;
-        document.getElementById('edit-' + k + '-val').textContent = '100';
-    });
+    document.getElementById('edit-brightness').value = 100;
+    document.getElementById('edit-contrast').value = 100;
+    document.getElementById('edit-saturation').value = 100;
     document.getElementById('edit-blur').value = 0;
-    document.getElementById('edit-blur-val').textContent = '0';
     document.getElementById('edit-sepia').value = 0;
+    document.getElementById('edit-brightness-val').textContent = '100';
+    document.getElementById('edit-contrast-val').textContent = '100';
+    document.getElementById('edit-saturation-val').textContent = '100';
+    document.getElementById('edit-blur-val').textContent = '0';
     document.getElementById('edit-sepia-val').textContent = '0';
     renderEditPresets();
     drawEditCanvas();
@@ -2338,10 +2891,10 @@ function bindEditEvents() {
 // INIT
 // ══════════════════════════════════════════════════════════════════
 (function init() {
-    document.getElementById('api-save-btn').addEventListener('click', saveHFToken);
+    document.getElementById('api-save-btn').addEventListener('click', saveApiKey);
     document.getElementById('stop-btn').addEventListener('click', stopGeneration);
     document.getElementById('api-key-input').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); saveHFToken(); }
+        if (e.key === 'Enter') { e.preventDefault(); saveApiKey(); }
     });
     document.querySelectorAll('[data-toggle]').forEach(header => {
         header.addEventListener('click', () => {
@@ -2351,9 +2904,12 @@ function bindEditEvents() {
     const uploadZone = document.getElementById('upload-zone');
     const fileInput = document.getElementById('file-input');
     uploadZone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', e => { handleFiles(e.target.files); fileInput.value = ''; });
+    fileInput.addEventListener('change', e => {
+        handleFiles(e.target.files);
+        fileInput.value = '';
+    });
     document.getElementById('main-prompt').addEventListener('input', e => { state.mainPrompt = e.target.value; });
-    document.getElementById('duration-select').addEventListener('change', e => { state.duration = parseInt(e.target.value, 10) / 24; });
+    document.getElementById('duration-select').addEventListener('change', e => { state.durationFrames = parseInt(e.target.value, 10); });
     document.getElementById('framing-select').addEventListener('change', e => { state.framing = e.target.value; });
     document.getElementById('intensity-select').addEventListener('change', e => { state.intensity = e.target.value; });
     document.getElementById('generate-btn').addEventListener('click', startGeneration);
@@ -2387,7 +2943,7 @@ function bindEditEvents() {
     setTheme(state.theme);
     renderImages();
     renderQueue();
-    log('Studio IA prêt — ' + Object.keys(THEMES).length + ' thèmes · API Hugging Face Seedance');
+    log('Studio IA prêt — ' + Object.keys(THEMES).length + ' thèmes');
 })();
 </script>
 
