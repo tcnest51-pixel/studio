@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Studio IA Universel — 52 thèmes · Agnes</title>
+<title>Studio IA — Replicate · 52 thèmes</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -298,7 +298,6 @@
         background: var(--panel); font-size: 0.82rem;
     }
     .queue-item.pending { opacity: 0.5; }
-    .queue-item.creating { border-color: var(--warn); }
     .queue-item.processing { border-color: var(--accent); }
     .queue-item.done { border-color: var(--success); }
     .queue-item.failed { border-color: var(--error); }
@@ -406,7 +405,7 @@
 
 <header>
     <h1>Studio IA Universel</h1>
-    <p class="subtitle">52 thèmes · Agnes API · Vraie transformation IA</p>
+    <p class="subtitle">52 thèmes · Replicate API · Wan 2.2</p>
 </header>
 
 <div class="theme-filter">
@@ -419,23 +418,23 @@
 <div class="theme-grid" id="theme-grid"></div>
 
 <div class="theme-banner" id="theme-banner">
-    <strong>Choisissez un thème</strong> puis ajoutez vos photos. L'IA Agnes transforme le contenu.
+    <strong>Choisissez un thème</strong> puis ajoutez vos photos. L'IA Replicate transforme le contenu.
 </div>
 
 <div class="api-panel" id="api-panel">
     <input type="password" class="api-key-input" id="api-key-input"
-           placeholder="Collez votre clé API Agnes ici (sk-...)" autocomplete="off" spellcheck="false">
-    <button type="button" class="api-save-btn" id="api-save-btn">Enregistrer la clé</button>
+           placeholder="Collez votre token Replicate ici (r8_...)" autocomplete="off" spellcheck="false">
+    <button type="button" class="api-save-btn" id="api-save-btn">Enregistrer le token</button>
     <div class="api-status-line" id="api-status-line">
         <span class="status-dot"></span>
-        <span id="api-status-text">Aucune clé API enregistrée</span>
+        <span id="api-status-text">Aucun token Replicate enregistré</span>
     </div>
     <div class="api-hint">
-        Clé gratuite sur <a href="https://platform.agnes-ai.com" target="_blank">platform.agnes-ai.com</a> → Settings → API Keys
+        Token gratuit sur <a href="https://replicate.com/account/api-tokens" target="_blank">replicate.com/account/api-tokens</a> · 5$ offerts
     </div>
     <div class="stat-line">
-        <span>📊 Vitesse : <span id="stat-speed">en attente</span></span>
-        <span id="stat-samples">0 génération</span>
+        <span>💰 Modèle : <span id="stat-model">Wan 2.2 Fast</span></span>
+        <span>~0,05 $/vidéo</span>
     </div>
     <div class="wake-status" id="wake-status">
         <span id="wake-status-text">💤 Veille auto</span>
@@ -486,11 +485,18 @@
     <div class="section-body">
         <div class="section-content">
             <div class="control-row">
-                <label class="control-label">Durée de chaque vidéo</label>
+                <label class="control-label">Modèle IA</label>
+                <select id="model-select">
+                    <option value="wan-video/wan-2.2-i2v-fast" selected>Wan 2.2 Fast (~0,05 $)</option>
+                    <option value="kwaivgi/kling-v2.1">Kling v2.1 (~0,15 $)</option>
+                    <option value="bytedance/seedance-2.0-fast">Seedance 2.0 (~0,10 $)</option>
+                </select>
+            </div>
+            <div class="control-row">
+                <label class="control-label">Durée (secondes)</label>
                 <select id="duration-select">
-                    <option value="121">5 secondes</option>
-                    <option value="153" selected>6,4 secondes (recommandé)</option>
-                    <option value="241">10 secondes</option>
+                    <option value="5" selected>5 secondes</option>
+                    <option value="10">10 secondes</option>
                 </select>
             </div>
             <div class="control-row">
@@ -581,28 +587,26 @@
 
 <script>
 // ══════════════════════════════════════════════════════════════════
-// CONFIGURATION AGNES
+// CONFIGURATION REPLICATE
 // ══════════════════════════════════════════════════════════════════
-const API_BASE = 'https://apihub.agnes-ai.com/v1';
-const POLL_BASE = 'https://apihub.agnes-ai.com/agnesapi';
-const MODEL_VIDEO = 'agnes-video-v2.0';
-const FRAME_RATE = 24;
-let createIntervalMs = 62000;
-const CREATE_INTERVAL_MIN = 62000;
-const CREATE_INTERVAL_MAX = 90000;
-const CREATE_INTERVAL_SAFE = 75000;
-const POLL_INTERVAL_SEC = 8;
-const MAX_POLL_ATTEMPTS = 100;
-const TIMING_CACHE_KEY = 'agnes_timing_v5';
-const API_KEY_STORAGE = 'agnes_api_key';
-const THEME_STORAGE = 'agnes_theme';
-const FAV_STORAGE = 'agnes_favorites';
-const HISTORY_STORAGE = 'agnes_history';
-const WAKE_LOCK_PREF = 'agnes_wakelock';
-const MAX_VISIBLE_QUEUE = 30;
+const REPLICATE_API = 'https://api.replicate.com/v1';
+const REPLICATE_TOKEN_KEY = 'replicate_token';
+const THEME_STORAGE = 'replicate_theme';
+const FAV_STORAGE = 'replicate_favorites';
+const HISTORY_STORAGE = 'replicate_history';
+const WAKE_LOCK_PREF = 'replicate_wakelock';
 const MAX_IMAGE_SIZE = 12 * 1024 * 1024;
 const THUMBNAIL_MAX_WIDTH = 200;
 const MAX_HISTORY = 200;
+const POLL_INTERVAL_MS = 5000;
+const MAX_POLL_ATTEMPTS = 120;
+
+// Modèles supportés
+const MODELS = {
+    'wan-video/wan-2.2-i2v-fast': { name: 'Wan 2.2 Fast', price: 0.05, supports10s: false },
+    'kwaivgi/kling-v2.1': { name: 'Kling v2.1', price: 0.15, supports10s: true },
+    'bytedance/seedance-2.0-fast': { name: 'Seedance 2.0', price: 0.10, supports10s: true }
+};
 
 // ══════════════════════════════════════════════════════════════════
 // CATÉGORIES
@@ -619,7 +623,7 @@ const CATEGORIES = {
 };
 
 // ══════════════════════════════════════════════════════════════════
-// 52 THÈMES (identiques à la version locale)
+// 52 THÈMES
 // ══════════════════════════════════════════════════════════════════
 const THEMES = {
     apocalypse: { name: 'Apocalypse', emoji: '☢️', desc: 'Fin du monde', cat: 'popular', accent: '#ff4500', accent2: '#8a1a1a', banner: 'Scènes post-apocalyptiques : cendres, ruines, ciels rouges.', presets: [
@@ -1064,8 +1068,8 @@ const state = {
     images: [], isRunning: false, stopRequested: false, queue: [],
     completed: 0, failed: 0, theme: 'apocalypse', selectedEffect: null,
     mainPrompt: '', framing: 'random', intensity: 'moderate',
-    durationFrames: 153, isLoadingImages: false,
-    creationAttemptsSinceLastError: 0, filterCat: 'all', searchQuery: ''
+    duration: 5, model: 'wan-video/wan-2.2-i2v-fast',
+    isLoadingImages: false, filterCat: 'all', searchQuery: ''
 };
 
 // ══════════════════════════════════════════════════════════════════
@@ -1189,62 +1193,26 @@ async function ensureWakeLockActive() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// CACHE TEMPS
+// TOKEN REPLICATE
 // ══════════════════════════════════════════════════════════════════
-function loadTimingCache() { try { return JSON.parse(localStorage.getItem(TIMING_CACHE_KEY) || '{}'); } catch (e) { return {}; } }
-function saveTimingCache(c) { try { localStorage.setItem(TIMING_CACHE_KEY, JSON.stringify(c)); } catch (e) {} }
-function recordGenerationTime(numFrames, durationMs) {
-    const cache = loadTimingCache();
-    const key = String(numFrames);
-    if (!cache[key]) cache[key] = [];
-    cache[key].push(durationMs);
-    if (cache[key].length > 10) cache[key] = cache[key].slice(-10);
-    saveTimingCache(cache);
-    updateTimingDisplay();
-}
-function estimateGenerationTime(numFrames) {
-    const cache = loadTimingCache();
-    const samples = cache[String(numFrames)];
-    if (samples && samples.length > 0) {
-        const sorted = [...samples].sort((a, b) => a - b);
-        const mid = Math.floor(sorted.length / 2);
-        return sorted.length % 2 === 0 ? (sorted[mid-1] + sorted[mid]) / 2 : sorted[mid];
-    }
-    return 30000 + numFrames * 500;
-}
-function updateTimingDisplay() {
-    const cache = loadTimingCache();
-    const all = Object.values(cache).flat();
-    const speedEl = document.getElementById('stat-speed');
-    const samplesEl = document.getElementById('stat-samples');
-    if (!speedEl || !samplesEl) return;
-    if (all.length === 0) { speedEl.textContent = 'en attente'; samplesEl.textContent = '0 génération'; return; }
-    const avg = all.reduce((a, b) => a + b, 0) / all.length;
-    speedEl.textContent = (avg / 1000).toFixed(1) + ' s';
-    samplesEl.textContent = all.length + ' génération' + (all.length > 1 ? 's' : '');
-}
-
-// ══════════════════════════════════════════════════════════════════
-// CLÉ API AGNES
-// ══════════════════════════════════════════════════════════════════
-function getApiKey() { try { return (localStorage.getItem(API_KEY_STORAGE) || '').trim(); } catch (e) { return ''; } }
-function saveApiKey() {
+function getToken() { try { return (localStorage.getItem(REPLICATE_TOKEN_KEY) || '').trim(); } catch (e) { return ''; } }
+function saveToken() {
     const input = document.getElementById('api-key-input');
     if (!input) return;
     const key = input.value.trim();
     if (!key) {
-        try { localStorage.removeItem(API_KEY_STORAGE); } catch (e) {}
+        try { localStorage.removeItem(REPLICATE_TOKEN_KEY); } catch (e) {}
         updateApiPanel();
-        showToast('Clé supprimée', 'warn');
+        showToast('Token supprimé', 'warn');
         return;
     }
-    if (!key.startsWith('sk-')) {
-        if (!confirm('La clé ne commence pas par "sk-". Sauvegarder ?')) return;
+    if (!key.startsWith('r8_')) {
+        if (!confirm('Le token ne commence pas par "r8_". Sauvegarder ?')) return;
     }
     try {
-        localStorage.setItem(API_KEY_STORAGE, key);
+        localStorage.setItem(REPLICATE_TOKEN_KEY, key);
         updateApiPanel();
-        showToast('Clé API enregistrée ✓', 'success');
+        showToast('Token Replicate enregistré ✓', 'success');
         input.blur();
     } catch (e) { showToast('Erreur', 'error'); }
 }
@@ -1253,16 +1221,16 @@ function updateApiPanel() {
     const input = document.getElementById('api-key-input');
     const statusLine = document.getElementById('api-status-line');
     const statusText = document.getElementById('api-status-text');
-    const key = getApiKey();
+    const key = getToken();
     if (!panel || !input || !statusLine || !statusText) return;
     if (key) {
         panel.classList.add('ok'); statusLine.classList.add('ok');
-        statusText.textContent = 'Clé API active · ' + key.slice(0, 8) + '…' + key.slice(-4);
+        statusText.textContent = 'Token Replicate actif · ' + key.slice(0, 8) + '…' + key.slice(-4);
         input.value = key; input.placeholder = '';
     } else {
         panel.classList.remove('ok'); statusLine.classList.remove('ok');
-        statusText.textContent = 'Aucune clé API enregistrée';
-        input.value = ''; input.placeholder = 'Collez votre clé API Agnes (sk-...)';
+        statusText.textContent = 'Aucun token Replicate enregistré';
+        input.value = ''; input.placeholder = 'Collez votre token Replicate (r8_...)';
     }
     updateGenerateBtn();
 }
@@ -1270,7 +1238,7 @@ function updateGenerateBtn() {
     const btn = document.getElementById('generate-btn');
     if (!btn) return;
     const hasImages = state.images.length > 0;
-    const hasKey = !!getApiKey();
+    const hasKey = !!getToken();
     const theme = THEMES[state.theme];
     btn.disabled = !hasImages || !hasKey || state.isRunning || state.isLoadingImages;
     if (state.isLoadingImages) btn.textContent = 'Chargement… (' + state.images.length + ')';
@@ -1278,7 +1246,7 @@ function updateGenerateBtn() {
         const total = state.queue.length;
         const done = state.completed + state.failed;
         btn.textContent = 'Génération… (' + done + '/' + total + ')';
-    } else if (!hasKey) btn.textContent = 'Ajoutez votre clé API';
+    } else if (!hasKey) btn.textContent = 'Ajoutez votre token Replicate';
     else if (!hasImages) btn.textContent = 'Ajoutez des photos';
     else btn.textContent = 'Générer ' + state.images.length + ' vidéo' + (state.images.length > 1 ? 's' : '') + ' ' + theme.emoji;
 }
@@ -1317,7 +1285,9 @@ async function processOneFile(file) {
     try {
         const dataUri = await fileToDataUri(file);
         const thumbnail = await generateThumbnail(dataUri);
-        return { file, dataUri, thumbnail, id: Date.now() + Math.random() };
+        const img = new Image();
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataUri; });
+        return { file, dataUri, thumbnail, img, id: Date.now() + Math.random() };
     } catch (e) { return null; }
 }
 async function handleFiles(files) {
@@ -1665,97 +1635,69 @@ function buildPrompt() {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// API AGNES
+// API REPLICATE
 // ══════════════════════════════════════════════════════════════════
-async function apiFetch(url, options = {}, label = 'API') {
-    for (let attempt = 0; attempt < 7; attempt++) {
-        if (state.stopRequested) throw new Error('Arrêt demandé');
-        try {
-            const res = await fetch(url, options);
-            if (res.status === 429) {
-                state.creationAttemptsSinceLastError = 0;
-                if (createIntervalMs < CREATE_INTERVAL_SAFE) createIntervalMs = Math.min(createIntervalMs + 8000, CREATE_INTERVAL_MAX);
-                const wait = [15, 30, 45, 60, 90, 120, 180][Math.min(attempt, 6)];
-                setStatus('IA se prépare… (' + wait + 's)');
-                await sleep(wait * 1000);
-                continue;
-            }
-            if (res.status === 503) {
-                const wait = [5, 10, 15, 20, 30, 45][Math.min(attempt, 5)];
-                setStatus('Vidéo en préparation… (' + wait + 's)');
-                await sleep(wait * 1000);
-                continue;
-            }
-            if (res.ok && createIntervalMs > CREATE_INTERVAL_MIN) {
-                state.creationAttemptsSinceLastError++;
-                if (state.creationAttemptsSinceLastError >= 3) {
-                    createIntervalMs = Math.max(createIntervalMs - 4000, CREATE_INTERVAL_MIN);
-                    state.creationAttemptsSinceLastError = 0;
-                }
-            }
-            return res;
-        } catch (e) {
-            if (e.message === 'Arrêt demandé') throw e;
-            const wait = [3, 5, 8, 12, 20, 30][Math.min(attempt, 5)];
-            setStatus('Connexion… (' + wait + 's)');
-            await sleep(wait * 1000);
-        }
+async function apiFetch(url, options = {}) {
+    const res = await fetch(url, options);
+    if (res.status === 401 || res.status === 403) {
+        throw new Error('Token Replicate invalide ou expiré. Vérifiez votre token.');
     }
-    return fetch(url, options);
+    if (res.status === 402) {
+        throw new Error('Crédits Replicate épuisés. Rechargez votre compte.');
+    }
+    if (res.status === 429) {
+        throw new Error('Trop de requêtes. Attendez quelques secondes.');
+    }
+    return res;
 }
+
 async function createVideoTask(imageDataUri, prompt) {
+    // Convertir l'image en URL publique temporaire
+    // Replicate accepte les data URIs directement dans le champ "image"
     const body = {
-        model: MODEL_VIDEO, prompt, image: imageDataUri,
-        num_frames: state.durationFrames, frame_rate: FRAME_RATE
+        input: {
+            image: imageDataUri,
+            prompt: prompt,
+            duration: state.duration
+        }
     };
-    const res = await apiFetch(API_BASE + '/videos', {
+    const res = await apiFetch(REPLICATE_API + '/models/' + state.model + '/predictions', {
         method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + getApiKey(), 'Content-Type': 'application/json' },
+        headers: {
+            'Authorization': 'Bearer ' + getToken(),
+            'Content-Type': 'application/json'
+        },
         body: JSON.stringify(body)
-    }, 'Création');
+    });
     if (!res.ok) {
         const err = await res.text();
-        throw new Error('HTTP ' + res.status + ' — ' + err.slice(0, 200));
+        throw new Error('HTTP ' + res.status + ' — ' + err.slice(0, 300));
     }
     const data = await res.json();
-    const videoId = data.video_id || data.id || data.task_id;
-    if (!videoId) throw new Error('Pas de video_id');
-    return videoId;
+    return data.id;
 }
-async function pollVideo(videoId, onProgress) {
-    const estimatedMs = estimateGenerationTime(state.durationFrames);
-    const estimatedSec = estimatedMs / 1000;
-    let remaining = Math.max(20, Math.floor(estimatedSec * 0.8));
-    while (remaining > 0) {
-        if (state.stopRequested) throw new Error('Arrêt demandé');
-        onProgress('Création… — ' + remaining + 's');
-        await sleep(1000);
-        remaining--;
-    }
+
+async function pollVideo(predictionId, onProgress) {
     for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
         if (state.stopRequested) throw new Error('Arrêt demandé');
-        if (attempt > 0) {
-            let r = POLL_INTERVAL_SEC;
-            while (r > 0) {
-                if (state.stopRequested) throw new Error('Arrêt demandé');
-                onProgress('L\'image prend vie… — ' + r + 's');
-                await sleep(1000);
-                r--;
-            }
-        }
-        const url = POLL_BASE + '?video_id=' + encodeURIComponent(videoId) + '&model_name=' + encodeURIComponent(MODEL_VIDEO);
-        const res = await apiFetch(url, { method: 'GET', headers: { 'Authorization': 'Bearer ' + getApiKey() } }, 'Polling');
+        await sleep(POLL_INTERVAL_MS);
+        const res = await apiFetch(REPLICATE_API + '/predictions/' + predictionId, {
+            headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
         const d = await res.json();
         const status = d.status || 'unknown';
-        const progress = d.progress || 0;
-        onProgress('Création… — ' + progress + '%');
-        if (status === 'completed' || status === 'succeeded' || status === 'done') {
-            const videoUrl = (d.metadata && d.metadata.url) || d.url || (d.output && d.output.url);
+        const elapsed = attempt * (POLL_INTERVAL_MS / 1000);
+        onProgress('Génération… — ' + Math.round(elapsed) + 's (' + status + ')');
+        if (status === 'succeeded') {
+            const videoUrl = d.output;
             if (!videoUrl) throw new Error('Terminé mais pas d\'URL');
-            return videoUrl;
+            return typeof videoUrl === 'string' ? videoUrl : videoUrl[0];
         }
-        if (status === 'failed' || status === 'error' || status === 'cancelled') {
-            throw new Error('Échec (' + status + ')');
+        if (status === 'failed') {
+            throw new Error('Échec : ' + (d.error || 'erreur inconnue'));
+        }
+        if (status === 'canceled') {
+            throw new Error('Annulé');
         }
     }
     throw new Error('Délai maximal dépassé');
@@ -1770,18 +1712,14 @@ function renderQueue() {
     queueEl.style.display = 'block';
     const total = state.queue.length;
     const done = state.completed + state.failed;
-    const inProgress = state.queue.filter(q => q.status === 'processing').length;
-    const pending = total - done - inProgress;
-    const estGen = estimateGenerationTime(state.durationFrames) / 1000;
-    const eta = pending > 0 ? (pending * (createIntervalMs / 1000)) + estGen : (inProgress * estGen / Math.max(inProgress, 1));
     let html = '<div class="queue-summary">' +
-        '<span class="progress-text">Progression : ' + done + '/' + total + '</span>' +
-        '<span class="eta-text">' + (done < total ? '≈ ' + formatEta(eta) + ' restant' : 'Terminé') + '</span>' +
+        '<span>Progression : ' + done + '/' + total + '</span>' +
+        '<span>' + (done < total ? 'En cours…' : 'Terminé') + '</span>' +
         '</div>';
     const theme = THEMES[state.theme];
-    html += state.queue.slice(0, MAX_VISIBLE_QUEUE).map(item => {
+    html += state.queue.slice(0, 30).map(item => {
         let icon = '○', statusText = 'En attente', cls = 'pending';
-        if (item.status === 'creating') { icon = '◐'; statusText = 'Préparation…'; cls = 'creating'; }
+        if (item.status === 'creating') { icon = '◐'; statusText = 'Création…'; cls = 'processing'; }
         else if (item.status === 'processing') { icon = theme.emoji; statusText = item.progress || 'En cours…'; cls = 'processing'; }
         else if (item.status === 'done') { icon = '●'; statusText = 'Terminé'; cls = 'done'; }
         else if (item.status === 'failed') { icon = '✕'; statusText = 'Échec'; cls = 'failed'; }
@@ -1817,26 +1755,24 @@ function addToGallery(videoUrl, label) {
 // ══════════════════════════════════════════════════════════════════
 async function createTaskOnly(item) {
     item.status = 'creating';
-    item.progress = 'Préparation…';
+    item.progress = 'Création…';
     renderQueue();
     const prompt = buildPrompt();
     item.prompt = prompt;
-    const videoId = await createVideoTask(item.image.dataUri, prompt);
-    item.videoId = videoId;
+    const predictionId = await createVideoTask(item.image.dataUri, prompt);
+    item.predictionId = predictionId;
     item.startTime = Date.now();
     item.status = 'processing';
     item.progress = 'En cours…';
     renderQueue();
-    return videoId;
+    return predictionId;
 }
 async function pollTaskAndDisplay(item) {
     try {
-        const videoUrl = await pollVideo(item.videoId, (prog) => {
+        const videoUrl = await pollVideo(item.predictionId, (prog) => {
             item.progress = prog;
             renderQueue();
         });
-        const elapsed = Date.now() - item.startTime;
-        recordGenerationTime(state.durationFrames, elapsed);
         item.status = 'done';
         item.videoUrl = videoUrl;
         item.progress = 'Terminé';
@@ -1846,325 +1782,4 @@ async function pollTaskAndDisplay(item) {
         addToGallery(videoUrl, 'Vidéo ' + (item.imageIndex + 1));
         addToHistory(videoUrl, state.theme, item.prompt, item.image.thumbnail);
     } catch (e) {
-        if (e.message === 'Arrêt demandé') { item.status = 'failed'; item.progress = 'Arrêté'; }
-        else {
-            log('[Image ' + (item.imageIndex + 1) + '] ' + e.message);
-            item.status = 'failed';
-            item.progress = 'Échec';
-            state.failed++;
-        }
-        renderQueue();
-        updateGenerateBtn();
-    }
-}
-async function startGeneration() {
-    if (state.isRunning || !state.images.length) return;
-    if (!getApiKey()) {
-        showToast('Ajoutez votre clé API', 'error');
-        document.getElementById('api-key-input').focus();
-        return;
-    }
-    state.mainPrompt = document.getElementById('main-prompt').value.trim();
-    if (!state.mainPrompt && !state.selectedEffect) {
-        if (!confirm('Ni prompt ni style. Continuer ?')) return;
-    }
-    state.isRunning = true;
-    state.stopRequested = false;
-    state.completed = 0;
-    state.failed = 0;
-    state.creationAttemptsSinceLastError = 0;
-    createIntervalMs = CREATE_INTERVAL_MIN;
-    state.queue = state.images.map((img, i) => ({
-        imageIndex: i, image: img, status: 'pending', progress: null,
-        videoId: null, videoUrl: null, prompt: null, startTime: null
-    }));
-    document.getElementById('gallery-grid').innerHTML = '';
-    document.getElementById('gallery').style.display = 'none';
-    document.getElementById('stop-btn').classList.add('visible');
-    document.getElementById('generate-btn').disabled = true;
-    await ensureWakeLockActive();
-    renderQueue();
-    updateGenerateBtn();
-    const totalStart = Date.now();
-    const pollingTasks = [];
-    try {
-        for (let i = 0; i < state.queue.length; i++) {
-            if (state.stopRequested) break;
-            const item = state.queue[i];
-            try {
-                await createTaskOnly(item);
-                pollingTasks.push(pollTaskAndDisplay(item));
-            } catch (e) {
-                if (e.message === 'Arrêt demandé') break;
-                log('[Image ' + (i + 1) + '] Échec création : ' + e.message);
-                item.status = 'failed';
-                item.progress = 'Échec';
-                state.failed++;
-                renderQueue();
-                updateGenerateBtn();
-            }
-            if (i < state.queue.length - 1 && !state.stopRequested) {
-                const waitSec = Math.ceil(createIntervalMs / 1000);
-                for (let r = waitSec; r > 0; r--) {
-                    if (state.stopRequested) break;
-                    setStatus('Respiration… — Image ' + (i + 2) + '/' + state.queue.length + ' dans ' + r + 's');
-                    await sleep(1000);
-                }
-            }
-        }
-        if (pollingTasks.length > 0) {
-            setStatus('Finalisation…');
-            await Promise.allSettled(pollingTasks);
-        }
-    } catch (e) { log('Erreur globale : ' + e.message); }
-    const totalElapsed = (Date.now() - totalStart) / 1000;
-    const theme = THEMES[state.theme];
-    const summary = state.stopRequested
-        ? 'Arrêté — ' + state.completed + '/' + state.queue.length
-        : theme.emoji + ' ' + state.completed + '/' + state.queue.length + ' créées en ' + formatEta(totalElapsed);
-    setStatus(summary);
-    await sleep(4000);
-    setStatus(null);
-    state.isRunning = false;
-    state.stopRequested = false;
-    document.getElementById('stop-btn').classList.remove('visible');
-    updateGenerateBtn();
-    showToast(state.completed + ' vidéo' + (state.completed > 1 ? 's' : '') + ' créée' + (state.completed > 1 ? 's' : ''), 'success');
-}
-function stopGeneration() {
-    if (!state.isRunning) return;
-    state.stopRequested = true;
-    setStatus('Arrêt…');
-}
-
-// ══════════════════════════════════════════════════════════════════
-// ÉDITEUR D'IMAGE
-// ══════════════════════════════════════════════════════════════════
-const EDIT_PRESETS = [
-    { id: 'none', name: 'Aucun', filter: '' },
-    { id: 'vivid', name: 'Vif', filter: 'saturate(1.6) contrast(1.15)' },
-    { id: 'vintage', name: 'Vintage', filter: 'sepia(0.5) contrast(1.1) saturate(0.9)' },
-    { id: 'noir', name: 'Noir', filter: 'grayscale(1) contrast(1.3)' },
-    { id: 'warm', name: 'Chaud', filter: 'sepia(0.25) saturate(1.2) brightness(1.05)' },
-    { id: 'cool', name: 'Froid', filter: 'hue-rotate(15deg) saturate(1.1) brightness(1.05)' },
-    { id: 'dramatic', name: 'Dramatique', filter: 'contrast(1.5) saturate(1.2) brightness(0.95)' },
-    { id: 'faded', name: 'Délavé', filter: 'contrast(0.85) saturate(0.7) brightness(1.1)' },
-    { id: 'neon', name: 'Néon', filter: 'saturate(2) contrast(1.2) hue-rotate(-10deg)' }
-];
-let editState = {
-    imageId: null, rotation: 0, flipH: false, flipV: false,
-    brightness: 100, contrast: 100, saturation: 100, blur: 0, sepia: 0,
-    preset: 'none', sourceImage: null, naturalW: 0, naturalH: 0
-};
-function openEditModal(imageId) {
-    const imgObj = state.images.find(i => i.id === imageId);
-    if (!imgObj) return;
-    editState = {
-        imageId, rotation: 0, flipH: false, flipV: false,
-        brightness: 100, contrast: 100, saturation: 100, blur: 0, sepia: 0,
-        preset: 'none', sourceImage: null, naturalW: 0, naturalH: 0
-    };
-    ['brightness', 'contrast', 'saturation'].forEach(k => {
-        document.getElementById('edit-' + k).value = 100;
-        document.getElementById('edit-' + k + '-val').textContent = '100';
-    });
-    document.getElementById('edit-blur').value = 0;
-    document.getElementById('edit-blur-val').textContent = '0';
-    document.getElementById('edit-sepia').value = 0;
-    document.getElementById('edit-sepia-val').textContent = '0';
-    const img = new Image();
-    img.onload = () => {
-        editState.sourceImage = img;
-        editState.naturalW = img.width;
-        editState.naturalH = img.height;
-        renderEditPresets();
-        drawEditCanvas();
-        document.getElementById('edit-modal').classList.add('visible');
-    };
-    img.src = imgObj.dataUri;
-}
-function closeEditModal() {
-    document.getElementById('edit-modal').classList.remove('visible');
-    editState.imageId = null;
-    editState.sourceImage = null;
-}
-function renderEditPresets() {
-    const container = document.getElementById('edit-presets');
-    container.innerHTML = EDIT_PRESETS.map(p =>
-        '<div class="edit-preset ' + (editState.preset === p.id ? 'selected' : '') + '" data-preset="' + p.id + '">' + esc(p.name) + '</div>'
-    ).join('');
-    container.querySelectorAll('[data-preset]').forEach(el => {
-        el.addEventListener('click', () => { editState.preset = el.dataset.preset; renderEditPresets(); drawEditCanvas(); });
-    });
-}
-function getEditFilterString() {
-    const preset = EDIT_PRESETS.find(p => p.id === editState.preset);
-    const presetFilter = preset ? preset.filter : '';
-    const parts = [];
-    if (editState.brightness !== 100) parts.push('brightness(' + (editState.brightness / 100) + ')');
-    if (editState.contrast !== 100) parts.push('contrast(' + (editState.contrast / 100) + ')');
-    if (editState.saturation !== 100) parts.push('saturate(' + (editState.saturation / 100) + ')');
-    if (editState.blur > 0) parts.push('blur(' + editState.blur + 'px)');
-    if (editState.sepia > 0) parts.push('sepia(' + (editState.sepia / 100) + ')');
-    return (presetFilter + ' ' + parts.join(' ')).trim();
-}
-function drawEditCanvas() {
-    const canvas = document.getElementById('edit-canvas');
-    const ctx = canvas.getContext('2d');
-    const src = editState.sourceImage;
-    if (!src) return;
-    const rotated = (editState.rotation % 180) !== 0;
-    const srcW = editState.naturalW, srcH = editState.naturalH;
-    const dispW = rotated ? srcH : srcW;
-    const dispH = rotated ? srcW : srcH;
-    const MAX = 1200;
-    const scale = Math.min(1, MAX / Math.max(dispW, dispH));
-    canvas.width = Math.round(dispW * scale);
-    canvas.height = Math.round(dispH * scale);
-    ctx.save();
-    ctx.filter = getEditFilterString() || 'none';
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.rotate((editState.rotation * Math.PI) / 180);
-    ctx.scale(editState.flipH ? -1 : 1, editState.flipV ? -1 : 1);
-    ctx.drawImage(src, -srcW * scale / 2, -srcH * scale / 2, srcW * scale, srcH * scale);
-    ctx.restore();
-}
-function saveEdit() {
-    const imgObj = state.images.find(i => i.id === editState.imageId);
-    if (!imgObj) { closeEditModal(); return; }
-    const fullCanvas = document.createElement('canvas');
-    const src = editState.sourceImage;
-    const rotated = (editState.rotation % 180) !== 0;
-    const srcW = editState.naturalW, srcH = editState.naturalH;
-    fullCanvas.width = rotated ? srcH : srcW;
-    fullCanvas.height = rotated ? srcW : srcH;
-    const fctx = fullCanvas.getContext('2d');
-    fctx.save();
-    fctx.filter = getEditFilterString() || 'none';
-    fctx.translate(fullCanvas.width / 2, fullCanvas.height / 2);
-    fctx.rotate((editState.rotation * Math.PI) / 180);
-    fctx.scale(editState.flipH ? -1 : 1, editState.flipV ? -1 : 1);
-    fctx.drawImage(src, -srcW / 2, -srcH / 2, srcW, srcH);
-    fctx.restore();
-    imgObj.dataUri = fullCanvas.toDataURL('image/jpeg', 0.92);
-    const thumbCanvas = document.createElement('canvas');
-    const ratio = fullCanvas.height / fullCanvas.width;
-    thumbCanvas.width = THUMBNAIL_MAX_WIDTH;
-    thumbCanvas.height = Math.round(THUMBNAIL_MAX_WIDTH * ratio);
-    thumbCanvas.getContext('2d').drawImage(fullCanvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
-    imgObj.thumbnail = thumbCanvas.toDataURL('image/jpeg', 0.7);
-    renderImages();
-    closeEditModal();
-    showToast('Image modifiée ✓', 'success');
-}
-function resetEdit() {
-    editState.rotation = 0; editState.flipH = false; editState.flipV = false;
-    editState.brightness = 100; editState.contrast = 100; editState.saturation = 100;
-    editState.blur = 0; editState.sepia = 0; editState.preset = 'none';
-    ['brightness', 'contrast', 'saturation'].forEach(k => {
-        document.getElementById('edit-' + k).value = 100;
-        document.getElementById('edit-' + k + '-val').textContent = '100';
-    });
-    document.getElementById('edit-blur').value = 0;
-    document.getElementById('edit-blur-val').textContent = '0';
-    document.getElementById('edit-sepia').value = 0;
-    document.getElementById('edit-sepia-val').textContent = '0';
-    renderEditPresets();
-    drawEditCanvas();
-}
-function bindEditEvents() {
-    document.querySelectorAll('[data-tool]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tool = btn.dataset.tool;
-            if (tool === 'rot-l') editState.rotation = (editState.rotation - 90 + 360) % 360;
-            else if (tool === 'rot-r') editState.rotation = (editState.rotation + 90) % 360;
-            else if (tool === 'flip-h') editState.flipH = !editState.flipH;
-            else if (tool === 'flip-v') editState.flipV = !editState.flipV;
-            else if (tool === 'reset') { resetEdit(); return; }
-            drawEditCanvas();
-        });
-    });
-    const sliderMap = {
-        'edit-brightness': { key: 'brightness', val: 'edit-brightness-val' },
-        'edit-contrast': { key: 'contrast', val: 'edit-contrast-val' },
-        'edit-saturation': { key: 'saturation', val: 'edit-saturation-val' },
-        'edit-blur': { key: 'blur', val: 'edit-blur-val' },
-        'edit-sepia': { key: 'sepia', val: 'edit-sepia-val' }
-    };
-    Object.keys(sliderMap).forEach(id => {
-        const slider = document.getElementById(id);
-        const valEl = document.getElementById(sliderMap[id].val);
-        if (!slider) return;
-        slider.addEventListener('input', (e) => {
-            const v = parseInt(e.target.value, 10);
-            editState[sliderMap[id].key] = v;
-            valEl.textContent = v;
-            drawEditCanvas();
-        });
-    });
-    document.getElementById('edit-save').addEventListener('click', saveEdit);
-    document.getElementById('edit-cancel').addEventListener('click', closeEditModal);
-    document.getElementById('edit-close-x').addEventListener('click', closeEditModal);
-    document.getElementById('edit-modal').addEventListener('click', (e) => {
-        if (e.target.id === 'edit-modal') closeEditModal();
-    });
-}
-
-// ══════════════════════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════════════════════
-(function init() {
-    document.getElementById('api-save-btn').addEventListener('click', saveApiKey);
-    document.getElementById('stop-btn').addEventListener('click', stopGeneration);
-    document.getElementById('api-key-input').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); saveApiKey(); }
-    });
-    document.querySelectorAll('[data-toggle]').forEach(header => {
-        header.addEventListener('click', () => {
-            document.getElementById(header.dataset.toggle).classList.toggle('open');
-        });
-    });
-    const uploadZone = document.getElementById('upload-zone');
-    const fileInput = document.getElementById('file-input');
-    uploadZone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', e => { handleFiles(e.target.files); fileInput.value = ''; });
-    document.getElementById('main-prompt').addEventListener('input', e => { state.mainPrompt = e.target.value; });
-    document.getElementById('duration-select').addEventListener('change', e => { state.durationFrames = parseInt(e.target.value, 10); });
-    document.getElementById('framing-select').addEventListener('change', e => { state.framing = e.target.value; });
-    document.getElementById('intensity-select').addEventListener('change', e => { state.intensity = e.target.value; });
-    document.getElementById('generate-btn').addEventListener('click', startGeneration);
-    document.getElementById('wake-toggle-btn').addEventListener('click', toggleWakeLock);
-    document.getElementById('theme-search').addEventListener('input', (e) => {
-        state.searchQuery = e.target.value;
-        renderThemes();
-    });
-    document.getElementById('hist-select-all').addEventListener('click', selectAllHistory);
-    document.getElementById('hist-clear').addEventListener('click', clearHistory);
-    bindEditEvents();
-
-    try {
-        const saved = localStorage.getItem(WAKE_LOCK_PREF);
-        wakeLockEnabled = saved === '1';
-    } catch (e) {}
-    if (wakeLockEnabled) activateWakeLock().then(() => updateWakeStatus());
-    try {
-        const savedTheme = localStorage.getItem(THEME_STORAGE);
-        if (savedTheme && THEMES[savedTheme]) state.theme = savedTheme;
-    } catch (e) {}
-
-    updateApiPanel();
-    updateTimingDisplay();
-    updateWakeStatus();
-    renderCategoryChips();
-    renderFavorites();
-    renderHistory();
-    setTheme(state.theme);
-    renderImages();
-    renderQueue();
-    updateGenerateBtn();
-    log('Studio IA Universel prêt — ' + Object.keys(THEMES).length + ' thèmes · Agnes');
-})();
-</script>
-
-</body>
-</html>
+        if (e.message === 'Arrêt demandé') { item.status = 'failed'; item.progress =
