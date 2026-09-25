@@ -60,7 +60,6 @@
     .section.open .section-body { max-height: 8000px; }
     .section-content { padding: 0 1.1rem 1.1rem; }
     .api-panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.2rem; margin-bottom: 1rem; }
-    .api-panel.ok { border-color: var(--success); }
     .api-key-input { width: 100%; padding: 0.85rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2); color: var(--ink); font-family: ui-monospace, monospace; font-size: 0.8rem; margin-bottom: 0.6rem; }
     .api-key-input:focus { outline: none; border-color: var(--accent); }
     .api-save-btn { width: 100%; padding: 0.8rem; border-radius: 8px; border: none; background: var(--accent); color: #fff; font-size: 0.9rem; font-weight: 700; font-family: inherit; cursor: pointer; margin-bottom: 0.6rem; }
@@ -192,8 +191,7 @@
 
 <div class="api-panel" id="api-panel">
     <div class="api-section-label">🔑 Token Replicate</div>
-    <input type="password" class="api-key-input" id="rep-token-input"
-           placeholder="r8_..." autocomplete="off" spellcheck="false">
+    <input type="password" class="api-key-input" id="rep-token-input" placeholder="r8_..." autocomplete="off" spellcheck="false">
     <button type="button" class="api-save-btn" id="rep-save-btn">Enregistrer le token Replicate</button>
     <div class="api-status-line" id="rep-status-line">
         <span class="status-dot"></span>
@@ -204,15 +202,14 @@
     </div>
 
     <div class="api-section-label">🖼️ Clé API imgbb (gratuite)</div>
-    <input type="password" class="api-key-input" id="imgbb-key-input"
-           placeholder="32 caractères" autocomplete="off" spellcheck="false">
+    <input type="password" class="api-key-input" id="imgbb-key-input" placeholder="32 caractères" autocomplete="off" spellcheck="false">
     <button type="button" class="api-save-btn" id="imgbb-save-btn">Enregistrer la clé imgbb</button>
     <div class="api-status-line" id="imgbb-status-line">
         <span class="status-dot"></span>
         <span id="imgbb-status-text">Aucune clé imgbb</span>
     </div>
     <div class="api-hint">
-        <a href="https://api.imgbb.com/" target="_blank">api.imgbb.com</a> → Get API key (30 sec, gratuit à vie)
+        <a href="https://api.imgbb.com/" target="_blank">api.imgbb.com</a> → Get API key (30 sec, gratuit)
     </div>
 
     <div class="wake-status" id="wake-status">
@@ -236,8 +233,7 @@
     </div>
     <div class="section-body">
         <div class="section-content">
-            <textarea class="prompt-main" id="main-prompt"
-                placeholder="Décrivez ce que vous voulez que l'IA fasse avec toutes vos images."></textarea>
+            <textarea class="prompt-main" id="main-prompt" placeholder="Décrivez ce que vous voulez que l'IA fasse avec toutes vos images."></textarea>
             <div class="prompt-presets" id="prompt-presets"></div>
             <div class="prompt-hint">💡 Ce prompt s'applique à <strong>toutes</strong> les images.</div>
         </div>
@@ -348,18 +344,24 @@
 // ══════════════════════════════════════════════════════════════════
 // CONFIGURATION
 // ══════════════════════════════════════════════════════════════════
-const REPLICATE_API = 'https://ton-projet.vercel.app/api/proxy';
-const REP_TOKEN_KEY = 'replicate_token_v3';
-const IMGBB_KEY_KEY = 'imgbb_key_v1';
-const THEME_STORAGE = 'rep_theme_v3';
-const FAV_STORAGE = 'rep_favorites_v3';
-const HISTORY_STORAGE = 'rep_history_v3';
-const WAKE_LOCK_PREF = 'rep_wakelock_v3';
+const REPLICATE_API = 'https://api.replicate.com/v1';
+// Proxy CORS public qui accepte les POST + Authorization
+const CORS_PROXY = 'https://corsproxy.io/?url=';
+const REP_TOKEN_KEY = 'rep_token_v4';
+const IMGBB_KEY_KEY = 'imgbb_key_v4';
+const THEME_STORAGE = 'rep_theme_v4';
+const FAV_STORAGE = 'rep_favorites_v4';
+const HISTORY_STORAGE = 'rep_history_v4';
+const WAKE_LOCK_PREF = 'rep_wakelock_v4';
 const MAX_IMAGE_SIZE = 12 * 1024 * 1024;
 const THUMBNAIL_MAX_WIDTH = 200;
 const MAX_HISTORY = 200;
-const POLL_INTERVAL_MS = 4000;
+const POLL_INTERVAL_MS = 5000;
 const MAX_POLL_ATTEMPTS = 180;
+
+function repUrl(path) {
+    return CORS_PROXY + encodeURIComponent(REPLICATE_API + path);
+}
 
 const CATEGORIES = {
     popular:  { name: 'Populaires', emoji: '🔥' },
@@ -771,50 +773,13 @@ const THEMES = {
     ]}
 };
 
-const RANDOM_ACTIONS = [
-    'the subject slowly raises a hand toward the camera',
-    'a single tear rolls down the subject\'s cheek in slow motion',
-    'the subject turns their head slowly, eyes closing, breathing softly',
-    'the subject\'s hair moves gently in an imperceptible breeze',
-    'the subject stands still, only their chest rising and falling',
-    'the subject\'s eyes open slowly, revealing an intense gaze',
-    'the subject walks slowly toward the camera, each step deliberate'
-];
-const RANDOM_CAMERA = [
-    'slow dolly-in, camera gliding forward',
-    'static locked-off frame',
-    'handheld, slight tremor, camera breathing',
-    'slow pan following the subject',
-    'subtle parallax movement revealing depth',
-    'low angle looking up, subject appears powerful',
-    'camera drifts backward slowly, revealing more'
-];
-const RANDOM_LIGHTING = [
-    'soft diffused natural light',
-    'warm golden hour backlight',
-    'dramatic side lighting with deep shadows',
-    'gentle ambient glow, almost shadowless',
-    'cool moonlight atmosphere',
-    'cinematic rim lighting emphasizing the silhouette'
-];
-const INTENSITY_PRESETS = {
-    subtle: 'very subtle movement, barely perceptible change',
-    moderate: 'moderate movement, clear but controlled motion',
-    strong: 'strong dynamic movement, energetic motion'
-};
-const FRAMING_PRESETS = {
-    close: 'extreme close-up framing, intimate and intense',
-    medium: 'medium shot, subject framed from waist up',
-    wide: 'wide shot, subject framed with environment visible'
-};
+const RANDOM_ACTIONS = ['the subject slowly raises a hand toward the camera', 'a single tear rolls down the subject\'s cheek in slow motion', 'the subject turns their head slowly, eyes closing, breathing softly', 'the subject\'s hair moves gently in an imperceptible breeze', 'the subject stands still, only their chest rising and falling', 'the subject\'s eyes open slowly, revealing an intense gaze', 'the subject walks slowly toward the camera, each step deliberate'];
+const RANDOM_CAMERA = ['slow dolly-in, camera gliding forward', 'static locked-off frame', 'handheld, slight tremor, camera breathing', 'slow pan following the subject', 'subtle parallax movement revealing depth', 'low angle looking up, subject appears powerful', 'camera drifts backward slowly, revealing more'];
+const RANDOM_LIGHTING = ['soft diffused natural light', 'warm golden hour backlight', 'dramatic side lighting with deep shadows', 'gentle ambient glow, almost shadowless', 'cool moonlight atmosphere', 'cinematic rim lighting emphasizing the silhouette'];
+const INTENSITY_PRESETS = { subtle: 'very subtle movement, barely perceptible change', moderate: 'moderate movement, clear but controlled motion', strong: 'strong dynamic movement, energetic motion' };
+const FRAMING_PRESETS = { close: 'extreme close-up framing, intimate and intense', medium: 'medium shot, subject framed from waist up', wide: 'wide shot, subject framed with environment visible' };
 
-const state = {
-    images: [], isRunning: false, stopRequested: false, queue: [],
-    completed: 0, failed: 0, theme: 'apocalypse', selectedEffect: null,
-    mainPrompt: '', framing: 'random', intensity: 'moderate',
-    model: 'wan-video/wan-2.2-i2v-fast',
-    isLoadingImages: false, filterCat: 'all', searchQuery: ''
-};
+const state = { images: [], isRunning: false, stopRequested: false, queue: [], completed: 0, failed: 0, theme: 'apocalypse', selectedEffect: null, mainPrompt: '', framing: 'random', intensity: 'moderate', model: 'wan-video/wan-2.2-i2v-fast', isLoadingImages: false, filterCat: 'all', searchQuery: '' };
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 function log(msg) { console.log('[Studio] ' + msg); }
@@ -852,7 +817,6 @@ function getRepToken() { try { return (localStorage.getItem(REP_TOKEN_KEY) || ''
 function getImgbbKey() { try { return (localStorage.getItem(IMGBB_KEY_KEY) || '').trim(); } catch (e) { return ''; } }
 function saveRepToken() {
     const input = document.getElementById('rep-token-input');
-    if (!input) return;
     const key = input.value.trim();
     if (!key) { try { localStorage.removeItem(REP_TOKEN_KEY); } catch (e) {} updateApiPanel(); showToast('Token Replicate supprimé', 'warn'); return; }
     if (!key.startsWith('r8_')) { if (!confirm('Le token ne commence pas par "r8_". Sauvegarder ?')) return; }
@@ -860,7 +824,6 @@ function saveRepToken() {
 }
 function saveImgbbKey() {
     const input = document.getElementById('imgbb-key-input');
-    if (!input) return;
     const key = input.value.trim();
     if (!key) { try { localStorage.removeItem(IMGBB_KEY_KEY); } catch (e) {} updateApiPanel(); showToast('Clé imgbb supprimée', 'warn'); return; }
     try { localStorage.setItem(IMGBB_KEY_KEY, key); updateApiPanel(); showToast('Clé imgbb enregistrée ✓', 'success'); input.blur(); } catch (e) { showToast('Erreur', 'error'); }
@@ -868,32 +831,16 @@ function saveImgbbKey() {
 function updateApiPanel() {
     const repToken = getRepToken();
     const imgbbKey = getImgbbKey();
-    const panel = document.getElementById('api-panel');
     const repStatusLine = document.getElementById('rep-status-line');
     const repStatusText = document.getElementById('rep-status-text');
     const repInput = document.getElementById('rep-token-input');
     const imgStatusLine = document.getElementById('imgbb-status-line');
     const imgStatusText = document.getElementById('imgbb-status-text');
     const imgInput = document.getElementById('imgbb-key-input');
-
-    if (repToken) {
-        panel.classList.add('ok'); repStatusLine.classList.add('ok');
-        repStatusText.textContent = 'Token Replicate actif · ' + repToken.slice(0, 8) + '…';
-        repInput.value = repToken;
-    } else {
-        panel.classList.remove('ok'); repStatusLine.classList.remove('ok');
-        repStatusText.textContent = 'Aucun token Replicate';
-        repInput.value = '';
-    }
-    if (imgbbKey) {
-        imgStatusLine.classList.add('ok');
-        imgStatusText.textContent = 'Clé imgbb active · ' + imgbbKey.slice(0, 6) + '…';
-        imgInput.value = imgbbKey;
-    } else {
-        imgStatusLine.classList.remove('ok');
-        imgStatusText.textContent = 'Aucune clé imgbb';
-        imgInput.value = '';
-    }
+    if (repToken) { repStatusLine.classList.add('ok'); repStatusText.textContent = 'Token actif · ' + repToken.slice(0, 8) + '…'; repInput.value = repToken; }
+    else { repStatusLine.classList.remove('ok'); repStatusText.textContent = 'Aucun token Replicate'; repInput.value = ''; }
+    if (imgbbKey) { imgStatusLine.classList.add('ok'); imgStatusText.textContent = 'Clé active · ' + imgbbKey.slice(0, 6) + '…'; imgInput.value = imgbbKey; }
+    else { imgStatusLine.classList.remove('ok'); imgStatusText.textContent = 'Aucune clé imgbb'; imgInput.value = ''; }
     updateGenerateBtn();
 }
 function updateGenerateBtn() {
@@ -939,11 +886,7 @@ function renderImages() {
 // FAVORIS
 function loadFavorites() { try { return JSON.parse(localStorage.getItem(FAV_STORAGE) || '[]'); } catch (e) { return []; } }
 function saveFavorites(l) { try { localStorage.setItem(FAV_STORAGE, JSON.stringify(l)); } catch (e) {} }
-function toggleFavorite(id) {
-    let favs = loadFavorites();
-    if (favs.includes(id)) { favs = favs.filter(x => x !== id); showToast('Retiré', 'warn', 1200); } else { favs.push(id); showToast('Ajouté ⭐', 'success', 1200); }
-    saveFavorites(favs); renderFavorites(); renderThemes();
-}
+function toggleFavorite(id) { let favs = loadFavorites(); if (favs.includes(id)) { favs = favs.filter(x => x !== id); showToast('Retiré', 'warn', 1200); } else { favs.push(id); showToast('Ajouté ⭐', 'success', 1200); } saveFavorites(favs); renderFavorites(); renderThemes(); }
 function renderFavorites() {
     const bar = document.getElementById('fav-bar'); if (!bar) return;
     const favs = loadFavorites().filter(id => THEMES[id]);
@@ -956,11 +899,7 @@ function renderFavorites() {
 // HISTORIQUE
 function loadHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_STORAGE) || '[]'); } catch (e) { return []; } }
 function saveHistory(l) { try { if (l.length > MAX_HISTORY) l = l.slice(0, MAX_HISTORY); localStorage.setItem(HISTORY_STORAGE, JSON.stringify(l)); } catch (e) {} }
-function addToHistory(videoUrl, themeId, prompt, thumb) {
-    const history = loadHistory();
-    history.unshift({ id: Date.now() + Math.random(), videoUrl, themeId, themeName: THEMES[themeId]?.name || themeId, themeEmoji: THEMES[themeId]?.emoji || '🎬', prompt: (prompt || '').slice(0, 200), thumb: thumb || '', timestamp: Date.now(), selected: false });
-    saveHistory(history); renderHistory();
-}
+function addToHistory(videoUrl, themeId, prompt, thumb) { const history = loadHistory(); history.unshift({ id: Date.now() + Math.random(), videoUrl, themeId, themeName: THEMES[themeId]?.name || themeId, themeEmoji: THEMES[themeId]?.emoji || '🎬', prompt: (prompt || '').slice(0, 200), thumb: thumb || '', timestamp: Date.now(), selected: false }); saveHistory(history); renderHistory(); }
 function clearHistory() { if (!confirm('Vider l\'historique ?')) return; saveHistory([]); renderHistory(); showToast('Historique vidé', 'warn'); }
 function deleteHistoryItem(id) { saveHistory(loadHistory().filter(h => h.id !== id)); renderHistory(); }
 function toggleHistorySelect(id) { const h = loadHistory(); const it = h.find(x => x.id === id); if (it) it.selected = !it.selected; saveHistory(h); renderHistory(); }
@@ -970,20 +909,12 @@ function renderHistory() {
     const history = loadHistory();
     if (count) count.textContent = history.length;
     if (!history.length) { list.innerHTML = '<div class="history-empty">Aucune vidéo</div>'; return; }
-    list.innerHTML = history.map(h => {
-        const date = new Date(h.timestamp);
-        const dateStr = date.toLocaleDateString('fr-FR') + ' ' + date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        return '<div class="history-item"><input type="checkbox" class="history-checkbox" data-check="' + h.id + '" ' + (h.selected ? 'checked' : '') + '><div class="history-thumb">' + (h.thumb ? '<img src="' + h.thumb + '">' : '<span class="emoji">' + h.themeEmoji + '</span>') + '</div><div class="history-info"><div class="history-title">' + h.themeEmoji + ' ' + esc(h.themeName) + '</div><div class="history-meta">' + dateStr + '</div></div><div class="history-actions"><button type="button" data-download="' + h.id + '" title="Télécharger">⬇</button><button type="button" data-delete="' + h.id + '" title="Supprimer">🗑</button></div></div>';
-    }).join('');
+    list.innerHTML = history.map(h => { const date = new Date(h.timestamp); const dateStr = date.toLocaleDateString('fr-FR') + ' ' + date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); return '<div class="history-item"><input type="checkbox" class="history-checkbox" data-check="' + h.id + '" ' + (h.selected ? 'checked' : '') + '><div class="history-thumb">' + (h.thumb ? '<img src="' + h.thumb + '">' : '<span class="emoji">' + h.themeEmoji + '</span>') + '</div><div class="history-info"><div class="history-title">' + h.themeEmoji + ' ' + esc(h.themeName) + '</div><div class="history-meta">' + dateStr + '</div></div><div class="history-actions"><button type="button" data-download="' + h.id + '" title="Télécharger">⬇</button><button type="button" data-delete="' + h.id + '" title="Supprimer">🗑</button></div></div>'; }).join('');
     list.querySelectorAll('[data-check]').forEach(el => el.addEventListener('change', () => toggleHistorySelect(parseFloat(el.dataset.check))));
     list.querySelectorAll('[data-download]').forEach(el => el.addEventListener('click', () => downloadHistoryItem(parseFloat(el.dataset.download))));
     list.querySelectorAll('[data-delete]').forEach(el => el.addEventListener('click', () => deleteHistoryItem(parseFloat(el.dataset.delete))));
 }
-function downloadHistoryItem(id) {
-    const item = loadHistory().find(h => h.id === id); if (!item) return;
-    const a = document.createElement('a'); a.href = item.videoUrl; a.download = 'studio-video-' + item.id + '.mp4'; a.target = '_blank';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a); showToast('Téléchargement', 'success');
-}
+function downloadHistoryItem(id) { const item = loadHistory().find(h => h.id === id); if (!item) return; const a = document.createElement('a'); a.href = item.videoUrl; a.download = 'studio-video-' + item.id + '.mp4'; a.target = '_blank'; document.body.appendChild(a); a.click(); document.body.removeChild(a); showToast('Téléchargement', 'success'); }
 
 // RENDU THÈMES
 function renderCategoryChips() {
@@ -1031,12 +962,7 @@ function renderPromptPresets() {
     const theme = THEMES[state.theme];
     if (!theme || !theme.presets) { container.innerHTML = ''; return; }
     container.innerHTML = theme.presets.map((p, i) => '<div class="prompt-preset" data-preset="' + i + '">' + esc(p.label) + '</div>').join('');
-    container.querySelectorAll('.prompt-preset').forEach(el => {
-        el.addEventListener('click', () => {
-            const idx = parseInt(el.dataset.preset, 10); const preset = theme.presets[idx]; if (!preset) return;
-            const ta = document.getElementById('main-prompt'); ta.value = preset.text; state.mainPrompt = preset.text; ta.focus(); showToast('Exemple appliqué', 'success', 1200);
-        });
-    });
+    container.querySelectorAll('.prompt-preset').forEach(el => { el.addEventListener('click', () => { const idx = parseInt(el.dataset.preset, 10); const preset = theme.presets[idx]; if (!preset) return; const ta = document.getElementById('main-prompt'); ta.value = preset.text; state.mainPrompt = preset.text; ta.focus(); showToast('Exemple appliqué', 'success', 1200); }); });
 }
 function renderStyles() {
     const container = document.getElementById('styles-grid');
@@ -1073,71 +999,42 @@ function buildPrompt() {
     return parts.join('. ');
 }
 
-// ══════════════════════════════════════════════════════════════════
-// API REPLICATE + UPLOAD IMGBB
-// ══════════════════════════════════════════════════════════════════
+// UPLOAD IMGBB
 async function uploadToImgbb(dataUri) {
     const imgbbKey = getImgbbKey();
     if (!imgbbKey) throw new Error('Clé imgbb manquante');
-
     log('Upload de l\'image vers imgbb…');
     const res = await fetch(dataUri);
     const blob = await res.blob();
-
     const formData = new FormData();
     formData.append('image', blob, 'input.jpg');
-
-    const uploadRes = await fetch('https://api.imgbb.com/1/upload?key=' + encodeURIComponent(imgbbKey), {
-        method: 'POST',
-        body: formData
-    });
-
-    if (!uploadRes.ok) {
-        const err = await uploadRes.text();
-        throw new Error('Upload imgbb échoué : HTTP ' + uploadRes.status + ' — ' + err.slice(0, 250));
-    }
-
+    const uploadRes = await fetch('https://api.imgbb.com/1/upload?key=' + encodeURIComponent(imgbbKey), { method: 'POST', body: formData });
+    if (!uploadRes.ok) { const err = await uploadRes.text(); throw new Error('Upload imgbb échoué : HTTP ' + uploadRes.status + ' — ' + err.slice(0, 250)); }
     const uploadData = await uploadRes.json();
-    if (!uploadData.success || !uploadData.data) {
-        throw new Error('imgbb : réponse invalide — ' + JSON.stringify(uploadData).slice(0, 200));
-    }
-
+    if (!uploadData.success || !uploadData.data) throw new Error('imgbb : réponse invalide');
     log('URL imgbb : ' + uploadData.data.url);
     return uploadData.data.url;
 }
 
+// REPLICATE — via proxy CORS
 async function createVideoTask(imageDataUri, prompt) {
-    // 1. Uploader l'image sur imgbb
     const imageUrl = await uploadToImgbb(imageDataUri);
-
-    // 2. Créer la prédiction Replicate avec l'URL publique
-    const body = {
-        input: {
-            image: imageUrl,
-            prompt: prompt
-        }
-    };
-
-    const res = await fetch(REPLICATE_API + '/models/' + state.model + '/predictions', {
+    const body = { input: { image: imageUrl, prompt: prompt } };
+    log('Appel Replicate (via corsproxy.io)…');
+    const res = await fetch(repUrl('/models/' + state.model + '/predictions'), {
         method: 'POST',
         headers: {
             'Authorization': 'Bearer ' + getRepToken(),
-            'Content-Type': 'application/json',
-            'Prefer': 'wait'
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
     });
-
-    if (res.status === 401 || res.status === 403) throw new Error('Token Replicate invalide ou expiré.');
+    if (res.status === 401 || res.status === 403) throw new Error('Token Replicate invalide.');
     if (res.status === 402) throw new Error('Crédits Replicate épuisés.');
     if (res.status === 429) throw new Error('Trop de requêtes. Attendez.');
-
-    if (!res.ok) {
-        const err = await res.text();
-        throw new Error('Replicate HTTP ' + res.status + ' — ' + err.slice(0, 300));
-    }
-
+    if (!res.ok) { const err = await res.text(); throw new Error('Replicate HTTP ' + res.status + ' — ' + err.slice(0, 300)); }
     const data = await res.json();
+    log('Prédiction créée : ' + data.id);
     return data.id;
 }
 
@@ -1145,21 +1042,12 @@ async function pollVideo(predictionId, onProgress) {
     for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
         if (state.stopRequested) throw new Error('Arrêt demandé');
         await sleep(POLL_INTERVAL_MS);
-
-        const res = await fetch(REPLICATE_API + '/predictions/' + predictionId, {
-            headers: { 'Authorization': 'Bearer ' + getRepToken() }
-        });
-
+        const res = await fetch(repUrl('/predictions/' + predictionId), { headers: { 'Authorization': 'Bearer ' + getRepToken() } });
         const d = await res.json();
         const status = d.status || 'unknown';
         const elapsed = Math.round((attempt + 1) * POLL_INTERVAL_MS / 1000);
         onProgress('Génération… ' + elapsed + 's');
-
-        if (status === 'succeeded') {
-            const videoUrl = d.output;
-            if (!videoUrl) throw new Error('Terminé mais pas d\'URL');
-            return typeof videoUrl === 'string' ? videoUrl : (Array.isArray(videoUrl) ? videoUrl[0] : videoUrl.url);
-        }
+        if (status === 'succeeded') { const videoUrl = d.output; if (!videoUrl) throw new Error('Terminé mais pas d\'URL'); return typeof videoUrl === 'string' ? videoUrl : (Array.isArray(videoUrl) ? videoUrl[0] : videoUrl.url); }
         if (status === 'failed') throw new Error('Échec : ' + (d.error || 'erreur'));
         if (status === 'canceled') throw new Error('Annulé');
     }
@@ -1200,24 +1088,17 @@ function addToGallery(videoUrl, label) {
 
 // PIPELINE
 async function createTaskOnly(item) {
-    item.status = 'uploading';
-    item.progress = 'Upload de l\'image…';
-    renderQueue();
-    const prompt = buildPrompt();
-    item.prompt = prompt;
+    item.status = 'uploading'; item.progress = 'Upload…'; renderQueue();
+    const prompt = buildPrompt(); item.prompt = prompt;
     const predictionId = await createVideoTask(item.image.dataUri, prompt);
-    item.predictionId = predictionId;
-    item.startTime = Date.now();
-    item.status = 'processing';
-    item.progress = 'En cours…';
-    renderQueue();
+    item.predictionId = predictionId; item.startTime = Date.now();
+    item.status = 'processing'; item.progress = 'En cours…'; renderQueue();
     return predictionId;
 }
 async function pollTaskAndDisplay(item) {
     try {
         const videoUrl = await pollVideo(item.predictionId, (prog) => { item.progress = prog; renderQueue(); });
-        item.status = 'done'; item.videoUrl = videoUrl; item.progress = 'Terminé';
-        state.completed++;
+        item.status = 'done'; item.videoUrl = videoUrl; item.progress = 'Terminé'; state.completed++;
         renderQueue(); updateGenerateBtn();
         addToGallery(videoUrl, 'Vidéo ' + (item.imageIndex + 1));
         addToHistory(videoUrl, state.theme, item.prompt, item.image.thumbnail);
@@ -1247,12 +1128,7 @@ async function startGeneration() {
         if (state.stopRequested) break;
         const item = state.queue[i];
         try { await createTaskOnly(item); pollingTasks.push(pollTaskAndDisplay(item)); }
-        catch (e) {
-            if (e.message === 'Arrêt demandé') break;
-            log('[Image ' + (i + 1) + '] Échec création : ' + e.message);
-            item.status = 'failed'; item.progress = 'Échec'; state.failed++;
-            renderQueue(); updateGenerateBtn();
-        }
+        catch (e) { if (e.message === 'Arrêt demandé') break; log('[Image ' + (i + 1) + '] Échec création : ' + e.message); item.status = 'failed'; item.progress = 'Échec'; state.failed++; renderQueue(); updateGenerateBtn(); }
         if (i < state.queue.length - 1 && !state.stopRequested) {
             for (let r = 3; r > 0; r--) { if (state.stopRequested) break; setStatus('Respiration… Image ' + (i + 2) + '/' + state.queue.length + ' dans ' + r + 's'); await sleep(1000); }
         }
@@ -1270,17 +1146,7 @@ async function startGeneration() {
 function stopGeneration() { if (!state.isRunning) return; state.stopRequested = true; setStatus('Arrêt…'); }
 
 // ÉDITEUR
-const EDIT_PRESETS = [
-    { id: 'none', name: 'Aucun', filter: '' },
-    { id: 'vivid', name: 'Vif', filter: 'saturate(1.6) contrast(1.15)' },
-    { id: 'vintage', name: 'Vintage', filter: 'sepia(0.5) contrast(1.1) saturate(0.9)' },
-    { id: 'noir', name: 'Noir', filter: 'grayscale(1) contrast(1.3)' },
-    { id: 'warm', name: 'Chaud', filter: 'sepia(0.25) saturate(1.2) brightness(1.05)' },
-    { id: 'cool', name: 'Froid', filter: 'hue-rotate(15deg) saturate(1.1) brightness(1.05)' },
-    { id: 'dramatic', name: 'Dramatique', filter: 'contrast(1.5) saturate(1.2) brightness(0.95)' },
-    { id: 'faded', name: 'Délavé', filter: 'contrast(0.85) saturate(0.7) brightness(1.1)' },
-    { id: 'neon', name: 'Néon', filter: 'saturate(2) contrast(1.2) hue-rotate(-10deg)' }
-];
+const EDIT_PRESETS = [{ id: 'none', name: 'Aucun', filter: '' }, { id: 'vivid', name: 'Vif', filter: 'saturate(1.6) contrast(1.15)' }, { id: 'vintage', name: 'Vintage', filter: 'sepia(0.5) contrast(1.1) saturate(0.9)' }, { id: 'noir', name: 'Noir', filter: 'grayscale(1) contrast(1.3)' }, { id: 'warm', name: 'Chaud', filter: 'sepia(0.25) saturate(1.2) brightness(1.05)' }, { id: 'cool', name: 'Froid', filter: 'hue-rotate(15deg) saturate(1.1) brightness(1.05)' }, { id: 'dramatic', name: 'Dramatique', filter: 'contrast(1.5) saturate(1.2) brightness(0.95)' }, { id: 'faded', name: 'Délavé', filter: 'contrast(0.85) saturate(0.7) brightness(1.1)' }, { id: 'neon', name: 'Néon', filter: 'saturate(2) contrast(1.2) hue-rotate(-10deg)' }];
 let editState = { imageId: null, rotation: 0, flipH: false, flipV: false, brightness: 100, contrast: 100, saturation: 100, blur: 0, sepia: 0, preset: 'none', sourceImage: null, naturalW: 0, naturalH: 0 };
 function openEditModal(imageId) {
     const imgObj = state.images.find(i => i.id === imageId); if (!imgObj) return;
@@ -1293,11 +1159,7 @@ function openEditModal(imageId) {
     img.src = imgObj.dataUri;
 }
 function closeEditModal() { document.getElementById('edit-modal').classList.remove('visible'); editState.imageId = null; editState.sourceImage = null; }
-function renderEditPresets() {
-    const container = document.getElementById('edit-presets');
-    container.innerHTML = EDIT_PRESETS.map(p => '<div class="edit-preset ' + (editState.preset === p.id ? 'selected' : '') + '" data-preset="' + p.id + '">' + esc(p.name) + '</div>').join('');
-    container.querySelectorAll('[data-preset]').forEach(el => { el.addEventListener('click', () => { editState.preset = el.dataset.preset; renderEditPresets(); drawEditCanvas(); }); });
-}
+function renderEditPresets() { const container = document.getElementById('edit-presets'); container.innerHTML = EDIT_PRESETS.map(p => '<div class="edit-preset ' + (editState.preset === p.id ? 'selected' : '') + '" data-preset="' + p.id + '">' + esc(p.name) + '</div>').join(''); container.querySelectorAll('[data-preset]').forEach(el => { el.addEventListener('click', () => { editState.preset = el.dataset.preset; renderEditPresets(); drawEditCanvas(); }); }); }
 function getEditFilterString() {
     const preset = EDIT_PRESETS.find(p => p.id === editState.preset); const presetFilter = preset ? preset.filter : '';
     const parts = [];
@@ -1385,7 +1247,7 @@ function bindEditEvents() {
     try { const savedTheme = localStorage.getItem(THEME_STORAGE); if (savedTheme && THEMES[savedTheme]) state.theme = savedTheme; } catch (e) {}
     updateApiPanel(); updateWakeStatus(); renderCategoryChips(); renderFavorites(); renderHistory();
     setTheme(state.theme); renderImages(); renderQueue(); updateGenerateBtn();
-    log('Studio IA prêt — ' + Object.keys(THEMES).length + ' thèmes · Replicate + imgbb');
+    log('Studio IA prêt — ' + Object.keys(THEMES).length + ' thèmes · Replicate + imgbb (proxy CORS actif)');
 })();
 </script>
 
