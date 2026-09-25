@@ -1021,7 +1021,7 @@ async function createVideoTask(imageDataUri, prompt) {
     const imageUrl = await uploadToImgbb(imageDataUri);
     const body = { input: { image: imageUrl, prompt: prompt } };
     log('Appel Replicate (via corsproxy.io)…');
-    const res = await fetch(repUrl('/models/' + state.model + '/predictions'), {
+    const res = await fetch(repUrl('/v1/models/' + state.model + '/predictions'), {
         method: 'POST',
         headers: {
             'Authorization': 'Bearer ' + getRepToken(),
@@ -1042,7 +1042,7 @@ async function pollVideo(predictionId, onProgress) {
     for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
         if (state.stopRequested) throw new Error('Arrêt demandé');
         await sleep(POLL_INTERVAL_MS);
-        const res = await fetch(repUrl('/predictions/' + predictionId), { headers: { 'Authorization': 'Bearer ' + getRepToken() } });
+        const res = await fetch(repUrl('/v1/predictions/' + predictionId), { headers: { 'Authorization': 'Bearer ' + getRepToken() } });
         const d = await res.json();
         const status = d.status || 'unknown';
         const elapsed = Math.round((attempt + 1) * POLL_INTERVAL_MS / 1000);
