@@ -1652,15 +1652,60 @@ async function apiFetch(url, options = {}) {
 }
 
 async function createVideoTask(imageDataUri, prompt) {
-    // Convertir l'image en URL publique temporaire
-    // Replicate accepte les data URIs directement dans le champ "image"
+    // Étape 1 : uploader l'image vers Replicate
+    const uploadUrl = await uploadImageToReplicate(imageDataUri);
+    log('Image uploadée : ' + uploadUrl);
+    
+    // Étape 2 : créer la prédiction avec l'URL
     const body = {
         input: {
-            image: imageDataUri,
+            image: uploadUrl,
             prompt: prompt,
             duration: state.duration
         }
     };
+    const res = await apiFetch(REPLICATE_API + '/models/' + state.model + '/predictions', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + getToken(),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+        const err = await res.text();
+        throw new Error('HTTP ' + res.status + ' — ' + err.slice(0, 300));
+    }
+    const data = await res.json();
+    return data.id;
+}
+
+// Fonction d'upload vers Replicate
+async function uploadImageToReplicate(dataUri) {
+    // Convertir le data URI en Blob
+    const res = await fetch(dataUri);
+    const blob = await res.blob();
+    
+    // Uploader via l'API files de Replicate
+    const formData = new FormData();
+    formData.append('content', blob, 'image.jpg');
+    
+    const uploadRes = await fetch('https://api.replicate.com/v1/files', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + getToken()
+        },
+        body: formData
+    });
+    
+    if (!uploadRes.ok) {
+        const err = await uploadRes.text();
+        throw new Error('Upload échoué : HTTP ' + uploadRes.status + ' — ' + err.slice(0, 200));
+    }
+    
+    const uploadData = await uploadRes.json();
+    return uploadData.urls.get;
+}
     const res = await apiFetch(REPLICATE_API + '/models/' + state.model + '/predictions', {
         method: 'POST',
         headers: {
