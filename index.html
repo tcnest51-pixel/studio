@@ -586,7 +586,7 @@
 <video id="noSleepVideo" playsinline muted loop></video>
 
 <script>
-const REPLICATE_API = 'https://api.replicate.com/v1';
+const REPLICATE_API = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.replicate.com/v1');
 const REPLICATE_TOKEN_KEY = 'replicate_token_v2';
 const THEME_STORAGE = 'replicate_theme_v2';
 const FAV_STORAGE = 'replicate_favorites_v2';
@@ -1599,7 +1599,12 @@ function buildPrompt() {
 // API REPLICATE — AVEC UPLOAD D'IMAGE
 // ══════════════════════════════════════════════════════════════════
 async function apiFetch(url, options = {}) {
-    const res = await fetch(url, options);
+    // Si l'URL n'est pas déjà passée par le proxy, on l'encode
+    const proxiedUrl = url.startsWith('https://api.replicate.com')
+        ? 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url)
+        : url;
+
+    const res = await fetch(proxiedUrl, options);
     if (res.status === 401 || res.status === 403) {
         throw new Error('Token Replicate invalide ou expiré.');
     }
@@ -1622,7 +1627,8 @@ async function uploadImageToReplicate(dataUri) {
     formData.append('content', blob, 'input.jpg');
     formData.append('type', 'image/jpeg');
 
-    const uploadRes = await fetch(REPLICATE_API + '/files', {
+    // Utiliser le proxy pour l'upload
+    const uploadRes = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.replicate.com/v1/files'), {
         method: 'POST',
         headers: {
             'Authorization': 'Bearer ' + getToken()
@@ -1639,7 +1645,6 @@ async function uploadImageToReplicate(dataUri) {
     log('URL publique : ' + uploadData.urls.get);
     return uploadData.urls.get;
 }
-
 async function createVideoTask(imageDataUri, prompt) {
     // 1. Upload de l'image vers Replicate
     const imageUrl = await uploadImageToReplicate(imageDataUri);
