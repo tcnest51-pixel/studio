@@ -1619,7 +1619,7 @@ async function apiFetch(url, options = {}) {
 
 // Upload l'image vers Replicate et retourne l'URL publique
 async function uploadImageToReplicate(dataUri) {
-    log('Upload de l\'image vers Replicate…');
+    log('Upload de l\'image via proxy…');
     const res = await fetch(dataUri);
     const blob = await res.blob();
 
@@ -1627,8 +1627,10 @@ async function uploadImageToReplicate(dataUri) {
     formData.append('content', blob, 'input.jpg');
     formData.append('type', 'image/jpeg');
 
-    // Utiliser le proxy pour l'upload
-    const uploadRes = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.replicate.com/v1/files'), {
+    // Proxy public corsproxy.io qui accepte les POST multipart
+    const proxiedUrl = 'https://corsproxy.io/?url=' + encodeURIComponent('https://api.replicate.com/v1/files');
+
+    const uploadRes = await fetch(proxiedUrl, {
         method: 'POST',
         headers: {
             'Authorization': 'Bearer ' + getToken()
@@ -1644,6 +1646,7 @@ async function uploadImageToReplicate(dataUri) {
     const uploadData = await uploadRes.json();
     log('URL publique : ' + uploadData.urls.get);
     return uploadData.urls.get;
+}
 }
 async function createVideoTask(imageDataUri, prompt) {
     // 1. Upload de l'image vers Replicate
