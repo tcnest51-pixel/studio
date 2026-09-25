@@ -489,7 +489,7 @@
                 <select id="model-select">
                     <option value="wan-video/wan-2.2-i2v-fast" selected>Wan 2.2 Fast (~0,05 $)</option>
                     <option value="kwaivgi/kling-v2.1">Kling v2.1 (~0,15 $)</option>
-                    <option value="bytedance/seedance-2.0-fast">Seedance 2.0 (~0,10 $)</option>
+                    <option value="bytedance/seedance-1-pro">Seedance 1 Pro (~0,10 $)</option>
                 </select>
             </div>
             <div class="control-row">
@@ -586,31 +586,18 @@
 <video id="noSleepVideo" playsinline muted loop></video>
 
 <script>
-// ══════════════════════════════════════════════════════════════════
-// CONFIGURATION REPLICATE
-// ══════════════════════════════════════════════════════════════════
 const REPLICATE_API = 'https://api.replicate.com/v1';
-const REPLICATE_TOKEN_KEY = 'replicate_token';
-const THEME_STORAGE = 'replicate_theme';
-const FAV_STORAGE = 'replicate_favorites';
-const HISTORY_STORAGE = 'replicate_history';
-const WAKE_LOCK_PREF = 'replicate_wakelock';
+const REPLICATE_TOKEN_KEY = 'replicate_token_v2';
+const THEME_STORAGE = 'replicate_theme_v2';
+const FAV_STORAGE = 'replicate_favorites_v2';
+const HISTORY_STORAGE = 'replicate_history_v2';
+const WAKE_LOCK_PREF = 'replicate_wakelock_v2';
 const MAX_IMAGE_SIZE = 12 * 1024 * 1024;
 const THUMBNAIL_MAX_WIDTH = 200;
 const MAX_HISTORY = 200;
-const POLL_INTERVAL_MS = 5000;
-const MAX_POLL_ATTEMPTS = 120;
+const POLL_INTERVAL_MS = 4000;
+const MAX_POLL_ATTEMPTS = 180;
 
-// Modèles supportés
-const MODELS = {
-    'wan-video/wan-2.2-i2v-fast': { name: 'Wan 2.2 Fast', price: 0.05, supports10s: false },
-    'kwaivgi/kling-v2.1': { name: 'Kling v2.1', price: 0.15, supports10s: true },
-    'bytedance/seedance-2.0-fast': { name: 'Seedance 2.0', price: 0.10, supports10s: true }
-};
-
-// ══════════════════════════════════════════════════════════════════
-// CATÉGORIES
-// ══════════════════════════════════════════════════════════════════
 const CATEGORIES = {
     popular:  { name: 'Populaires', emoji: '🔥' },
     gaming:   { name: 'Gaming', emoji: '🎮' },
@@ -622,9 +609,6 @@ const CATEGORIES = {
     niche:    { name: 'Niches', emoji: '💎' }
 };
 
-// ══════════════════════════════════════════════════════════════════
-// 52 THÈMES
-// ══════════════════════════════════════════════════════════════════
 const THEMES = {
     apocalypse: { name: 'Apocalypse', emoji: '☢️', desc: 'Fin du monde', cat: 'popular', accent: '#ff4500', accent2: '#8a1a1a', banner: 'Scènes post-apocalyptiques : cendres, ruines, ciels rouges.', presets: [
         { label: '☢️ Nucléaire', text: 'Décor post-nucléaire, ciel rouge sang, fumée, cendres, ruines.' },
@@ -1061,9 +1045,6 @@ const FRAMING_PRESETS = {
     wide: 'wide shot, subject framed with environment visible'
 };
 
-// ══════════════════════════════════════════════════════════════════
-// ÉTAT
-// ══════════════════════════════════════════════════════════════════
 const state = {
     images: [], isRunning: false, stopRequested: false, queue: [],
     completed: 0, failed: 0, theme: 'apocalypse', selectedEffect: null,
@@ -1072,9 +1053,6 @@ const state = {
     isLoadingImages: false, filterCat: 'all', searchQuery: ''
 };
 
-// ══════════════════════════════════════════════════════════════════
-// UTILITAIRES
-// ══════════════════════════════════════════════════════════════════
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 function log(msg) { console.log('[Studio] ' + msg); }
 function esc(s) {
@@ -1113,9 +1091,7 @@ function showToast(message, type = 'success', duration = 2500) {
     toastTimeout = setTimeout(() => toast.classList.remove('visible'), duration);
 }
 
-// ══════════════════════════════════════════════════════════════════
 // ANTI-VEILLE
-// ══════════════════════════════════════════════════════════════════
 let wakeLockSentinel = null, wakeLockEnabled = false, canvasStream = null, canvasInterval = null;
 function isWakeLockSupported() { return 'wakeLock' in navigator && typeof navigator.wakeLock.request === 'function'; }
 async function requestWakeLockAPI() {
@@ -1192,9 +1168,7 @@ async function ensureWakeLockActive() {
     if (wakeLockSentinel === null && canvasStream === null) { await activateWakeLock(); updateWakeStatus(); }
 }
 
-// ══════════════════════════════════════════════════════════════════
 // TOKEN REPLICATE
-// ══════════════════════════════════════════════════════════════════
 function getToken() { try { return (localStorage.getItem(REPLICATE_TOKEN_KEY) || '').trim(); } catch (e) { return ''; } }
 function saveToken() {
     const input = document.getElementById('api-key-input');
@@ -1251,9 +1225,7 @@ function updateGenerateBtn() {
     else btn.textContent = 'Générer ' + state.images.length + ' vidéo' + (state.images.length > 1 ? 's' : '') + ' ' + theme.emoji;
 }
 
-// ══════════════════════════════════════════════════════════════════
 // IMAGES
-// ══════════════════════════════════════════════════════════════════
 function fileToDataUri(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1333,9 +1305,7 @@ function renderImages() {
     });
 }
 
-// ══════════════════════════════════════════════════════════════════
 // FAVORIS
-// ══════════════════════════════════════════════════════════════════
 function loadFavorites() { try { return JSON.parse(localStorage.getItem(FAV_STORAGE) || '[]'); } catch (e) { return []; } }
 function saveFavorites(l) { try { localStorage.setItem(FAV_STORAGE, JSON.stringify(l)); } catch (e) {} }
 function toggleFavorite(id) {
@@ -1369,9 +1339,7 @@ function renderFavorites() {
     });
 }
 
-// ══════════════════════════════════════════════════════════════════
 // HISTORIQUE
-// ══════════════════════════════════════════════════════════════════
 function loadHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_STORAGE) || '[]'); } catch (e) { return []; } }
 function saveHistory(l) {
     try {
@@ -1459,9 +1427,7 @@ function downloadHistoryItem(id) {
     showToast('Téléchargement', 'success');
 }
 
-// ══════════════════════════════════════════════════════════════════
 // RENDU THÈMES
-// ══════════════════════════════════════════════════════════════════
 function renderCategoryChips() {
     const container = document.getElementById('cat-chips');
     const cats = [{ id: 'all', name: 'Tous', emoji: '📋' }, ...Object.keys(CATEGORIES).map(id => ({ id, ...CATEGORIES[id] }))];
@@ -1540,9 +1506,7 @@ function setTheme(id) {
     showToast('Thème ' + theme.name, 'success', 1200);
 }
 
-// ══════════════════════════════════════════════════════════════════
 // PRESETS & STYLES
-// ══════════════════════════════════════════════════════════════════
 function renderPromptPresets() {
     const container = document.getElementById('prompt-presets');
     const theme = THEMES[state.theme];
@@ -1602,9 +1566,7 @@ function renderStyles() {
     });
 }
 
-// ══════════════════════════════════════════════════════════════════
 // BUILD PROMPT
-// ══════════════════════════════════════════════════════════════════
 function buildPrompt() {
     const theme = THEMES[state.theme];
     const effect = state.selectedEffect ? theme.styles.find(s => s.id === state.selectedEffect) : null;
@@ -1629,18 +1591,17 @@ function buildPrompt() {
     parts.push(randomItem(RANDOM_ACTIONS));
     parts.push(randomItem(RANDOM_CAMERA));
     parts.push(randomItem(RANDOM_LIGHTING));
-    parts.push('Sound design: minimal ambient textures, no music, no dialogue');
     parts.push('Portrait orientation 9:16 vertical, 24fps, no text, no watermarks');
     return parts.join('. ');
 }
 
 // ══════════════════════════════════════════════════════════════════
-// API REPLICATE
+// API REPLICATE — AVEC UPLOAD D'IMAGE
 // ══════════════════════════════════════════════════════════════════
 async function apiFetch(url, options = {}) {
     const res = await fetch(url, options);
     if (res.status === 401 || res.status === 403) {
-        throw new Error('Token Replicate invalide ou expiré. Vérifiez votre token.');
+        throw new Error('Token Replicate invalide ou expiré.');
     }
     if (res.status === 402) {
         throw new Error('Crédits Replicate épuisés. Rechargez votre compte.');
@@ -1651,66 +1612,52 @@ async function apiFetch(url, options = {}) {
     return res;
 }
 
-async function createVideoTask(imageDataUri, prompt) {
-    // Étape 1 : uploader l'image vers Replicate
-    const uploadUrl = await uploadImageToReplicate(imageDataUri);
-    log('Image uploadée : ' + uploadUrl);
-    
-    // Étape 2 : créer la prédiction avec l'URL
-    const body = {
-        input: {
-            image: uploadUrl,
-            prompt: prompt,
-            duration: state.duration
-        }
-    };
-    const res = await apiFetch(REPLICATE_API + '/models/' + state.model + '/predictions', {
-        method: 'POST',
-        headers: {
-            'Authorization': 'Bearer ' + getToken(),
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-    });
-    if (!res.ok) {
-        const err = await res.text();
-        throw new Error('HTTP ' + res.status + ' — ' + err.slice(0, 300));
-    }
-    const data = await res.json();
-    return data.id;
-}
-
-// Fonction d'upload vers Replicate
+// Upload l'image vers Replicate et retourne l'URL publique
 async function uploadImageToReplicate(dataUri) {
-    // Convertir le data URI en Blob
+    log('Upload de l\'image vers Replicate…');
     const res = await fetch(dataUri);
     const blob = await res.blob();
-    
-    // Uploader via l'API files de Replicate
+
     const formData = new FormData();
-    formData.append('content', blob, 'image.jpg');
-    
-    const uploadRes = await fetch('https://api.replicate.com/v1/files', {
+    formData.append('content', blob, 'input.jpg');
+    formData.append('type', 'image/jpeg');
+
+    const uploadRes = await fetch(REPLICATE_API + '/files', {
         method: 'POST',
         headers: {
             'Authorization': 'Bearer ' + getToken()
         },
         body: formData
     });
-    
+
     if (!uploadRes.ok) {
         const err = await uploadRes.text();
-        throw new Error('Upload échoué : HTTP ' + uploadRes.status + ' — ' + err.slice(0, 200));
+        throw new Error('Upload échoué : HTTP ' + uploadRes.status + ' — ' + err.slice(0, 250));
     }
-    
+
     const uploadData = await uploadRes.json();
+    log('URL publique : ' + uploadData.urls.get);
     return uploadData.urls.get;
 }
+
+async function createVideoTask(imageDataUri, prompt) {
+    // 1. Upload de l'image vers Replicate
+    const imageUrl = await uploadImageToReplicate(imageDataUri);
+
+    // 2. Création de la prédiction
+    const body = {
+        input: {
+            image: imageUrl,
+            prompt: prompt
+        }
+    };
+
     const res = await apiFetch(REPLICATE_API + '/models/' + state.model + '/predictions', {
         method: 'POST',
         headers: {
             'Authorization': 'Bearer ' + getToken(),
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Prefer': 'wait'
         },
         body: JSON.stringify(body)
     });
@@ -1731,12 +1678,12 @@ async function pollVideo(predictionId, onProgress) {
         });
         const d = await res.json();
         const status = d.status || 'unknown';
-        const elapsed = attempt * (POLL_INTERVAL_MS / 1000);
-        onProgress('Génération… — ' + Math.round(elapsed) + 's (' + status + ')');
+        const elapsed = Math.round((attempt + 1) * POLL_INTERVAL_MS / 1000);
+        onProgress('Génération… ' + elapsed + 's (' + status + ')');
         if (status === 'succeeded') {
             const videoUrl = d.output;
             if (!videoUrl) throw new Error('Terminé mais pas d\'URL');
-            return typeof videoUrl === 'string' ? videoUrl : videoUrl[0];
+            return typeof videoUrl === 'string' ? videoUrl : (Array.isArray(videoUrl) ? videoUrl[0] : videoUrl.url);
         }
         if (status === 'failed') {
             throw new Error('Échec : ' + (d.error || 'erreur inconnue'));
@@ -1748,9 +1695,7 @@ async function pollVideo(predictionId, onProgress) {
     throw new Error('Délai maximal dépassé');
 }
 
-// ══════════════════════════════════════════════════════════════════
 // QUEUE
-// ══════════════════════════════════════════════════════════════════
 function renderQueue() {
     const queueEl = document.getElementById('queue');
     if (!state.queue.length) { queueEl.style.display = 'none'; return; }
@@ -1764,7 +1709,8 @@ function renderQueue() {
     const theme = THEMES[state.theme];
     html += state.queue.slice(0, 30).map(item => {
         let icon = '○', statusText = 'En attente', cls = 'pending';
-        if (item.status === 'creating') { icon = '◐'; statusText = 'Création…'; cls = 'processing'; }
+        if (item.status === 'uploading') { icon = '⬆️'; statusText = 'Upload…'; cls = 'processing'; }
+        else if (item.status === 'creating') { icon = '◐'; statusText = 'Création…'; cls = 'processing'; }
         else if (item.status === 'processing') { icon = theme.emoji; statusText = item.progress || 'En cours…'; cls = 'processing'; }
         else if (item.status === 'done') { icon = '●'; statusText = 'Terminé'; cls = 'done'; }
         else if (item.status === 'failed') { icon = '✕'; statusText = 'Échec'; cls = 'failed'; }
@@ -1777,9 +1723,7 @@ function renderQueue() {
     queueEl.innerHTML = html;
 }
 
-// ══════════════════════════════════════════════════════════════════
 // GALERIE
-// ══════════════════════════════════════════════════════════════════
 function addToGallery(videoUrl, label) {
     const galleryEl = document.getElementById('gallery');
     const galleryGrid = document.getElementById('gallery-grid');
@@ -1795,12 +1739,10 @@ function addToGallery(videoUrl, label) {
     galleryGrid.appendChild(el);
 }
 
-// ══════════════════════════════════════════════════════════════════
 // PIPELINE
-// ══════════════════════════════════════════════════════════════════
 async function createTaskOnly(item) {
-    item.status = 'creating';
-    item.progress = 'Création…';
+    item.status = 'uploading';
+    item.progress = 'Upload de l\'image…';
     renderQueue();
     const prompt = buildPrompt();
     item.prompt = prompt;
@@ -1881,9 +1823,8 @@ async function startGeneration() {
             renderQueue();
             updateGenerateBtn();
         }
-        // Pause de 5s entre chaque création pour éviter le rate limit
         if (i < state.queue.length - 1 && !state.stopRequested) {
-            for (let r = 5; r > 0; r--) {
+            for (let r = 3; r > 0; r--) {
                 if (state.stopRequested) break;
                 setStatus('Respiration… — Image ' + (i + 2) + '/' + state.queue.length + ' dans ' + r + 's');
                 await sleep(1000);
@@ -1914,9 +1855,7 @@ function stopGeneration() {
     setStatus('Arrêt…');
 }
 
-// ══════════════════════════════════════════════════════════════════
 // ÉDITEUR D'IMAGE
-// ══════════════════════════════════════════════════════════════════
 const EDIT_PRESETS = [
     { id: 'none', name: 'Aucun', filter: '' },
     { id: 'vivid', name: 'Vif', filter: 'saturate(1.6) contrast(1.15)' },
@@ -2087,9 +2026,7 @@ function bindEditEvents() {
     });
 }
 
-// ══════════════════════════════════════════════════════════════════
 // INIT
-// ══════════════════════════════════════════════════════════════════
 (function init() {
     document.getElementById('api-save-btn').addEventListener('click', saveToken);
     document.getElementById('stop-btn').addEventListener('click', stopGeneration);
