@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Studio IA — Agnes Flash + imgbb</title>
+<title>Studio IA — Agnes v2.0 + imgbb</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -165,7 +165,7 @@ select{width:100%;padding:.7rem .9rem;border-radius:8px;border:1px solid var(--b
 
 <header>
 <h1>Studio IA Universel</h1>
-<p class="subtitle">52 thèmes · Agnes Flash + imgbb</p>
+<p class="subtitle">52 thèmes · Agnes v2.0 + imgbb</p>
 </header>
 
 <div class="theme-filter">
@@ -195,7 +195,7 @@ select{width:100%;padding:.7rem .9rem;border-radius:8px;border:1px solid var(--b
 
 <div class="api-sep"></div>
 
-<div class="stat-line"><span>📊 Modèle : <span style="color:var(--accent)">agnes-video-2.5-flash</span></span></div>
+<div class="stat-line"><span>📊 Modèle : <span style="color:var(--accent)">agnes-video-v2.0</span></span></div>
 <div class="wake-status" id="wake-status"><span id="wake-status-text">💤 Veille auto</span><button type="button" id="wake-toggle-btn">Garder l'écran allumé</button></div>
 </div>
 
@@ -238,18 +238,9 @@ select{width:100%;padding:.7rem .9rem;border-radius:8px;border:1px solid var(--b
 <div class="control-row">
 <label class="control-label">Durée</label>
 <select id="duration-select">
-<option value="4">4 secondes (minimum)</option>
-<option value="5" selected>5 secondes (recommandé)</option>
-<option value="8">8 secondes</option>
-<option value="10">10 secondes</option>
-</select>
-</div>
-<div class="control-row">
-<label class="control-label">Format</label>
-<select id="aspect-select">
-<option value="9:16" selected>Portrait 9:16 (TikTok / Reels)</option>
-<option value="16:9">Paysage 16:9 (YouTube)</option>
-<option value="1:1">Carré 1:1 (Instagram)</option>
+<option value="121" selected>5 secondes (rapide)</option>
+<option value="153">6,4 secondes</option>
+<option value="241">10 secondes (lent)</option>
 </select>
 </div>
 <div class="control-row">
@@ -322,17 +313,21 @@ select{width:100%;padding:.7rem .9rem;border-radius:8px;border:1px solid var(--b
 <video id="noSleepVideo" playsinline muted loop></video>
 
 <script>
+// ══════════════════════════════════════════════════════════════════
+// CONFIG — MODÈLE v2.0
+// ══════════════════════════════════════════════════════════════════
 const API_BASE='https://apihub.agnes-ai.com/v1';
 const POLL_BASE='https://apihub.agnes-ai.com/agnesapi';
-const MODEL_VIDEO='agnes-video-2.5-flash';
+const MODEL_VIDEO='agnes-video-v2.0';
+const FRAME_RATE=24;
 const POLL_INTERVAL_SEC=8;
 const MAX_POLL_ATTEMPTS=120;
-const API_KEY_STORAGE='agnes_api_key_v70';
-const IMGBB_KEY_STORAGE='agnes_imgbb_key_v70';
-const THEME_STORAGE='agnes_theme_v70';
-const FAV_STORAGE='agnes_favorites_v70';
-const HISTORY_STORAGE='agnes_history_v70';
-const WAKE_LOCK_PREF='agnes_wakelock_v70';
+const API_KEY_STORAGE='agnes_api_key_v80';
+const IMGBB_KEY_STORAGE='agnes_imgbb_key_v80';
+const THEME_STORAGE='agnes_theme_v80';
+const FAV_STORAGE='agnes_favorites_v80';
+const HISTORY_STORAGE='agnes_history_v80';
+const WAKE_LOCK_PREF='agnes_wakelock_v80';
 const MAX_VISIBLE_QUEUE=30;
 const MAX_IMAGE_SIZE=12*1024*1024;
 const THUMBNAIL_MAX_WIDTH=200;
@@ -402,7 +397,7 @@ const RANDOM_LIGHTING=['soft diffused natural light','warm golden hour backlight
 const INTENSITY_PRESETS={subtle:'very subtle movement, barely perceptible change',moderate:'moderate movement, clear but controlled motion',strong:'strong dynamic movement, energetic motion'};
 const FRAMING_PRESETS={close:'extreme close-up framing, intimate and intense',medium:'medium shot, subject framed from waist up',wide:'wide shot, subject framed with environment visible'};
 
-const state={images:[],isRunning:false,stopRequested:false,queue:[],completed:0,failed:0,theme:'apocalypse',selectedEffect:null,mainPrompt:'',framing:'random',intensity:'moderate',duration:5,aspect:'9:16',isLoadingImages:false,filterCat:'all',searchQuery:''};
+const state={images:[],isRunning:false,stopRequested:false,queue:[],completed:0,failed:0,theme:'apocalypse',selectedEffect:null,mainPrompt:'',framing:'random',intensity:'moderate',durationFrames:121,isLoadingImages:false,filterCat:'all',searchQuery:''};
 
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 function log(msg){console.log('[Studio] '+msg)}
@@ -480,7 +475,6 @@ function renderStyles(){const container=document.getElementById('styles-grid');c
 
 function buildPrompt(){const theme=THEMES[state.theme];const effect=state.selectedEffect?theme.styles.find(s=>s.id===state.selectedEffect):null;const isTransform=effect&&effect.cat==='transform';const hasUserPrompt=state.mainPrompt&&state.mainPrompt.trim().length>0;const parts=[];if(isTransform)parts.push('Animate this image as the starting frame. Transform the entire scene according to the following artistic direction.');else parts.push('Animate this exact image as the starting frame. Keep the subject IDENTICAL to the input: same face, same expression, same clothing, same pose. This is a CONTINUATION of the source image. Preserve the exact composition, framing, and layout of the original image.');if(effect)parts.push(effect.prompt);if(hasUserPrompt)parts.push('Artistic direction: '+state.mainPrompt.trim());if(state.framing!=='random'&&FRAMING_PRESETS[state.framing])parts.push(FRAMING_PRESETS[state.framing]);if(state.intensity!=='random'&&INTENSITY_PRESETS[state.intensity])parts.push(INTENSITY_PRESETS[state.intensity]);else parts.push('moderate movement, clear but controlled motion');parts.push(randomItem(RANDOM_ACTIONS));parts.push(randomItem(RANDOM_CAMERA));parts.push(randomItem(RANDOM_LIGHTING));parts.push('Portrait orientation 9:16 vertical, 24fps, no text, no watermarks');return parts.join('. ')}
 
-// REDIMENSIONNEMENT
 function resizeImage(dataUri,maxSide,minSide){
     return new Promise((resolve,reject)=>{
         const img=new Image();
@@ -502,7 +496,6 @@ function resizeImage(dataUri,maxSide,minSide){
     });
 }
 
-// UPLOAD IMGBB
 async function uploadToImgbb(dataUri){
     const key=getImgbbKey();
     if(!key)throw new Error('Clé imgbb manquante');
@@ -523,20 +516,18 @@ async function uploadToImgbb(dataUri){
 }
 
 // ══════════════════════════════════════════════════════════════════
-// CREATE VIDEO TASK — utilise le bon video_id pour le polling
+// CREATE VIDEO TASK — v2.0 (image directe + num_frames)
 // ══════════════════════════════════════════════════════════════════
 async function createVideoTask(imageDataUri,prompt){
-    log('--- createVideoTask Flash ---');
+    log('--- createVideoTask v2.0 ---');
     const imageUrl=await uploadToImgbb(imageDataUri);
 
     const body={
         model:MODEL_VIDEO,
         prompt:prompt,
-        first_frame:imageUrl,
-        seconds:String(state.duration),
-        mode:'keyframe',
-        size:'720P',
-        aspect_ratio:state.aspect
+        image:imageUrl,
+        num_frames: state.durationFrames,
+        frame_rate: FRAME_RATE
     };
 
     let lastError=null;
@@ -549,8 +540,8 @@ async function createVideoTask(imageDataUri,prompt){
             await sleep(wait*1000);
         }
 
-        log('Envoi à Agnes Flash... (tentative '+(attempt+1)+'/5)');
-        log('Body : '+JSON.stringify(body).slice(0,350));
+        log('Envoi à Agnes v2.0... (tentative '+(attempt+1)+'/5)');
+        log('Body : '+JSON.stringify(body).slice(0,300));
 
         try{
             const res=await fetch(API_BASE+'/videos',{
@@ -563,26 +554,16 @@ async function createVideoTask(imageDataUri,prompt){
             const responseText=await res.text();
             log('Corps : '+responseText.slice(0,500));
 
-            if(res.status===503){lastError='HTTP 503 — queue pleine';log('File d\'attente pleine → retry automatique');continue}
-            if(res.status===429){lastError='HTTP 429 — rate limit';log('Rate limit → retry automatique');continue}
+            if(res.status===503){lastError='HTTP 503 — queue pleine';log('File d\'attente pleine → retry');continue}
+            if(res.status===429){lastError='HTTP 429 — rate limit';log('Rate limit → retry');continue}
             if(!res.ok)throw new Error('HTTP '+res.status+' — '+responseText.slice(0,200));
 
             let data;
             try{data=JSON.parse(responseText)}catch(e){throw new Error('Réponse non-JSON')}
 
-            // ⚠️ IMPORTANT : utiliser video_id (pas task_id) pour le polling
-            const videoId=data.video_id;
-
-            log('Champs disponibles : ' + Object.keys(data).join(', '));
-            log('data.video_id = '+data.video_id);
-            log('data.task_id = '+data.task_id);
-            log('data.id = '+data.id);
-
-            if(!videoId){
-                throw new Error('Champ "video_id" manquant ! Réponse : '+JSON.stringify(data).slice(0,300));
-            }
-
-            log('✓ video_id (utilisé pour polling) : '+videoId);
+            const videoId=data.video_id||data.id||data.task_id;
+            if(!videoId)throw new Error('Pas de video_id dans : '+JSON.stringify(data).slice(0,200));
+            log('✓ video_id : '+videoId);
             return videoId;
 
         }catch(e){
@@ -595,7 +576,6 @@ async function createVideoTask(imageDataUri,prompt){
     throw new Error('Échec après 5 tentatives. Dernière erreur : '+lastError);
 }
 
-// POLLING
 async function pollVideo(videoId,onProgress){
     log('Polling démarré pour : '+videoId);
     for(let attempt=0;attempt<MAX_POLL_ATTEMPTS;attempt++){
@@ -617,10 +597,7 @@ async function pollVideo(videoId,onProgress){
         }catch(e){log('Polling erreur réseau : '+e.message);continue}
         log('Polling HTTP '+res.status);
         log('Polling corps : '+responseText.slice(0,300));
-        if(res.status===429||res.status===503){
-            log('Rate limit → attente 30s');
-            await sleep(30000);continue;
-        }
+        if(res.status===429||res.status===503){log('Rate limit → attente 30s');await sleep(30000);continue}
         let d;
         try{d=JSON.parse(responseText)}catch(e){log('Polling : non-JSON');continue}
         const status=(d.status||d.internal_status||'unknown').toLowerCase();
@@ -644,9 +621,7 @@ async function pollVideo(videoId,onProgress){
             log('✓ Vidéo prête : '+videoUrl);
             return videoUrl;
         }
-        if(['failed','error','cancelled','canceled'].includes(status)||d.error){
-            throw new Error('Échec : '+(d.error||status));
-        }
+        if(['failed','error','cancelled','canceled'].includes(status)||d.error){throw new Error('Échec : '+(d.error||status))}
     }
     throw new Error('Délai maximal dépassé');
 }
@@ -716,8 +691,7 @@ const uploadZone=document.getElementById('upload-zone');const fileInput=document
 uploadZone.addEventListener('click',()=>fileInput.click());
 fileInput.addEventListener('change',e=>{handleFiles(e.target.files);fileInput.value=''});
 document.getElementById('main-prompt').addEventListener('input',e=>{state.mainPrompt=e.target.value});
-document.getElementById('duration-select').addEventListener('change',e=>{state.duration=parseInt(e.target.value,10)});
-document.getElementById('aspect-select').addEventListener('change',e=>{state.aspect=e.target.value});
+document.getElementById('duration-select').addEventListener('change',e=>{state.durationFrames=parseInt(e.target.value,10)});
 document.getElementById('framing-select').addEventListener('change',e=>{state.framing=e.target.value});
 document.getElementById('intensity-select').addEventListener('change',e=>{state.intensity=e.target.value});
 document.getElementById('generate-btn').addEventListener('click',startGeneration);
@@ -731,7 +705,7 @@ if(wakeLockEnabled)activateWakeLock().then(()=>updateWakeStatus());
 try{const savedTheme=localStorage.getItem(THEME_STORAGE);if(savedTheme&&THEMES[savedTheme])state.theme=savedTheme}catch(e){}
 updateApiPanel();updateWakeStatus();renderCategoryChips();renderFavorites();renderHistory();
 setTheme(state.theme);renderImages();renderQueue();updateGenerateBtn();
-log('Studio IA Agnes Flash prêt — '+Object.keys(THEMES).length+' thèmes');
+log('Studio IA Agnes v2.0 prêt — '+Object.keys(THEMES).length+' thèmes');
 })();
 </script>
 
