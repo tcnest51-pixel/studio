@@ -1088,35 +1088,71 @@ async function pollVideo(videoId, onProgress) {
         }
 
         const url = POLL_BASE + '?video_id=' + encodeURIComponent(videoId) + '&model_name=' + encodeURIComponent(MODEL_VIDEO);
-        log('Polling #' + attempt + ' → ' + url);
+        log('Polling #' + attempt);
 
-        const res = await fetch(url, {
-            method: 'GET',
-            headers: { 'Authorization': 'Bearer ' + getApiKey() }
-        });
+        let res, responseText;
+        try {
+            res = await fetch(url, { method: 'GET', headers: { 'Authorization': 'Bearer ' + getApiKey() } });
+            responseText = await res.text();
+        } catch (e) {
+            log('Polling erreur réseau : ' + e.message);
+            continue;
+        }
 
-        const responseText = await res.text();
         log('Polling HTTP ' + res.status);
-        log('Polling corps : ' + responseText.slice(0, 500));
+        log('Polling corps : ' + responseText.slice(0, 400));
+
+        if (res.status === 429 || res.status === 503) {
+            log('Rate limit → attente 30s');
+            await sleep(30000);
+            continue;
+        }
 
         let d;
         try { d = JSON.parse(responseText); } catch (e) {
-            throw new Error('Polling : réponse non-JSON');
+            log('Polling : non-JSON');
+            continue;
         }
 
-        const status = d.status || 'unknown';
-        const progress = d.progress || 0;
+        // Agnes utilise "internal_status" + "internal_progress" ou "progress"
+        const status = (d.status || d.internal_status || 'unknown').toLowerCase();
+        const progress = d.progress || d.internal_progress || 0;
+        const completedAt = d.completed_at;
+
         onProgress('Création… — ' + progress + '%');
 
-        if (status === 'completed' || status === 'succeeded' || status === 'done') {
-            const videoUrl = (d.metadata && d.metadata.url) || d.url || (d.output && d.output.url);
-            if (!videoUrl) throw new Error('Terminé mais pas d\'URL');
+        // Détection de fin : plusieurs critères possibles
+        const isCompleted = (
+            completedAt !== null && completedAt !== undefined ||
+            progress >= 100 ||
+            ['completed', 'succeeded', 'done', 'success', 'finished'].includes(status)
+        );
+
+        if (isCompleted) {
+            // Chercher l'URL vidéo dans plusieurs endroits possibles
+            let videoUrl = null;
+            if (d.metadata && d.metadata.url) videoUrl = d.metadata.url;
+            else if (d.url) videoUrl = d.url;
+            else if (d.video_url) videoUrl = d.video_url;
+            else if (d.output_url) videoUrl = d.output_url;
+            else if (d.output && d.output.url) videoUrl = d.output.url;
+            else if (typeof d.output === 'string') videoUrl = d.output;
+
+            if (!videoUrl) {
+                log('URL vidéo manquante. Réponse complète :');
+                log(responseText);
+                throw new Error('Terminé mais URL introuvable');
+            }
             log('✓ Vidéo prête : ' + videoUrl);
             return videoUrl;
         }
-        if (status === 'failed' || status === 'error' || status === 'cancelled') {
-            throw new Error('Échec (' + status + ') : ' + responseText.slice(0, 200));
+
+        // Détection d'échec
+        if (['failed', 'error', 'cancelled', 'canceled'].includes(status) || d.error) {
+            throw new Error('Échec : ' + (d.error || status));
         }
+
+        // Sinon, continuer à poller (inference, processing, queued, etc.)
     }
     throw new Error('Délai maximal dépassé');
 }
