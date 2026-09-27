@@ -1076,14 +1076,52 @@ async function apiFetch(url, options = {}, label = 'API') {
     return fetch(url, options);
 }
 async function createVideoTask(imageDataUri, prompt) {
+    log('--- createVideoTask démarré ---');
     const imageUrl = await uploadToImgbb(imageDataUri);
-    const body = { model: MODEL_VIDEO, prompt, image: imageUrl, num_frames: state.durationFrames, frame_rate: FRAME_RATE };
-    const res = await apiFetch(API_BASE + '/videos', { method: 'POST', headers: { 'Authorization': 'Bearer ' + getApiKey(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) }, 'Création');
-    if (!res.ok) { const err = await res.text(); throw new Error('HTTP ' + res.status + ' — ' + err.slice(0, 200)); }
-    const data = await res.json();
+
+    const body = {
+        model: MODEL_VIDEO,
+        prompt: prompt,
+        image: imageUrl,
+        num_frames: state.durationFrames,
+        frame_rate: FRAME_RATE
+    };
+
+    log('Envoi à Agnes...');
+    log('URL image : ' + imageUrl);
+    log('Body : ' + JSON.stringify(body).slice(0, 300));
+
+    const res = await fetch(API_BASE + '/videos', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + getApiKey(),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+
+    log('Réponse Agnes : HTTP ' + res.status);
+
+    const responseText = await res.text();
+    log('Corps : ' + responseText.slice(0, 500));
+
+    if (!res.ok) {
+        throw new Error('HTTP ' + res.status + ' — ' + responseText.slice(0, 200));
+    }
+
+    let data;
+    try {
+        data = JSON.parse(responseText);
+    } catch (e) {
+        throw new Error('Réponse non-JSON : ' + responseText.slice(0, 200));
+    }
+
     const videoId = data.video_id || data.id || data.task_id;
-    if (!videoId) throw new Error('Pas de video_id');
+    if (!videoId) throw new Error('Pas de video_id dans : ' + JSON.stringify(data).slice(0, 200));
+
+    log('✓ video_id : ' + videoId);
     return videoId;
+}
 }
 async function pollVideo(videoId, onProgress) {
     const estimatedMs = estimateGenerationTime(state.durationFrames);
