@@ -252,13 +252,24 @@
     <div class="section-body">
         <div class="section-content">
             <div class="control-row">
-                <label class="control-label">Durée</label>
-                <select id="duration-select">
-                    <option value="121">5 secondes</option>
-                    <option value="153" selected>6,4 secondes (recommandé)</option>
-                    <option value="241">10 secondes</option>
-                </select>
-            </div>
+    <label class="control-label">Résolution</label>
+    <select id="resolution-select">
+        <option value="480x832">480×832 (ultra rapide)</option>
+        <option value="640x480">640×480 (rapide, carré)</option>
+        <option value="720x1280" selected>720×1280 (portrait, recommandé)</option>
+        <option value="832x480">832×480 (paysage)</option>
+        <option value="1088x832">1088×832 (haute qualité, lent)</option>
+    </select>
+</div>
+
+<div class="control-row">
+    <label class="control-label">Étapes d'inférence</label>
+    <select id="steps-select">
+        <option value="4" selected>4 étapes (rapide)</option>
+        <option value="6">6 étapes (équilibré)</option>
+        <option value="8">8 étapes (haute qualité, lent)</option>
+    </select>
+</div>
             <div class="control-row">
                 <label class="control-label">Cadrage</label>
                 <select id="framing-select">
@@ -1026,12 +1037,15 @@ async function createVideoTask(imageDataUri, prompt) {
     log('--- createVideoTask démarré ---');
     const imageUrl = await uploadToImgbb(imageDataUri);
 
+    // Réduire la charge : 720x1280 portrait + moins de steps
     const body = {
         model: MODEL_VIDEO,
         prompt: prompt,
         image: imageUrl,
         num_frames: state.durationFrames,
-        frame_rate: FRAME_RATE
+        frame_rate: FRAME_RATE,
+        size: "720x1280",
+        num_inference_steps: 4
     };
 
     log('Envoi à Agnes...');
