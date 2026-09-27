@@ -327,12 +327,12 @@ const POLL_BASE='https://apihub.agnes-ai.com/agnesapi';
 const MODEL_VIDEO='agnes-video-2.5-flash';
 const POLL_INTERVAL_SEC=8;
 const MAX_POLL_ATTEMPTS=120;
-const API_KEY_STORAGE='agnes_api_key_v60';
-const IMGBB_KEY_STORAGE='agnes_imgbb_key_v60';
-const THEME_STORAGE='agnes_theme_v60';
-const FAV_STORAGE='agnes_favorites_v60';
-const HISTORY_STORAGE='agnes_history_v60';
-const WAKE_LOCK_PREF='agnes_wakelock_v60';
+const API_KEY_STORAGE='agnes_api_key_v70';
+const IMGBB_KEY_STORAGE='agnes_imgbb_key_v70';
+const THEME_STORAGE='agnes_theme_v70';
+const FAV_STORAGE='agnes_favorites_v70';
+const HISTORY_STORAGE='agnes_history_v70';
+const WAKE_LOCK_PREF='agnes_wakelock_v70';
 const MAX_VISIBLE_QUEUE=30;
 const MAX_IMAGE_SIZE=12*1024*1024;
 const THUMBNAIL_MAX_WIDTH=200;
@@ -480,68 +480,42 @@ function renderStyles(){const container=document.getElementById('styles-grid');c
 
 function buildPrompt(){const theme=THEMES[state.theme];const effect=state.selectedEffect?theme.styles.find(s=>s.id===state.selectedEffect):null;const isTransform=effect&&effect.cat==='transform';const hasUserPrompt=state.mainPrompt&&state.mainPrompt.trim().length>0;const parts=[];if(isTransform)parts.push('Animate this image as the starting frame. Transform the entire scene according to the following artistic direction.');else parts.push('Animate this exact image as the starting frame. Keep the subject IDENTICAL to the input: same face, same expression, same clothing, same pose. This is a CONTINUATION of the source image. Preserve the exact composition, framing, and layout of the original image.');if(effect)parts.push(effect.prompt);if(hasUserPrompt)parts.push('Artistic direction: '+state.mainPrompt.trim());if(state.framing!=='random'&&FRAMING_PRESETS[state.framing])parts.push(FRAMING_PRESETS[state.framing]);if(state.intensity!=='random'&&INTENSITY_PRESETS[state.intensity])parts.push(INTENSITY_PRESETS[state.intensity]);else parts.push('moderate movement, clear but controlled motion');parts.push(randomItem(RANDOM_ACTIONS));parts.push(randomItem(RANDOM_CAMERA));parts.push(randomItem(RANDOM_LIGHTING));parts.push('Portrait orientation 9:16 vertical, 24fps, no text, no watermarks');return parts.join('. ')}
 
-// ══════════════════════════════════════════════════════════════════
-// REDIMENSIONNEMENT DE L'IMAGE
-// ══════════════════════════════════════════════════════════════════
-function resizeImage(dataUri, maxSide, minSide){
-    return new Promise((resolve, reject)=>{
-        const img = new Image();
-        img.onload = () => {
-            let w = img.width;
-            let h = img.height;
-            // Réduire si trop grand
-            if(w > maxSide || h > maxSide){
-                const ratio = Math.min(maxSide / w, maxSide / h);
-                w = Math.round(w * ratio);
-                h = Math.round(h * ratio);
-            }
-            // Agrandir si trop petit
-            if(w < minSide && h < minSide){
-                const ratio = Math.max(minSide / w, minSide / h);
-                w = Math.round(w * ratio);
-                h = Math.round(h * ratio);
-            }
-            // Vérification finale
-            w = Math.max(minSide + 1, Math.min(maxSide - 1, w));
-            h = Math.max(minSide + 1, Math.min(maxSide - 1, h));
-
-            const canvas = document.createElement('canvas');
-            canvas.width = w;
-            canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, w, h);
-            const output = canvas.toDataURL('image/jpeg', 0.92);
-            log('Nouvelle taille : ' + w + '×' + h);
+// REDIMENSIONNEMENT
+function resizeImage(dataUri,maxSide,minSide){
+    return new Promise((resolve,reject)=>{
+        const img=new Image();
+        img.onload=()=>{
+            let w=img.width,h=img.height;
+            if(w>maxSide||h>maxSide){const r=Math.min(maxSide/w,maxSide/h);w=Math.round(w*r);h=Math.round(h*r)}
+            if(w<minSide&&h<minSide){const r=Math.max(minSide/w,minSide/h);w=Math.round(w*r);h=Math.round(h*r)}
+            w=Math.max(minSide+1,Math.min(maxSide-1,w));
+            h=Math.max(minSide+1,Math.min(maxSide-1,h));
+            const canvas=document.createElement('canvas');
+            canvas.width=w;canvas.height=h;
+            canvas.getContext('2d').drawImage(img,0,0,w,h);
+            const output=canvas.toDataURL('image/jpeg',0.92);
+            log('Nouvelle taille : '+w+'×'+h);
             resolve(output);
         };
-        img.onerror = () => reject(new Error('Impossible de charger l\'image'));
-        img.src = dataUri;
+        img.onerror=()=>reject(new Error('Impossible de charger l\'image'));
+        img.src=dataUri;
     });
 }
 
-// ══════════════════════════════════════════════════════════════════
 // UPLOAD IMGBB
-// ══════════════════════════════════════════════════════════════════
 async function uploadToImgbb(dataUri){
     const key=getImgbbKey();
     if(!key)throw new Error('Clé imgbb manquante');
-
     log('Redimensionnement de l\'image…');
-    const resizedDataUri = await resizeImage(dataUri, 2048, 512);
+    const resized=await resizeImage(dataUri,2048,512);
     log('Image redimensionnée');
-
     log('Upload de l\'image vers imgbb…');
-    const res=await fetch(resizedDataUri);
+    const res=await fetch(resized);
     const blob=await res.blob();
     const formData=new FormData();
     formData.append('image',blob,'input.jpg');
-
-    const uploadRes=await fetch('https://api.imgbb.com/1/upload?key='+encodeURIComponent(key),{
-        method:'POST',
-        body:formData
-    });
+    const uploadRes=await fetch('https://api.imgbb.com/1/upload?key='+encodeURIComponent(key),{method:'POST',body:formData});
     if(!uploadRes.ok)throw new Error('Upload imgbb : HTTP '+uploadRes.status);
-
     const uploadData=await uploadRes.json();
     if(!uploadData.success||!uploadData.data)throw new Error('imgbb : réponse invalide');
     log('URL imgbb : '+uploadData.data.url);
@@ -549,7 +523,7 @@ async function uploadToImgbb(dataUri){
 }
 
 // ══════════════════════════════════════════════════════════════════
-// CREATE VIDEO TASK — AVEC RETRY AUTOMATIQUE 503/429
+// CREATE VIDEO TASK — utilise le bon video_id pour le polling
 // ══════════════════════════════════════════════════════════════════
 async function createVideoTask(imageDataUri,prompt){
     log('--- createVideoTask Flash ---');
@@ -565,21 +539,20 @@ async function createVideoTask(imageDataUri,prompt){
         aspect_ratio:state.aspect
     };
 
-    let lastError = null;
-    for(let attempt = 0; attempt < 5; attempt++){
-        if(state.stopRequested) throw new Error('Arrêt demandé');
-
-        if(attempt > 0){
-            const wait = [30, 60, 90, 120][Math.min(attempt-1, 3)];
+    let lastError=null;
+    for(let attempt=0;attempt<5;attempt++){
+        if(state.stopRequested)throw new Error('Arrêt demandé');
+        if(attempt>0){
+            const wait=[30,60,90,120][Math.min(attempt-1,3)];
             log('Retry #'+attempt+' dans '+wait+'s…');
             setStatus('File d\'attente Agnes pleine… retry dans '+wait+'s');
-            await sleep(wait * 1000);
+            await sleep(wait*1000);
         }
 
         log('Envoi à Agnes Flash... (tentative '+(attempt+1)+'/5)');
         log('Body : '+JSON.stringify(body).slice(0,350));
 
-        try {
+        try{
             const res=await fetch(API_BASE+'/videos',{
                 method:'POST',
                 headers:{'Authorization':'Bearer '+getApiKey(),'Content-Type':'application/json'},
@@ -590,45 +563,39 @@ async function createVideoTask(imageDataUri,prompt){
             const responseText=await res.text();
             log('Corps : '+responseText.slice(0,500));
 
-            // 503 queue pleine → retry
-            if(res.status === 503){
-                lastError = 'HTTP 503 — queue pleine';
-                log('File d\'attente pleine → retry automatique');
-                continue;
-            }
-
-            // 429 rate limit → retry
-            if(res.status === 429){
-                lastError = 'HTTP 429 — rate limit';
-                log('Rate limit → retry automatique');
-                continue;
-            }
-
-            if(!res.ok) throw new Error('HTTP '+res.status+' — '+responseText.slice(0,200));
+            if(res.status===503){lastError='HTTP 503 — queue pleine';log('File d\'attente pleine → retry automatique');continue}
+            if(res.status===429){lastError='HTTP 429 — rate limit';log('Rate limit → retry automatique');continue}
+            if(!res.ok)throw new Error('HTTP '+res.status+' — '+responseText.slice(0,200));
 
             let data;
             try{data=JSON.parse(responseText)}catch(e){throw new Error('Réponse non-JSON')}
 
-            const videoId=data.video_id||data.id||data.task_id;
-            if(!videoId)throw new Error('Pas de video_id dans : '+JSON.stringify(data).slice(0,200));
-            log('✓ video_id : '+videoId);
+            // ⚠️ IMPORTANT : utiliser video_id (pas task_id) pour le polling
+            const videoId=data.video_id;
+
+            log('Champs disponibles : ' + Object.keys(data).join(', '));
+            log('data.video_id = '+data.video_id);
+            log('data.task_id = '+data.task_id);
+            log('data.id = '+data.id);
+
+            if(!videoId){
+                throw new Error('Champ "video_id" manquant ! Réponse : '+JSON.stringify(data).slice(0,300));
+            }
+
+            log('✓ video_id (utilisé pour polling) : '+videoId);
             return videoId;
 
-        } catch(e){
-            lastError = e.message;
-            if(e.message === 'Arrêt demandé') throw e;
+        }catch(e){
+            lastError=e.message;
+            if(e.message==='Arrêt demandé')throw e;
             log('Erreur tentative '+(attempt+1)+' : '+e.message);
-            // Si c'est une erreur de validation (400), pas la peine de retry
-            if(e.message.includes('HTTP 400')) throw e;
+            if(e.message.includes('HTTP 400'))throw e;
         }
     }
-
     throw new Error('Échec après 5 tentatives. Dernière erreur : '+lastError);
 }
 
-// ══════════════════════════════════════════════════════════════════
 // POLLING
-// ══════════════════════════════════════════════════════════════════
 async function pollVideo(videoId,onProgress){
     log('Polling démarré pour : '+videoId);
     for(let attempt=0;attempt<MAX_POLL_ATTEMPTS;attempt++){
@@ -641,39 +608,30 @@ async function pollVideo(videoId,onProgress){
                 await sleep(1000);r--;
             }
         }
-
         const url=POLL_BASE+'?video_id='+encodeURIComponent(videoId)+'&model_name='+encodeURIComponent(MODEL_VIDEO);
         log('Polling #'+attempt);
-
         let res,responseText;
         try{
             res=await fetch(url,{method:'GET',headers:{'Authorization':'Bearer '+getApiKey()}});
             responseText=await res.text();
         }catch(e){log('Polling erreur réseau : '+e.message);continue}
-
         log('Polling HTTP '+res.status);
         log('Polling corps : '+responseText.slice(0,300));
-
         if(res.status===429||res.status===503){
             log('Rate limit → attente 30s');
             await sleep(30000);continue;
         }
-
         let d;
         try{d=JSON.parse(responseText)}catch(e){log('Polling : non-JSON');continue}
-
         const status=(d.status||d.internal_status||'unknown').toLowerCase();
         const progress=d.progress||d.internal_progress||0;
         const completedAt=d.completed_at;
-
         onProgress('Création… — '+progress+'%');
-
         const isCompleted=(
             (completedAt!==null&&completedAt!==undefined)||
             progress>=100||
             ['completed','succeeded','done','success','finished'].includes(status)
         );
-
         if(isCompleted){
             let videoUrl=null;
             if(d.metadata&&d.metadata.url)videoUrl=d.metadata.url;
