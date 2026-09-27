@@ -71,6 +71,7 @@
     .api-hint { font-size: 0.72rem; color: var(--ink-dim); margin-top: 0.4rem; margin-bottom: 0.8rem; }
     .api-hint a { color: var(--accent); text-decoration: underline; }
     .api-sep { height: 1px; background: var(--border); margin: 0.8rem 0; }
+    .control-label { display: block; font-size: 0.72rem; color: var(--ink-dim); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
     .stat-line { font-size: 0.72rem; color: var(--ink-dim); padding: 0.4rem 0.6rem; background: var(--panel-2); border-radius: 6px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.3rem; }
     .wake-status { font-size: 0.72rem; padding: 0.5rem 0.7rem; border-radius: 6px; margin-top: 0.4rem; display: flex; justify-content: space-between; align-items: center; background: #1a1a2a; color: #8ab0ff; flex-wrap: wrap; gap: 0.4rem; }
     .wake-status.active { background: #1a3a1a; color: #6ad46a; }
@@ -104,7 +105,6 @@
     .no-style-card { grid-column: 1 / -1; padding: 0.8rem 1rem; border-radius: 8px; border: 2px dashed var(--border); text-align: center; cursor: pointer; font-size: 0.82rem; color: var(--ink-dim); }
     .no-style-card.selected { border-color: var(--accent); border-style: solid; background: var(--panel-2); color: var(--ink); font-weight: 600; }
     .control-row { margin-bottom: 0.9rem; }
-    .control-label { display: block; font-size: 0.72rem; color: var(--ink-dim); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
     select { width: 100%; padding: 0.7rem 0.9rem; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2); color: var(--ink); font-family: inherit; font-size: 0.88rem; -webkit-appearance: none; appearance: none; }
     .btn-primary { width: 100%; padding: 1.1rem; border-radius: var(--radius); border: none; background: var(--accent); color: #fff; font-size: 1rem; font-weight: 700; font-family: inherit; cursor: pointer; margin-bottom: 1rem; }
     .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
@@ -191,41 +191,23 @@
 
 <div class="api-panel" id="api-panel">
     <label class="control-label">🔑 Clé API Agnes</label>
-    <input type="password" class="api-key-input" id="api-key-input"
-           placeholder="Collez votre clé API Agnes ici (sk-...)" autocomplete="off" spellcheck="false">
+    <input type="password" class="api-key-input" id="api-key-input" placeholder="Collez votre clé API Agnes ici (sk-...)" autocomplete="off" spellcheck="false">
     <button type="button" class="api-save-btn" id="api-save-btn">Enregistrer la clé Agnes</button>
-    <div class="api-status-line" id="api-status-line">
-        <span class="status-dot"></span>
-        <span id="api-status-text">Aucune clé API enregistrée</span>
-    </div>
-    <div class="api-hint">
-        Clé sur <a href="https://platform.agnes-ai.com" target="_blank">platform.agnes-ai.com</a> → Settings → API Keys
-    </div>
+    <div class="api-status-line" id="api-status-line"><span class="status-dot"></span><span id="api-status-text">Aucune clé API enregistrée</span></div>
+    <div class="api-hint">Clé sur <a href="https://platform.agnes-ai.com" target="_blank">platform.agnes-ai.com</a> → Settings → API Keys</div>
 
     <div class="api-sep"></div>
 
-    <label class="control-label">🖼️ Clé API imgbb (pour héberger les images)</label>
-    <input type="password" class="api-key-input" id="imgbb-key-input"
-           placeholder="Collez votre clé imgbb (32 caractères)" autocomplete="off" spellcheck="false">
+    <label class="control-label">🖼️ Clé API imgbb (hébergement images)</label>
+    <input type="password" class="api-key-input" id="imgbb-key-input" placeholder="Collez votre clé imgbb (32 caractères)" autocomplete="off" spellcheck="false">
     <button type="button" class="api-save-btn green" id="imgbb-save-btn">Enregistrer la clé imgbb</button>
-    <div class="api-status-line" id="imgbb-status-line">
-        <span class="status-dot"></span>
-        <span id="imgbb-status-text">Aucune clé imgbb</span>
-    </div>
-    <div class="api-hint">
-        Clé gratuite sur <a href="https://api.imgbb.com/" target="_blank">api.imgbb.com</a> → Get API key
-    </div>
+    <div class="api-status-line" id="imgbb-status-line"><span class="status-dot"></span><span id="imgbb-status-text">Aucune clé imgbb</span></div>
+    <div class="api-hint">Clé gratuite sur <a href="https://api.imgbb.com/" target="_blank">api.imgbb.com</a> → Get API key</div>
 
     <div class="api-sep"></div>
 
-    <div class="stat-line">
-        <span>📊 Vitesse : <span id="stat-speed">en attente</span></span>
-        <span id="stat-samples">0 génération</span>
-    </div>
-    <div class="wake-status" id="wake-status">
-        <span id="wake-status-text">💤 Veille auto</span>
-        <button type="button" id="wake-toggle-btn">Garder l'écran allumé</button>
-    </div>
+    <div class="stat-line"><span>📊 Vitesse : <span id="stat-speed">en attente</span></span><span id="stat-samples">0 génération</span></div>
+    <div class="wake-status" id="wake-status"><span id="wake-status-text">💤 Veille auto</span><button type="button" id="wake-toggle-btn">Garder l'écran allumé</button></div>
 </div>
 
 <div class="upload-zone" id="upload-zone">
@@ -364,13 +346,13 @@ const CREATE_INTERVAL_MAX = 90000;
 const CREATE_INTERVAL_SAFE = 75000;
 const POLL_INTERVAL_SEC = 8;
 const MAX_POLL_ATTEMPTS = 100;
-const TIMING_CACHE_KEY = 'agnes_timing_v10';
-const API_KEY_STORAGE = 'agnes_api_key_v10';
-const IMGBB_KEY_STORAGE = 'agnes_imgbb_key';
-const THEME_STORAGE = 'agnes_theme_v10';
-const FAV_STORAGE = 'agnes_favorites_v10';
-const HISTORY_STORAGE = 'agnes_history_v10';
-const WAKE_LOCK_PREF = 'agnes_wakelock_v10';
+const TIMING_CACHE_KEY = 'agnes_timing_v20';
+const API_KEY_STORAGE = 'agnes_api_key_v20';
+const IMGBB_KEY_STORAGE = 'agnes_imgbb_key_v20';
+const THEME_STORAGE = 'agnes_theme_v20';
+const FAV_STORAGE = 'agnes_favorites_v20';
+const HISTORY_STORAGE = 'agnes_history_v20';
+const WAKE_LOCK_PREF = 'agnes_wakelock_v20';
 const MAX_VISIBLE_QUEUE = 30;
 const MAX_IMAGE_SIZE = 12 * 1024 * 1024;
 const THUMBNAIL_MAX_WIDTH = 200;
@@ -835,7 +817,6 @@ function updateTimingDisplay() { const cache = loadTimingCache(); const all = Ob
 // CLÉS API
 function getApiKey() { try { return (localStorage.getItem(API_KEY_STORAGE) || '').trim(); } catch (e) { return ''; } }
 function getImgbbKey() { try { return (localStorage.getItem(IMGBB_KEY_STORAGE) || '').trim(); } catch (e) { return ''; } }
-
 function saveApiKey() {
     const input = document.getElementById('api-key-input');
     if (!input) return;
@@ -852,18 +833,17 @@ function saveImgbbKey() {
     try { localStorage.setItem(IMGBB_KEY_STORAGE, key); updateApiPanel(); showToast('Clé imgbb enregistrée ✓', 'success'); input.blur(); } catch (e) { showToast('Erreur', 'error'); }
 }
 function updateApiPanel() {
-    const panel = document.getElementById('api-panel');
-    const input = document.getElementById('api-key-input');
     const statusLine = document.getElementById('api-status-line');
     const statusText = document.getElementById('api-status-text');
     const imgInput = document.getElementById('imgbb-key-input');
     const imgLine = document.getElementById('imgbb-status-line');
     const imgText = document.getElementById('imgbb-status-text');
+    const input = document.getElementById('api-key-input');
     const key = getApiKey();
     const imgbbKey = getImgbbKey();
-    if (panel && input && statusLine && statusText) {
-        if (key) { panel.classList.add('ok'); statusLine.classList.add('ok'); statusText.textContent = 'Clé Agnes active · ' + key.slice(0, 8) + '…' + key.slice(-4); input.value = key; input.placeholder = ''; }
-        else { panel.classList.remove('ok'); statusLine.classList.remove('ok'); statusText.textContent = 'Aucune clé API enregistrée'; input.value = ''; input.placeholder = 'Collez votre clé API Agnes ici (sk-...)'; }
+    if (input && statusLine && statusText) {
+        if (key) { statusLine.classList.add('ok'); statusText.textContent = 'Clé Agnes active · ' + key.slice(0, 8) + '…' + key.slice(-4); input.value = key; input.placeholder = ''; }
+        else { statusLine.classList.remove('ok'); statusText.textContent = 'Aucune clé API enregistrée'; input.value = ''; input.placeholder = 'Collez votre clé API Agnes ici (sk-...)'; }
     }
     if (imgInput && imgLine && imgText) {
         if (imgbbKey) { imgLine.classList.add('ok'); imgText.textContent = 'Clé imgbb active · ' + imgbbKey.slice(0, 6) + '…'; imgInput.value = imgbbKey; imgInput.placeholder = ''; }
@@ -1027,7 +1007,7 @@ function buildPrompt() {
 // UPLOAD IMGBB
 async function uploadToImgbb(dataUri) {
     const key = getImgbbKey();
-    if (!key) throw new Error('Clé imgbb manquante — colle-la en haut de l\'app');
+    if (!key) throw new Error('Clé imgbb manquante');
     log('Upload de l\'image vers imgbb…');
     const res = await fetch(dataUri);
     const blob = await res.blob();
@@ -1041,40 +1021,7 @@ async function uploadToImgbb(dataUri) {
     return uploadData.data.url;
 }
 
-// API AGNES
-async function apiFetch(url, options = {}, label = 'API') {
-    for (let attempt = 0; attempt < 7; attempt++) {
-        if (state.stopRequested) throw new Error('Arrêt demandé');
-        try {
-            const res = await fetch(url, options);
-            if (res.status === 429) {
-                state.creationAttemptsSinceLastError = 0;
-                if (createIntervalMs < CREATE_INTERVAL_SAFE) createIntervalMs = Math.min(createIntervalMs + 8000, CREATE_INTERVAL_MAX);
-                const wait = [15, 30, 45, 60, 90, 120, 180][Math.min(attempt, 6)];
-                setStatus('IA se prépare… (' + wait + 's)');
-                await sleep(wait * 1000);
-                continue;
-            }
-            if (res.status === 503) {
-                const wait = [5, 10, 15, 20, 30, 45][Math.min(attempt, 5)];
-                setStatus('Vidéo en préparation… (' + wait + 's)');
-                await sleep(wait * 1000);
-                continue;
-            }
-            if (res.ok && createIntervalMs > CREATE_INTERVAL_MIN) {
-                state.creationAttemptsSinceLastError++;
-                if (state.creationAttemptsSinceLastError >= 3) { createIntervalMs = Math.max(createIntervalMs - 4000, CREATE_INTERVAL_MIN); state.creationAttemptsSinceLastError = 0; }
-            }
-            return res;
-        } catch (e) {
-            if (e.message === 'Arrêt demandé') throw e;
-            const wait = [3, 5, 8, 12, 20, 30][Math.min(attempt, 5)];
-            setStatus('Connexion… (' + wait + 's)');
-            await sleep(wait * 1000);
-        }
-    }
-    return fetch(url, options);
-}
+// CREATE VIDEO TASK — AVEC DEBUG COMPLET
 async function createVideoTask(imageDataUri, prompt) {
     log('--- createVideoTask démarré ---');
     const imageUrl = await uploadToImgbb(imageDataUri);
@@ -1088,7 +1035,6 @@ async function createVideoTask(imageDataUri, prompt) {
     };
 
     log('Envoi à Agnes...');
-    log('URL image : ' + imageUrl);
     log('Body : ' + JSON.stringify(body).slice(0, 300));
 
     const res = await fetch(API_BASE + '/videos', {
@@ -1101,7 +1047,6 @@ async function createVideoTask(imageDataUri, prompt) {
     });
 
     log('Réponse Agnes : HTTP ' + res.status);
-
     const responseText = await res.text();
     log('Corps : ' + responseText.slice(0, 500));
 
@@ -1110,11 +1055,7 @@ async function createVideoTask(imageDataUri, prompt) {
     }
 
     let data;
-    try {
-        data = JSON.parse(responseText);
-    } catch (e) {
-        throw new Error('Réponse non-JSON : ' + responseText.slice(0, 200));
-    }
+    try { data = JSON.parse(responseText); } catch (e) { throw new Error('Réponse non-JSON'); }
 
     const videoId = data.video_id || data.id || data.task_id;
     if (!videoId) throw new Error('Pas de video_id dans : ' + JSON.stringify(data).slice(0, 200));
@@ -1122,7 +1063,8 @@ async function createVideoTask(imageDataUri, prompt) {
     log('✓ video_id : ' + videoId);
     return videoId;
 }
-}
+
+// POLLING
 async function pollVideo(videoId, onProgress) {
     const estimatedMs = estimateGenerationTime(state.durationFrames);
     const estimatedSec = estimatedMs / 1000;
@@ -1132,7 +1074,7 @@ async function pollVideo(videoId, onProgress) {
         if (state.stopRequested) throw new Error('Arrêt demandé');
         if (attempt > 0) { let r = POLL_INTERVAL_SEC; while (r > 0) { if (state.stopRequested) throw new Error('Arrêt demandé'); onProgress('L\'image prend vie… — ' + r + 's'); await sleep(1000); r--; } }
         const url = POLL_BASE + '?video_id=' + encodeURIComponent(videoId) + '&model_name=' + encodeURIComponent(MODEL_VIDEO);
-        const res = await apiFetch(url, { method: 'GET', headers: { 'Authorization': 'Bearer ' + getApiKey() } }, 'Polling');
+        const res = await fetch(url, { method: 'GET', headers: { 'Authorization': 'Bearer ' + getApiKey() } });
         const d = await res.json();
         const status = d.status || 'unknown';
         const progress = d.progress || 0;
@@ -1220,19 +1162,17 @@ async function startGeneration() {
     renderQueue(); updateGenerateBtn();
     const totalStart = Date.now();
     const pollingTasks = [];
-    try {
-        for (let i = 0; i < state.queue.length; i++) {
-            if (state.stopRequested) break;
-            const item = state.queue[i];
-            try { await createTaskOnly(item); pollingTasks.push(pollTaskAndDisplay(item)); }
-            catch (e) { if (e.message === 'Arrêt demandé') break; log('[Image ' + (i + 1) + '] Échec création : ' + e.message); item.status = 'failed'; item.progress = 'Échec'; state.failed++; renderQueue(); updateGenerateBtn(); }
-            if (i < state.queue.length - 1 && !state.stopRequested) {
-                const waitSec = Math.ceil(createIntervalMs / 1000);
-                for (let r = waitSec; r > 0; r--) { if (state.stopRequested) break; setStatus('Respiration… — Image ' + (i + 2) + '/' + state.queue.length + ' dans ' + r + 's'); await sleep(1000); }
-            }
+    for (let i = 0; i < state.queue.length; i++) {
+        if (state.stopRequested) break;
+        const item = state.queue[i];
+        try { await createTaskOnly(item); pollingTasks.push(pollTaskAndDisplay(item)); }
+        catch (e) { if (e.message === 'Arrêt demandé') break; log('[Image ' + (i + 1) + '] Échec création : ' + e.message); item.status = 'failed'; item.progress = 'Échec'; state.failed++; renderQueue(); updateGenerateBtn(); }
+        if (i < state.queue.length - 1 && !state.stopRequested) {
+            const waitSec = Math.ceil(createIntervalMs / 1000);
+            for (let r = waitSec; r > 0; r--) { if (state.stopRequested) break; setStatus('Respiration… — Image ' + (i + 2) + '/' + state.queue.length + ' dans ' + r + 's'); await sleep(1000); }
         }
-        if (pollingTasks.length > 0) { setStatus('Finalisation…'); await Promise.allSettled(pollingTasks); }
-    } catch (e) { log('Erreur globale : ' + e.message); }
+    }
+    if (pollingTasks.length > 0) { setStatus('Finalisation…'); await Promise.allSettled(pollingTasks); }
     const totalElapsed = (Date.now() - totalStart) / 1000;
     const theme = THEMES[state.theme];
     const summary = state.stopRequested ? 'Arrêté — ' + state.completed + '/' + state.queue.length : theme.emoji + ' ' + state.completed + '/' + state.queue.length + ' créées en ' + formatEta(totalElapsed);
@@ -1346,7 +1286,7 @@ function bindEditEvents() {
     try { const savedTheme = localStorage.getItem(THEME_STORAGE); if (savedTheme && THEMES[savedTheme]) state.theme = savedTheme; } catch (e) {}
     updateApiPanel(); updateTimingDisplay(); updateWakeStatus(); renderCategoryChips(); renderFavorites(); renderHistory();
     setTheme(state.theme); renderImages(); renderQueue(); updateGenerateBtn();
-    log('Studio IA Agnes + imgbb prêt — ' + Object.keys(THEMES).length + ' thèmes');
+    log('Studio IA prêt — ' + Object.keys(THEMES).length + ' thèmes · debug activé');
 })();
 </script>
 
