@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Studio IA — Replicate + imgbb · 52 thèmes</title>
+<title>Studio IA — Agnes · 52 thèmes</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -60,7 +60,8 @@
     .section.open .section-body { max-height: 8000px; }
     .section-content { padding: 0 1.1rem 1.1rem; }
     .api-panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.2rem; margin-bottom: 1rem; }
-    .api-key-input { width: 100%; padding: 0.85rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2); color: var(--ink); font-family: ui-monospace, monospace; font-size: 0.8rem; margin-bottom: 0.6rem; }
+    .api-panel.ok { border-color: var(--success); }
+    .api-key-input { width: 100%; padding: 0.85rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2); color: var(--ink); font-family: ui-monospace, monospace; font-size: 0.85rem; margin-bottom: 0.6rem; }
     .api-key-input:focus { outline: none; border-color: var(--accent); }
     .api-save-btn { width: 100%; padding: 0.8rem; border-radius: 8px; border: none; background: var(--accent); color: #fff; font-size: 0.9rem; font-weight: 700; font-family: inherit; cursor: pointer; margin-bottom: 0.6rem; }
     .api-status-line { font-size: 0.75rem; padding: 0.55rem 0.85rem; border-radius: 6px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; background: var(--panel-2); color: var(--ink-dim); }
@@ -69,8 +70,7 @@
     .api-status-line.ok .status-dot { background: var(--success); }
     .api-hint { font-size: 0.72rem; color: var(--ink-dim); margin-top: 0.4rem; }
     .api-hint a { color: var(--accent); text-decoration: underline; }
-    .api-section-label { font-size: 0.68rem; font-weight: 700; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem; margin-top: 0.8rem; }
-    .api-section-label:first-child { margin-top: 0; }
+    .stat-line { font-size: 0.72rem; color: var(--ink-dim); margin-top: 0.5rem; padding: 0.4rem 0.6rem; background: var(--panel-2); border-radius: 6px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.3rem; }
     .wake-status { font-size: 0.72rem; padding: 0.5rem 0.7rem; border-radius: 6px; margin-top: 0.4rem; display: flex; justify-content: space-between; align-items: center; background: #1a1a2a; color: #8ab0ff; flex-wrap: wrap; gap: 0.4rem; }
     .wake-status.active { background: #1a3a1a; color: #6ad46a; }
     .wake-status.warn { background: #3a2a1a; color: #ffb84a; }
@@ -173,7 +173,7 @@
 
 <header>
     <h1>Studio IA Universel</h1>
-    <p class="subtitle">52 thèmes · Replicate + imgbb</p>
+    <p class="subtitle">52 thèmes · Agnes API</p>
 </header>
 
 <div class="theme-filter">
@@ -182,7 +182,6 @@
 </div>
 
 <div class="fav-bar" id="fav-bar"></div>
-
 <div class="theme-grid" id="theme-grid"></div>
 
 <div class="theme-banner" id="theme-banner">
@@ -190,28 +189,20 @@
 </div>
 
 <div class="api-panel" id="api-panel">
-    <div class="api-section-label">🔑 Token Replicate</div>
-    <input type="password" class="api-key-input" id="rep-token-input" placeholder="r8_..." autocomplete="off" spellcheck="false">
-    <button type="button" class="api-save-btn" id="rep-save-btn">Enregistrer le token Replicate</button>
-    <div class="api-status-line" id="rep-status-line">
+    <input type="password" class="api-key-input" id="api-key-input"
+           placeholder="Collez votre clé API Agnes ici (sk-...)" autocomplete="off" spellcheck="false">
+    <button type="button" class="api-save-btn" id="api-save-btn">Enregistrer la clé</button>
+    <div class="api-status-line" id="api-status-line">
         <span class="status-dot"></span>
-        <span id="rep-status-text">Aucun token Replicate</span>
+        <span id="api-status-text">Aucune clé API enregistrée</span>
     </div>
     <div class="api-hint">
-        <a href="https://replicate.com/account/api-tokens" target="_blank">replicate.com/account/api-tokens</a> · 5$ offerts
+        Clé sur <a href="https://platform.agnes-ai.com" target="_blank">platform.agnes-ai.com</a> → Settings → API Keys
     </div>
-
-    <div class="api-section-label">🖼️ Clé API imgbb (gratuite)</div>
-    <input type="password" class="api-key-input" id="imgbb-key-input" placeholder="32 caractères" autocomplete="off" spellcheck="false">
-    <button type="button" class="api-save-btn" id="imgbb-save-btn">Enregistrer la clé imgbb</button>
-    <div class="api-status-line" id="imgbb-status-line">
-        <span class="status-dot"></span>
-        <span id="imgbb-status-text">Aucune clé imgbb</span>
+    <div class="stat-line">
+        <span>📊 Vitesse : <span id="stat-speed">en attente</span></span>
+        <span id="stat-samples">0 génération</span>
     </div>
-    <div class="api-hint">
-        <a href="https://api.imgbb.com/" target="_blank">api.imgbb.com</a> → Get API key (30 sec, gratuit)
-    </div>
-
     <div class="wake-status" id="wake-status">
         <span id="wake-status-text">💤 Veille auto</span>
         <button type="button" id="wake-toggle-btn">Garder l'écran allumé</button>
@@ -260,11 +251,11 @@
     <div class="section-body">
         <div class="section-content">
             <div class="control-row">
-                <label class="control-label">Modèle IA</label>
-                <select id="model-select">
-                    <option value="wan-video/wan-2.2-i2v-fast" selected>Wan 2.2 Fast (~0,05 $)</option>
-                    <option value="kwaivgi/kling-v2.1">Kling v2.1 (~0,15 $)</option>
-                    <option value="bytedance/seedance-1-pro">Seedance 1 Pro (~0,10 $)</option>
+                <label class="control-label">Durée</label>
+                <select id="duration-select">
+                    <option value="121">5 secondes</option>
+                    <option value="153" selected>6,4 secondes (recommandé)</option>
+                    <option value="241">10 secondes</option>
                 </select>
             </div>
             <div class="control-row">
@@ -341,27 +332,26 @@
 <video id="noSleepVideo" playsinline muted loop></video>
 
 <script>
-// ══════════════════════════════════════════════════════════════════
-// CONFIGURATION
-// ══════════════════════════════════════════════════════════════════
-const REPLICATE_API = 'https://api.replicate.com/v1';
-// Proxy CORS public qui accepte les POST + Authorization
-const CORS_PROXY = 'https://studio.tcnest51.workers.dev';
-const REP_TOKEN_KEY = 'rep_token_v4';
-const IMGBB_KEY_KEY = 'imgbb_key_v4';
-const THEME_STORAGE = 'rep_theme_v4';
-const FAV_STORAGE = 'rep_favorites_v4';
-const HISTORY_STORAGE = 'rep_history_v4';
-const WAKE_LOCK_PREF = 'rep_wakelock_v4';
+const API_BASE = 'https://apihub.agnes-ai.com/v1';
+const POLL_BASE = 'https://apihub.agnes-ai.com/agnesapi';
+const MODEL_VIDEO = 'agnes-video-v2.0';
+const FRAME_RATE = 24;
+let createIntervalMs = 62000;
+const CREATE_INTERVAL_MIN = 62000;
+const CREATE_INTERVAL_MAX = 90000;
+const CREATE_INTERVAL_SAFE = 75000;
+const POLL_INTERVAL_SEC = 8;
+const MAX_POLL_ATTEMPTS = 100;
+const TIMING_CACHE_KEY = 'agnes_timing_final';
+const API_KEY_STORAGE = 'agnes_api_key_final';
+const THEME_STORAGE = 'agnes_theme_final';
+const FAV_STORAGE = 'agnes_favorites_final';
+const HISTORY_STORAGE = 'agnes_history_final';
+const WAKE_LOCK_PREF = 'agnes_wakelock_final';
+const MAX_VISIBLE_QUEUE = 30;
 const MAX_IMAGE_SIZE = 12 * 1024 * 1024;
 const THUMBNAIL_MAX_WIDTH = 200;
 const MAX_HISTORY = 200;
-const POLL_INTERVAL_MS = 5000;
-const MAX_POLL_ATTEMPTS = 180;
-
-function repUrl(path) {
-    return CORS_PROXY + path;
-}
 
 const CATEGORIES = {
     popular:  { name: 'Populaires', emoji: '🔥' },
@@ -779,7 +769,7 @@ const RANDOM_LIGHTING = ['soft diffused natural light', 'warm golden hour backli
 const INTENSITY_PRESETS = { subtle: 'very subtle movement, barely perceptible change', moderate: 'moderate movement, clear but controlled motion', strong: 'strong dynamic movement, energetic motion' };
 const FRAMING_PRESETS = { close: 'extreme close-up framing, intimate and intense', medium: 'medium shot, subject framed from waist up', wide: 'wide shot, subject framed with environment visible' };
 
-const state = { images: [], isRunning: false, stopRequested: false, queue: [], completed: 0, failed: 0, theme: 'apocalypse', selectedEffect: null, mainPrompt: '', framing: 'random', intensity: 'moderate', model: 'wan-video/wan-2.2-i2v-fast', isLoadingImages: false, filterCat: 'all', searchQuery: '' };
+const state = { images: [], isRunning: false, stopRequested: false, queue: [], completed: 0, failed: 0, theme: 'apocalypse', selectedEffect: null, mainPrompt: '', framing: 'random', intensity: 'moderate', durationFrames: 153, isLoadingImages: false, creationAttemptsSinceLastError: 0, filterCat: 'all', searchQuery: '' };
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 function log(msg) { console.log('[Studio] ' + msg); }
@@ -812,61 +802,52 @@ async function toggleWakeLock() { if (wakeLockEnabled) { wakeLockEnabled = false
 document.addEventListener('visibilitychange', async () => { if (document.visibilityState === 'visible' && wakeLockEnabled) { await activateWakeLock(); updateWakeStatus(); } });
 async function ensureWakeLockActive() { if (!wakeLockEnabled) return; if (wakeLockSentinel === null && canvasStream === null) { await activateWakeLock(); updateWakeStatus(); } }
 
-// TOKENS
-function getRepToken() { try { return (localStorage.getItem(REP_TOKEN_KEY) || '').trim(); } catch (e) { return ''; } }
-function getImgbbKey() { try { return (localStorage.getItem(IMGBB_KEY_KEY) || '').trim(); } catch (e) { return ''; } }
-function saveRepToken() {
-    const input = document.getElementById('rep-token-input');
+// CACHE TEMPS
+function loadTimingCache() { try { return JSON.parse(localStorage.getItem(TIMING_CACHE_KEY) || '{}'); } catch (e) { return {}; } }
+function saveTimingCache(c) { try { localStorage.setItem(TIMING_CACHE_KEY, JSON.stringify(c)); } catch (e) {} }
+function recordGenerationTime(numFrames, durationMs) { const cache = loadTimingCache(); const key = String(numFrames); if (!cache[key]) cache[key] = []; cache[key].push(durationMs); if (cache[key].length > 10) cache[key] = cache[key].slice(-10); saveTimingCache(cache); updateTimingDisplay(); }
+function estimateGenerationTime(numFrames) { const cache = loadTimingCache(); const samples = cache[String(numFrames)]; if (samples && samples.length > 0) { const sorted = [...samples].sort((a, b) => a - b); const mid = Math.floor(sorted.length / 2); return sorted.length % 2 === 0 ? (sorted[mid-1] + sorted[mid]) / 2 : sorted[mid]; } return 30000 + numFrames * 500; }
+function updateTimingDisplay() { const cache = loadTimingCache(); const all = Object.values(cache).flat(); const speedEl = document.getElementById('stat-speed'); const samplesEl = document.getElementById('stat-samples'); if (!speedEl || !samplesEl) return; if (all.length === 0) { speedEl.textContent = 'en attente'; samplesEl.textContent = '0 génération'; return; } const avg = all.reduce((a, b) => a + b, 0) / all.length; speedEl.textContent = (avg / 1000).toFixed(1) + ' s'; samplesEl.textContent = all.length + ' génération' + (all.length > 1 ? 's' : ''); }
+
+// CLÉ API
+function getApiKey() { try { return (localStorage.getItem(API_KEY_STORAGE) || '').trim(); } catch (e) { return ''; } }
+function saveApiKey() {
+    const input = document.getElementById('api-key-input');
+    if (!input) return;
     const key = input.value.trim();
-    if (!key) { try { localStorage.removeItem(REP_TOKEN_KEY); } catch (e) {} updateApiPanel(); showToast('Token Replicate supprimé', 'warn'); return; }
-    if (!key.startsWith('r8_')) { if (!confirm('Le token ne commence pas par "r8_". Sauvegarder ?')) return; }
-    try { localStorage.setItem(REP_TOKEN_KEY, key); updateApiPanel(); showToast('Token Replicate enregistré ✓', 'success'); input.blur(); } catch (e) { showToast('Erreur', 'error'); }
-}
-function saveImgbbKey() {
-    const input = document.getElementById('imgbb-key-input');
-    const key = input.value.trim();
-    if (!key) { try { localStorage.removeItem(IMGBB_KEY_KEY); } catch (e) {} updateApiPanel(); showToast('Clé imgbb supprimée', 'warn'); return; }
-    try { localStorage.setItem(IMGBB_KEY_KEY, key); updateApiPanel(); showToast('Clé imgbb enregistrée ✓', 'success'); input.blur(); } catch (e) { showToast('Erreur', 'error'); }
+    if (!key) { try { localStorage.removeItem(API_KEY_STORAGE); } catch (e) {} updateApiPanel(); showToast('Clé supprimée', 'warn'); return; }
+    if (!key.startsWith('sk-')) { if (!confirm('La clé ne commence pas par "sk-". Sauvegarder ?')) return; }
+    try { localStorage.setItem(API_KEY_STORAGE, key); updateApiPanel(); showToast('Clé API enregistrée ✓', 'success'); input.blur(); } catch (e) { showToast('Erreur', 'error'); }
 }
 function updateApiPanel() {
-    const repToken = getRepToken();
-    const imgbbKey = getImgbbKey();
-    const repStatusLine = document.getElementById('rep-status-line');
-    const repStatusText = document.getElementById('rep-status-text');
-    const repInput = document.getElementById('rep-token-input');
-    const imgStatusLine = document.getElementById('imgbb-status-line');
-    const imgStatusText = document.getElementById('imgbb-status-text');
-    const imgInput = document.getElementById('imgbb-key-input');
-    if (repToken) { repStatusLine.classList.add('ok'); repStatusText.textContent = 'Token actif · ' + repToken.slice(0, 8) + '…'; repInput.value = repToken; }
-    else { repStatusLine.classList.remove('ok'); repStatusText.textContent = 'Aucun token Replicate'; repInput.value = ''; }
-    if (imgbbKey) { imgStatusLine.classList.add('ok'); imgStatusText.textContent = 'Clé active · ' + imgbbKey.slice(0, 6) + '…'; imgInput.value = imgbbKey; }
-    else { imgStatusLine.classList.remove('ok'); imgStatusText.textContent = 'Aucune clé imgbb'; imgInput.value = ''; }
+    const panel = document.getElementById('api-panel');
+    const input = document.getElementById('api-key-input');
+    const statusLine = document.getElementById('api-status-line');
+    const statusText = document.getElementById('api-status-text');
+    const key = getApiKey();
+    if (!panel || !input || !statusLine || !statusText) return;
+    if (key) { panel.classList.add('ok'); statusLine.classList.add('ok'); statusText.textContent = 'Clé API active · ' + key.slice(0, 8) + '…' + key.slice(-4); input.value = key; input.placeholder = ''; }
+    else { panel.classList.remove('ok'); statusLine.classList.remove('ok'); statusText.textContent = 'Aucune clé API enregistrée'; input.value = ''; input.placeholder = 'Collez votre clé API ici (sk-...)'; }
     updateGenerateBtn();
 }
 function updateGenerateBtn() {
     const btn = document.getElementById('generate-btn');
     if (!btn) return;
     const hasImages = state.images.length > 0;
-    const hasRep = !!getRepToken();
-    const hasImgbb = !!getImgbbKey();
+    const hasKey = !!getApiKey();
     const theme = THEMES[state.theme];
-    btn.disabled = !hasImages || !hasRep || !hasImgbb || state.isRunning || state.isLoadingImages;
+    btn.disabled = !hasImages || !hasKey || state.isRunning || state.isLoadingImages;
     if (state.isLoadingImages) btn.textContent = 'Chargement… (' + state.images.length + ')';
-    else if (state.isRunning) btn.textContent = 'Génération… (' + (state.completed + state.failed) + '/' + state.queue.length + ')';
-    else if (!hasRep) btn.textContent = 'Ajoutez votre token Replicate';
-    else if (!hasImgbb) btn.textContent = 'Ajoutez votre clé imgbb';
+    else if (state.isRunning) { const total = state.queue.length; const done = state.completed + state.failed; btn.textContent = 'Génération… (' + done + '/' + total + ')'; }
+    else if (!hasKey) btn.textContent = 'Ajoutez votre clé API';
     else if (!hasImages) btn.textContent = 'Ajoutez des photos';
     else btn.textContent = 'Générer ' + state.images.length + ' vidéo' + (state.images.length > 1 ? 's' : '') + ' ' + theme.emoji;
 }
 
 // IMAGES
-function fileToDataUri(file) { return new Promise((resolve, reject) => { const r = new FileReader(); r.onload = e => resolve(e.target.result); r.onerror = () => reject(new Error('Erreur lecture')); r.readAsDataURL(file); }); }
+function fileToDataUri(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = e => resolve(e.target.result); reader.onerror = () => reject(new Error('Erreur lecture')); reader.readAsDataURL(file); }); }
 function generateThumbnail(dataUri) { return new Promise((resolve) => { const img = new Image(); img.onload = () => { try { const canvas = document.createElement('canvas'); const ratio = img.height / img.width; canvas.width = THUMBNAIL_MAX_WIDTH; canvas.height = Math.round(THUMBNAIL_MAX_WIDTH * ratio); canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height); resolve(canvas.toDataURL('image/jpeg', 0.7)); } catch (e) { resolve(dataUri); } }; img.onerror = () => resolve(dataUri); img.src = dataUri; }); }
-async function processOneFile(file) {
-    if (!file.type.startsWith('image/')) return null;
-    if (file.size > MAX_IMAGE_SIZE) return null;
-    try { const dataUri = await fileToDataUri(file); const thumbnail = await generateThumbnail(dataUri); const img = new Image(); await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataUri; }); return { file, dataUri, thumbnail, img, id: Date.now() + Math.random() }; } catch (e) { return null; }
-}
+async function processOneFile(file) { if (!file.type.startsWith('image/')) return null; if (file.size > MAX_IMAGE_SIZE) return null; try { const dataUri = await fileToDataUri(file); const thumbnail = await generateThumbnail(dataUri); return { file, dataUri, thumbnail, id: Date.now() + Math.random() }; } catch (e) { return null; } }
 async function handleFiles(files) {
     const list = Array.from(files).filter(f => f.type.startsWith('image/'));
     if (!list.length) return;
@@ -995,61 +976,70 @@ function buildPrompt() {
     parts.push(randomItem(RANDOM_ACTIONS));
     parts.push(randomItem(RANDOM_CAMERA));
     parts.push(randomItem(RANDOM_LIGHTING));
+    parts.push('Sound design: minimal ambient textures, no music, no dialogue');
     parts.push('Portrait orientation 9:16 vertical, 24fps, no text, no watermarks');
     return parts.join('. ');
 }
 
-// UPLOAD IMGBB
-async function uploadToImgbb(dataUri) {
-    const imgbbKey = getImgbbKey();
-    if (!imgbbKey) throw new Error('Clé imgbb manquante');
-    log('Upload de l\'image vers imgbb…');
-    const res = await fetch(dataUri);
-    const blob = await res.blob();
-    const formData = new FormData();
-    formData.append('image', blob, 'input.jpg');
-    const uploadRes = await fetch('https://api.imgbb.com/1/upload?key=' + encodeURIComponent(imgbbKey), { method: 'POST', body: formData });
-    if (!uploadRes.ok) { const err = await uploadRes.text(); throw new Error('Upload imgbb échoué : HTTP ' + uploadRes.status + ' — ' + err.slice(0, 250)); }
-    const uploadData = await uploadRes.json();
-    if (!uploadData.success || !uploadData.data) throw new Error('imgbb : réponse invalide');
-    log('URL imgbb : ' + uploadData.data.url);
-    return uploadData.data.url;
+// API AGNES
+async function apiFetch(url, options = {}, label = 'API') {
+    for (let attempt = 0; attempt < 7; attempt++) {
+        if (state.stopRequested) throw new Error('Arrêt demandé');
+        try {
+            const res = await fetch(url, options);
+            if (res.status === 429) {
+                state.creationAttemptsSinceLastError = 0;
+                if (createIntervalMs < CREATE_INTERVAL_SAFE) createIntervalMs = Math.min(createIntervalMs + 8000, CREATE_INTERVAL_MAX);
+                const wait = [15, 30, 45, 60, 90, 120, 180][Math.min(attempt, 6)];
+                setStatus('IA se prépare… (' + wait + 's)');
+                await sleep(wait * 1000);
+                continue;
+            }
+            if (res.status === 503) {
+                const wait = [5, 10, 15, 20, 30, 45][Math.min(attempt, 5)];
+                setStatus('Vidéo en préparation… (' + wait + 's)');
+                await sleep(wait * 1000);
+                continue;
+            }
+            if (res.ok && createIntervalMs > CREATE_INTERVAL_MIN) {
+                state.creationAttemptsSinceLastError++;
+                if (state.creationAttemptsSinceLastError >= 3) { createIntervalMs = Math.max(createIntervalMs - 4000, CREATE_INTERVAL_MIN); state.creationAttemptsSinceLastError = 0; }
+            }
+            return res;
+        } catch (e) {
+            if (e.message === 'Arrêt demandé') throw e;
+            const wait = [3, 5, 8, 12, 20, 30][Math.min(attempt, 5)];
+            setStatus('Connexion… (' + wait + 's)');
+            await sleep(wait * 1000);
+        }
+    }
+    return fetch(url, options);
 }
-
-// REPLICATE — via proxy CORS
 async function createVideoTask(imageDataUri, prompt) {
-    const imageUrl = await uploadToImgbb(imageDataUri);
-    const body = { input: { image: imageUrl, prompt: prompt } };
-    log('Appel Replicate (via corsproxy.io)…');
-    const res = await fetch(repUrl('/v1/models/' + state.model + '/predictions'), {
-        method: 'POST',
-        headers: {
-            'Authorization': 'Bearer ' + getRepToken(),
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-    });
-    if (res.status === 401 || res.status === 403) throw new Error('Token Replicate invalide.');
-    if (res.status === 402) throw new Error('Crédits Replicate épuisés.');
-    if (res.status === 429) throw new Error('Trop de requêtes. Attendez.');
-    if (!res.ok) { const err = await res.text(); throw new Error('Replicate HTTP ' + res.status + ' — ' + err.slice(0, 300)); }
+    const body = { model: MODEL_VIDEO, prompt, image: imageDataUri, num_frames: state.durationFrames, frame_rate: FRAME_RATE };
+    const res = await apiFetch(API_BASE + '/videos', { method: 'POST', headers: { 'Authorization': 'Bearer ' + getApiKey(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) }, 'Création');
+    if (!res.ok) { const err = await res.text(); throw new Error('HTTP ' + res.status + ' — ' + err.slice(0, 200)); }
     const data = await res.json();
-    log('Prédiction créée : ' + data.id);
-    return data.id;
+    const videoId = data.video_id || data.id || data.task_id;
+    if (!videoId) throw new Error('Pas de video_id');
+    return videoId;
 }
-
-async function pollVideo(predictionId, onProgress) {
+async function pollVideo(videoId, onProgress) {
+    const estimatedMs = estimateGenerationTime(state.durationFrames);
+    const estimatedSec = estimatedMs / 1000;
+    let remaining = Math.max(20, Math.floor(estimatedSec * 0.8));
+    while (remaining > 0) { if (state.stopRequested) throw new Error('Arrêt demandé'); onProgress('Création… — ' + remaining + 's'); await sleep(1000); remaining--; }
     for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
         if (state.stopRequested) throw new Error('Arrêt demandé');
-        await sleep(POLL_INTERVAL_MS);
-        const res = await fetch(repUrl('/v1/predictions/' + predictionId), { headers: { 'Authorization': 'Bearer ' + getRepToken() } });
+        if (attempt > 0) { let r = POLL_INTERVAL_SEC; while (r > 0) { if (state.stopRequested) throw new Error('Arrêt demandé'); onProgress('L\'image prend vie… — ' + r + 's'); await sleep(1000); r--; } }
+        const url = POLL_BASE + '?video_id=' + encodeURIComponent(videoId) + '&model_name=' + encodeURIComponent(MODEL_VIDEO);
+        const res = await apiFetch(url, { method: 'GET', headers: { 'Authorization': 'Bearer ' + getApiKey() } }, 'Polling');
         const d = await res.json();
         const status = d.status || 'unknown';
-        const elapsed = Math.round((attempt + 1) * POLL_INTERVAL_MS / 1000);
-        onProgress('Génération… ' + elapsed + 's');
-        if (status === 'succeeded') { const videoUrl = d.output; if (!videoUrl) throw new Error('Terminé mais pas d\'URL'); return typeof videoUrl === 'string' ? videoUrl : (Array.isArray(videoUrl) ? videoUrl[0] : videoUrl.url); }
-        if (status === 'failed') throw new Error('Échec : ' + (d.error || 'erreur'));
-        if (status === 'canceled') throw new Error('Annulé');
+        const progress = d.progress || 0;
+        onProgress('Création… — ' + progress + '%');
+        if (status === 'completed' || status === 'succeeded' || status === 'done') { const videoUrl = (d.metadata && d.metadata.url) || d.url || (d.output && d.output.url); if (!videoUrl) throw new Error('Terminé mais pas d\'URL'); return videoUrl; }
+        if (status === 'failed' || status === 'error' || status === 'cancelled') throw new Error('Échec (' + status + ')');
     }
     throw new Error('Délai maximal dépassé');
 }
@@ -1061,12 +1051,15 @@ function renderQueue() {
     queueEl.style.display = 'block';
     const total = state.queue.length;
     const done = state.completed + state.failed;
-    let html = '<div class="queue-summary"><span>Progression : ' + done + '/' + total + '</span><span>' + (done < total ? 'En cours…' : 'Terminé') + '</span></div>';
+    const inProgress = state.queue.filter(q => q.status === 'processing').length;
+    const pending = total - done - inProgress;
+    const estGen = estimateGenerationTime(state.durationFrames) / 1000;
+    const eta = pending > 0 ? (pending * (createIntervalMs / 1000)) + estGen : (inProgress * estGen / Math.max(inProgress, 1));
+    let html = '<div class="queue-summary"><span>Progression : ' + done + '/' + total + '</span><span>' + (done < total ? '≈ ' + formatEta(eta) + ' restant' : 'Terminé') + '</span></div>';
     const theme = THEMES[state.theme];
-    html += state.queue.slice(0, 30).map(item => {
+    html += state.queue.slice(0, MAX_VISIBLE_QUEUE).map(item => {
         let icon = '○', statusText = 'En attente', cls = 'pending';
-        if (item.status === 'uploading') { icon = '⬆️'; statusText = 'Upload…'; cls = 'processing'; }
-        else if (item.status === 'creating') { icon = '◐'; statusText = 'Création…'; cls = 'processing'; }
+        if (item.status === 'creating') { icon = '◐'; statusText = 'Préparation…'; cls = 'processing'; }
         else if (item.status === 'processing') { icon = theme.emoji; statusText = item.progress || 'En cours…'; cls = 'processing'; }
         else if (item.status === 'done') { icon = '●'; statusText = 'Terminé'; cls = 'done'; }
         else if (item.status === 'failed') { icon = '✕'; statusText = 'Échec'; cls = 'failed'; }
@@ -1088,16 +1081,18 @@ function addToGallery(videoUrl, label) {
 
 // PIPELINE
 async function createTaskOnly(item) {
-    item.status = 'uploading'; item.progress = 'Upload…'; renderQueue();
+    item.status = 'creating'; item.progress = 'Préparation…'; renderQueue();
     const prompt = buildPrompt(); item.prompt = prompt;
-    const predictionId = await createVideoTask(item.image.dataUri, prompt);
-    item.predictionId = predictionId; item.startTime = Date.now();
+    const videoId = await createVideoTask(item.image.dataUri, prompt);
+    item.videoId = videoId; item.startTime = Date.now();
     item.status = 'processing'; item.progress = 'En cours…'; renderQueue();
-    return predictionId;
+    return videoId;
 }
 async function pollTaskAndDisplay(item) {
     try {
-        const videoUrl = await pollVideo(item.predictionId, (prog) => { item.progress = prog; renderQueue(); });
+        const videoUrl = await pollVideo(item.videoId, (prog) => { item.progress = prog; renderQueue(); });
+        const elapsed = Date.now() - item.startTime;
+        recordGenerationTime(state.durationFrames, elapsed);
         item.status = 'done'; item.videoUrl = videoUrl; item.progress = 'Terminé'; state.completed++;
         renderQueue(); updateGenerateBtn();
         addToGallery(videoUrl, 'Vidéo ' + (item.imageIndex + 1));
@@ -1110,12 +1105,12 @@ async function pollTaskAndDisplay(item) {
 }
 async function startGeneration() {
     if (state.isRunning || !state.images.length) return;
-    if (!getRepToken()) { showToast('Ajoutez votre token Replicate', 'error'); document.getElementById('rep-token-input').focus(); return; }
-    if (!getImgbbKey()) { showToast('Ajoutez votre clé imgbb', 'error'); document.getElementById('imgbb-key-input').focus(); return; }
+    if (!getApiKey()) { showToast('Ajoutez votre clé API', 'error'); document.getElementById('api-key-input').focus(); return; }
     state.mainPrompt = document.getElementById('main-prompt').value.trim();
     if (!state.mainPrompt && !state.selectedEffect) { if (!confirm('Ni prompt ni style. Continuer ?')) return; }
-    state.isRunning = true; state.stopRequested = false; state.completed = 0; state.failed = 0;
-    state.queue = state.images.map((img, i) => ({ imageIndex: i, image: img, status: 'pending', progress: null, predictionId: null, videoUrl: null, prompt: null, startTime: null }));
+    state.isRunning = true; state.stopRequested = false; state.completed = 0; state.failed = 0; state.creationAttemptsSinceLastError = 0;
+    createIntervalMs = CREATE_INTERVAL_MIN;
+    state.queue = state.images.map((img, i) => ({ imageIndex: i, image: img, status: 'pending', progress: null, videoId: null, videoUrl: null, prompt: null, startTime: null }));
     document.getElementById('gallery-grid').innerHTML = '';
     document.getElementById('gallery').style.display = 'none';
     document.getElementById('stop-btn').classList.add('visible');
@@ -1124,16 +1119,19 @@ async function startGeneration() {
     renderQueue(); updateGenerateBtn();
     const totalStart = Date.now();
     const pollingTasks = [];
-    for (let i = 0; i < state.queue.length; i++) {
-        if (state.stopRequested) break;
-        const item = state.queue[i];
-        try { await createTaskOnly(item); pollingTasks.push(pollTaskAndDisplay(item)); }
-        catch (e) { if (e.message === 'Arrêt demandé') break; log('[Image ' + (i + 1) + '] Échec création : ' + e.message); item.status = 'failed'; item.progress = 'Échec'; state.failed++; renderQueue(); updateGenerateBtn(); }
-        if (i < state.queue.length - 1 && !state.stopRequested) {
-            for (let r = 3; r > 0; r--) { if (state.stopRequested) break; setStatus('Respiration… Image ' + (i + 2) + '/' + state.queue.length + ' dans ' + r + 's'); await sleep(1000); }
+    try {
+        for (let i = 0; i < state.queue.length; i++) {
+            if (state.stopRequested) break;
+            const item = state.queue[i];
+            try { await createTaskOnly(item); pollingTasks.push(pollTaskAndDisplay(item)); }
+            catch (e) { if (e.message === 'Arrêt demandé') break; log('[Image ' + (i + 1) + '] Échec création : ' + e.message); item.status = 'failed'; item.progress = 'Échec'; state.failed++; renderQueue(); updateGenerateBtn(); }
+            if (i < state.queue.length - 1 && !state.stopRequested) {
+                const waitSec = Math.ceil(createIntervalMs / 1000);
+                for (let r = waitSec; r > 0; r--) { if (state.stopRequested) break; setStatus('Respiration… — Image ' + (i + 2) + '/' + state.queue.length + ' dans ' + r + 's'); await sleep(1000); }
+            }
         }
-    }
-    if (pollingTasks.length > 0) { setStatus('Finalisation…'); await Promise.allSettled(pollingTasks); }
+        if (pollingTasks.length > 0) { setStatus('Finalisation…'); await Promise.allSettled(pollingTasks); }
+    } catch (e) { log('Erreur globale : ' + e.message); }
     const totalElapsed = (Date.now() - totalStart) / 1000;
     const theme = THEMES[state.theme];
     const summary = state.stopRequested ? 'Arrêté — ' + state.completed + '/' + state.queue.length : theme.emoji + ' ' + state.completed + '/' + state.queue.length + ' créées en ' + formatEta(totalElapsed);
@@ -1223,17 +1221,15 @@ function bindEditEvents() {
 
 // INIT
 (function init() {
-    document.getElementById('rep-save-btn').addEventListener('click', saveRepToken);
-    document.getElementById('imgbb-save-btn').addEventListener('click', saveImgbbKey);
+    document.getElementById('api-save-btn').addEventListener('click', saveApiKey);
     document.getElementById('stop-btn').addEventListener('click', stopGeneration);
-    document.getElementById('rep-token-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); saveRepToken(); } });
-    document.getElementById('imgbb-key-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); saveImgbbKey(); } });
+    document.getElementById('api-key-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); saveApiKey(); } });
     document.querySelectorAll('[data-toggle]').forEach(header => { header.addEventListener('click', () => { document.getElementById(header.dataset.toggle).classList.toggle('open'); }); });
     const uploadZone = document.getElementById('upload-zone'); const fileInput = document.getElementById('file-input');
     uploadZone.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', e => { handleFiles(e.target.files); fileInput.value = ''; });
     document.getElementById('main-prompt').addEventListener('input', e => { state.mainPrompt = e.target.value; });
-    document.getElementById('model-select').addEventListener('change', e => { state.model = e.target.value; });
+    document.getElementById('duration-select').addEventListener('change', e => { state.durationFrames = parseInt(e.target.value, 10); });
     document.getElementById('framing-select').addEventListener('change', e => { state.framing = e.target.value; });
     document.getElementById('intensity-select').addEventListener('change', e => { state.intensity = e.target.value; });
     document.getElementById('generate-btn').addEventListener('click', startGeneration);
@@ -1245,9 +1241,9 @@ function bindEditEvents() {
     try { const saved = localStorage.getItem(WAKE_LOCK_PREF); wakeLockEnabled = saved === '1'; } catch (e) {}
     if (wakeLockEnabled) activateWakeLock().then(() => updateWakeStatus());
     try { const savedTheme = localStorage.getItem(THEME_STORAGE); if (savedTheme && THEMES[savedTheme]) state.theme = savedTheme; } catch (e) {}
-    updateApiPanel(); updateWakeStatus(); renderCategoryChips(); renderFavorites(); renderHistory();
+    updateApiPanel(); updateTimingDisplay(); updateWakeStatus(); renderCategoryChips(); renderFavorites(); renderHistory();
     setTheme(state.theme); renderImages(); renderQueue(); updateGenerateBtn();
-    log('Studio IA prêt — ' + Object.keys(THEMES).length + ' thèmes · Replicate + imgbb (proxy CORS actif)');
+    log('Studio IA Agnes prêt — ' + Object.keys(THEMES).length + ' thèmes');
 })();
 </script>
 
