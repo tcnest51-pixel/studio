@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Studio IA — Agnes + imgbb</title>
+<title>Studio IA — Agnes Flash + imgbb</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -165,7 +165,7 @@ select{width:100%;padding:.7rem .9rem;border-radius:8px;border:1px solid var(--b
 
 <header>
 <h1>Studio IA Universel</h1>
-<p class="subtitle">52 thèmes · Agnes + imgbb</p>
+<p class="subtitle">52 thèmes · Agnes Flash + imgbb</p>
 </header>
 
 <div class="theme-filter">
@@ -195,7 +195,7 @@ select{width:100%;padding:.7rem .9rem;border-radius:8px;border:1px solid var(--b
 
 <div class="api-sep"></div>
 
-<div class="stat-line"><span>📊 Vitesse : <span id="stat-speed">en attente</span></span><span id="stat-samples">0 génération</span></div>
+<div class="stat-line"><span>📊 Modèle : <span style="color:var(--accent)">agnes-video-2.5-flash</span></span></div>
 <div class="wake-status" id="wake-status"><span id="wake-status-text">💤 Veille auto</span><button type="button" id="wake-toggle-btn">Garder l'écran allumé</button></div>
 </div>
 
@@ -238,27 +238,18 @@ select{width:100%;padding:.7rem .9rem;border-radius:8px;border:1px solid var(--b
 <div class="control-row">
 <label class="control-label">Durée</label>
 <select id="duration-select">
-<option value="121" selected>5 secondes (rapide)</option>
-<option value="153">6,4 secondes</option>
-<option value="241">10 secondes (lent)</option>
+<option value="3">3 secondes</option>
+<option value="5" selected>5 secondes (recommandé)</option>
+<option value="8">8 secondes</option>
+<option value="10">10 secondes</option>
 </select>
 </div>
 <div class="control-row">
-<label class="control-label">Résolution</label>
-<select id="resolution-select">
-<option value="480x832">480×832 (ultra rapide)</option>
-<option value="640x480">640×480 (rapide, carré)</option>
-<option value="720x1280" selected>720×1280 (portrait, recommandé)</option>
-<option value="832x480">832×480 (paysage)</option>
-<option value="1088x832">1088×832 (haute qualité, lent)</option>
-</select>
-</div>
-<div class="control-row">
-<label class="control-label">Étapes d'inférence</label>
-<select id="steps-select">
-<option value="4" selected>4 étapes (rapide)</option>
-<option value="6">6 étapes (équilibré)</option>
-<option value="8">8 étapes (haute qualité, lent)</option>
+<label class="control-label">Format</label>
+<select id="aspect-select">
+<option value="9:16" selected>Portrait 9:16 (TikTok / Reels)</option>
+<option value="16:9">Paysage 16:9 (YouTube)</option>
+<option value="1:1">Carré 1:1 (Instagram)</option>
 </select>
 </div>
 <div class="control-row">
@@ -331,22 +322,20 @@ select{width:100%;padding:.7rem .9rem;border-radius:8px;border:1px solid var(--b
 <video id="noSleepVideo" playsinline muted loop></video>
 
 <script>
+// ══════════════════════════════════════════════════════════════════
+// CONFIGURATION — MODÈLE FLASH
+// ══════════════════════════════════════════════════════════════════
 const API_BASE='https://apihub.agnes-ai.com/v1';
 const POLL_BASE='https://apihub.agnes-ai.com/agnesapi';
-const MODEL_VIDEO='agnes-video-v2.0';
-const FRAME_RATE=24;
-let createIntervalMs=62000;
-const CREATE_INTERVAL_MIN=62000;
-const CREATE_INTERVAL_MAX=90000;
+const MODEL_VIDEO='agnes-video-2.5-flash';   // ← NOUVEAU MODÈLE
 const POLL_INTERVAL_SEC=8;
-const MAX_POLL_ATTEMPTS=80;
-const TIMING_CACHE_KEY='agnes_timing_v30';
-const API_KEY_STORAGE='agnes_api_key_v30';
-const IMGBB_KEY_STORAGE='agnes_imgbb_key_v30';
-const THEME_STORAGE='agnes_theme_v30';
-const FAV_STORAGE='agnes_favorites_v30';
-const HISTORY_STORAGE='agnes_history_v30';
-const WAKE_LOCK_PREF='agnes_wakelock_v30';
+const MAX_POLL_ATTEMPTS=120;
+const API_KEY_STORAGE='agnes_api_key_v40';
+const IMGBB_KEY_STORAGE='agnes_imgbb_key_v40';
+const THEME_STORAGE='agnes_theme_v40';
+const FAV_STORAGE='agnes_favorites_v40';
+const HISTORY_STORAGE='agnes_history_v40';
+const WAKE_LOCK_PREF='agnes_wakelock_v40';
 const MAX_VISIBLE_QUEUE=30;
 const MAX_IMAGE_SIZE=12*1024*1024;
 const THUMBNAIL_MAX_WIDTH=200;
@@ -420,7 +409,7 @@ const RANDOM_LIGHTING=['soft diffused natural light','warm golden hour backlight
 const INTENSITY_PRESETS={subtle:'very subtle movement, barely perceptible change',moderate:'moderate movement, clear but controlled motion',strong:'strong dynamic movement, energetic motion'};
 const FRAMING_PRESETS={close:'extreme close-up framing, intimate and intense',medium:'medium shot, subject framed from waist up',wide:'wide shot, subject framed with environment visible'};
 
-const state={images:[],isRunning:false,stopRequested:false,queue:[],completed:0,failed:0,theme:'apocalypse',selectedEffect:null,mainPrompt:'',framing:'random',intensity:'moderate',durationFrames:121,resolution:'720x1280',steps:4,isLoadingImages:false,creationAttemptsSinceLastError:0,filterCat:'all',searchQuery:''};
+const state={images:[],isRunning:false,stopRequested:false,queue:[],completed:0,failed:0,theme:'apocalypse',selectedEffect:null,mainPrompt:'',framing:'random',intensity:'moderate',duration:5,aspect:'9:16',isLoadingImages:false,filterCat:'all',searchQuery:''};
 
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 function log(msg){console.log('[Studio] '+msg)}
@@ -453,17 +442,10 @@ async function toggleWakeLock(){if(wakeLockEnabled){wakeLockEnabled=false;await 
 document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&wakeLockEnabled){await activateWakeLock();updateWakeStatus()}});
 async function ensureWakeLockActive(){if(!wakeLockEnabled)return;if(wakeLockSentinel===null&&canvasStream===null){await activateWakeLock();updateWakeStatus()}}
 
-// CACHE TEMPS
-function loadTimingCache(){try{return JSON.parse(localStorage.getItem(TIMING_CACHE_KEY)||'{}')}catch(e){return{}}}
-function saveTimingCache(c){try{localStorage.setItem(TIMING_CACHE_KEY,JSON.stringify(c))}catch(e){}}
-function recordGenerationTime(numFrames,durationMs){const cache=loadTimingCache();const key=String(numFrames);if(!cache[key])cache[key]=[];cache[key].push(durationMs);if(cache[key].length>10)cache[key]=cache[key].slice(-10);saveTimingCache(cache);updateTimingDisplay()}
-function estimateGenerationTime(numFrames){const cache=loadTimingCache();const samples=cache[String(numFrames)];if(samples&&samples.length>0){const sorted=[...samples].sort((a,b)=>a-b);const mid=Math.floor(sorted.length/2);return sorted.length%2===0?(sorted[mid-1]+sorted[mid])/2:sorted[mid]}return 30000+numFrames*500}
-function updateTimingDisplay(){const cache=loadTimingCache();const all=Object.values(cache).flat();const speedEl=document.getElementById('stat-speed');const samplesEl=document.getElementById('stat-samples');if(!speedEl||!samplesEl)return;if(all.length===0){speedEl.textContent='en attente';samplesEl.textContent='0 génération';return}const avg=all.reduce((a,b)=>a+b,0)/all.length;speedEl.textContent=(avg/1000).toFixed(1)+' s';samplesEl.textContent=all.length+' génération'+(all.length>1?'s':'')}
-
 // CLÉS
 function getApiKey(){try{return(localStorage.getItem(API_KEY_STORAGE)||'').trim()}catch(e){return''}}
 function getImgbbKey(){try{return(localStorage.getItem(IMGBB_KEY_STORAGE)||'').trim()}catch(e){return''}}
-function saveApiKey(){const input=document.getElementById('api-key-input');if(!input)return;const key=input.value.trim();if(!key){try{localStorage.removeItem(API_KEY_STORAGE)}catch(e){}updateApiPanel();showToast('Clé Agnes supprimée','warn');return}if(!key.startsWith('sk-')){if(!confirm('La clé ne commence pas par "sk-". Sauvegarder ?'))return}try{localStorage.setItem(API_KEY_STORAGE,key);updateApiPanel();showToast('Clé Agnes enregistrée ✓','success');input.blur()}catch(e){showToast('Erreur','error')}}
+function saveApiKey(){const input=document.getElementById('api-key-input');if(!input)return;const key=input.value.trim();if(!key){try{localStorage.removeItem(API_KEY_STORAGE)}catch(e){}updateApiPanel();showToast('Clé Agnes supprimée','warn');return}try{localStorage.setItem(API_KEY_STORAGE,key);updateApiPanel();showToast('Clé Agnes enregistrée ✓','success');input.blur()}catch(e){showToast('Erreur','error')}}
 function saveImgbbKey(){const input=document.getElementById('imgbb-key-input');if(!input)return;const key=input.value.trim();if(!key){try{localStorage.removeItem(IMGBB_KEY_STORAGE)}catch(e){}updateApiPanel();showToast('Clé imgbb supprimée','warn');return}try{localStorage.setItem(IMGBB_KEY_STORAGE,key);updateApiPanel();showToast('Clé imgbb enregistrée ✓','success');input.blur()}catch(e){showToast('Erreur','error')}}
 function updateApiPanel(){
 const statusLine=document.getElementById('api-status-line');const statusText=document.getElementById('api-status-text');
@@ -511,7 +493,7 @@ function renderPromptPresets(){const container=document.getElementById('prompt-p
 function renderStyles(){const container=document.getElementById('styles-grid');const theme=THEMES[state.theme];if(!theme||!theme.styles){container.innerHTML='';return}let html='';html+='<div class="no-style-card '+(state.selectedEffect===null?'selected':'')+'" data-effect="none">'+(state.selectedEffect===null?'✓ Aucun style':'🚫 Aucun style')+'</div>';const ambiances=theme.styles.filter(s=>s.cat==='ambiance');const transforms=theme.styles.filter(s=>s.cat==='transform');if(ambiances.length){html+='<div class="style-category-header">✨ Ambiance</div>';html+=ambiances.map(s=>'<div class="style-card '+(state.selectedEffect===s.id?'selected':'')+'" data-effect="'+s.id+'"><div class="style-emoji">'+s.emoji+'</div><div><div class="style-name">'+esc(s.name)+'</div><div class="style-desc">'+esc(s.desc)+'</div></div></div>').join('')}if(transforms.length){html+='<div class="style-category-header">🎭 Transformation</div>';html+=transforms.map(s=>'<div class="style-card '+(state.selectedEffect===s.id?'selected':'')+'" data-effect="'+s.id+'"><div class="style-emoji">'+s.emoji+'</div><div><div class="style-name">'+esc(s.name)+'</div><div class="style-desc">'+esc(s.desc)+'</div></div></div>').join('')}container.innerHTML=html;container.querySelectorAll('[data-effect]').forEach(el=>{el.addEventListener('click',()=>{const val=el.dataset.effect;state.selectedEffect=(val==='none')?null:val;renderStyles()})})}
 
 // BUILD PROMPT
-function buildPrompt(){const theme=THEMES[state.theme];const effect=state.selectedEffect?theme.styles.find(s=>s.id===state.selectedEffect):null;const isTransform=effect&&effect.cat==='transform';const hasUserPrompt=state.mainPrompt&&state.mainPrompt.trim().length>0;const parts=[];if(isTransform)parts.push('Animate this image as the starting frame. Transform the entire scene according to the following artistic direction.');else parts.push('Animate this exact image as the starting frame. Keep the subject IDENTICAL to the input: same face, same expression, same clothing, same pose. This is a CONTINUATION of the source image. Preserve the exact composition, framing, and layout of the original image.');if(effect)parts.push(effect.prompt);if(hasUserPrompt)parts.push('Artistic direction (highest priority): '+state.mainPrompt.trim());if(state.framing!=='random'&&FRAMING_PRESETS[state.framing])parts.push(FRAMING_PRESETS[state.framing]);if(state.intensity!=='random'&&INTENSITY_PRESETS[state.intensity])parts.push(INTENSITY_PRESETS[state.intensity]);else parts.push('moderate movement, clear but controlled motion');parts.push(randomItem(RANDOM_ACTIONS));parts.push(randomItem(RANDOM_CAMERA));parts.push(randomItem(RANDOM_LIGHTING));parts.push('Portrait orientation 9:16 vertical, 24fps, no text, no watermarks');return parts.join('. ')}
+function buildPrompt(){const theme=THEMES[state.theme];const effect=state.selectedEffect?theme.styles.find(s=>s.id===state.selectedEffect):null;const isTransform=effect&&effect.cat==='transform';const hasUserPrompt=state.mainPrompt&&state.mainPrompt.trim().length>0;const parts=[];if(isTransform)parts.push('Animate this image as the starting frame. Transform the entire scene according to the following artistic direction.');else parts.push('Animate this exact image as the starting frame. Keep the subject IDENTICAL to the input: same face, same expression, same clothing, same pose. This is a CONTINUATION of the source image. Preserve the exact composition, framing, and layout of the original image.');if(effect)parts.push(effect.prompt);if(hasUserPrompt)parts.push('Artistic direction: '+state.mainPrompt.trim());if(state.framing!=='random'&&FRAMING_PRESETS[state.framing])parts.push(FRAMING_PRESETS[state.framing]);if(state.intensity!=='random'&&INTENSITY_PRESETS[state.intensity])parts.push(INTENSITY_PRESETS[state.intensity]);else parts.push('moderate movement, clear but controlled motion');parts.push(randomItem(RANDOM_ACTIONS));parts.push(randomItem(RANDOM_CAMERA));parts.push(randomItem(RANDOM_LIGHTING));parts.push('Portrait orientation 9:16 vertical, 24fps, no text, no watermarks');return parts.join('. ')}
 
 // UPLOAD IMGBB
 async function uploadToImgbb(dataUri){
@@ -520,58 +502,99 @@ log('Upload de l\'image vers imgbb…');
 const res=await fetch(dataUri);const blob=await res.blob();
 const formData=new FormData();formData.append('image',blob,'input.jpg');
 const uploadRes=await fetch('https://api.imgbb.com/1/upload?key='+encodeURIComponent(key),{method:'POST',body:formData});
-if(!uploadRes.ok){const err=await uploadRes.text();throw new Error('Upload imgbb : HTTP '+uploadRes.status+' — '+err.slice(0,200))}
+if(!uploadRes.ok){const err=await uploadRes.text();throw new Error('Upload imgbb : HTTP '+uploadRes.status)}
 const uploadData=await uploadRes.json();
 if(!uploadData.success||!uploadData.data)throw new Error('imgbb : réponse invalide');
 log('URL imgbb : '+uploadData.data.url);
 return uploadData.data.url;
 }
 
-// CREATE VIDEO TASK
+// CREATE VIDEO TASK — MODÈLE FLASH
 async function createVideoTask(imageDataUri,prompt){
-log('--- createVideoTask démarré ---');
+log('--- createVideoTask Flash ---');
 const imageUrl=await uploadToImgbb(imageDataUri);
-const body={model:MODEL_VIDEO,prompt:prompt,image:imageUrl,num_frames:state.durationFrames,frame_rate:FRAME_RATE,size:state.resolution,num_inference_steps:state.steps};
-log('Envoi à Agnes...');
+
+// Format pour Agnes Video 2.5 Flash
+const body={
+model:MODEL_VIDEO,
+prompt:prompt,
+image:imageUrl,
+seconds:String(state.duration),
+mode:'image',
+size:'720P',
+aspect_ratio:state.aspect
+};
+
+log('Envoi à Agnes Flash...');
 log('Body : '+JSON.stringify(body).slice(0,300));
-const res=await fetch(API_BASE+'/videos',{method:'POST',headers:{'Authorization':'Bearer '+getApiKey(),'Content-Type':'application/json'},body:JSON.stringify(body)});
+
+const res=await fetch(API_BASE+'/videos',{
+method:'POST',
+headers:{'Authorization':'Bearer '+getApiKey(),'Content-Type':'application/json'},
+body:JSON.stringify(body)
+});
+
 log('Réponse Agnes : HTTP '+res.status);
 const responseText=await res.text();
 log('Corps : '+responseText.slice(0,500));
+
 if(!res.ok)throw new Error('HTTP '+res.status+' — '+responseText.slice(0,200));
-let data;try{data=JSON.parse(responseText)}catch(e){throw new Error('Réponse non-JSON')}
+
+let data;
+try{data=JSON.parse(responseText)}catch(e){throw new Error('Réponse non-JSON')}
+
 const videoId=data.video_id||data.id||data.task_id;
 if(!videoId)throw new Error('Pas de video_id dans : '+JSON.stringify(data).slice(0,200));
 log('✓ video_id : '+videoId);
 return videoId;
 }
 
-// POLLING
+// POLLING — SUPPORT FLASH
 async function pollVideo(videoId,onProgress){
-const estimatedMs=estimateGenerationTime(state.durationFrames);
-const estimatedSec=estimatedMs/1000;
-let remaining=Math.max(20,Math.floor(estimatedSec*0.8));
-while(remaining>0){if(state.stopRequested)throw new Error('Arrêt demandé');onProgress('Création… — '+remaining+'s');await sleep(1000);remaining--}
+log('Polling démarré pour : '+videoId);
 for(let attempt=0;attempt<MAX_POLL_ATTEMPTS;attempt++){
 if(state.stopRequested)throw new Error('Arrêt demandé');
-if(attempt>0){let r=POLL_INTERVAL_SEC;while(r>0){if(state.stopRequested)throw new Error('Arrêt demandé');onProgress('L\'image prend vie… — '+r+'s');await sleep(1000);r--}}
+if(attempt>0){
+let r=POLL_INTERVAL_SEC;
+while(r>0){
+if(state.stopRequested)throw new Error('Arrêt demandé');
+onProgress('L\'image prend vie… — '+r+'s');
+await sleep(1000);r--;
+}
+}
+
 const url=POLL_BASE+'?video_id='+encodeURIComponent(videoId)+'&model_name='+encodeURIComponent(MODEL_VIDEO);
 log('Polling #'+attempt);
+
 let res,responseText;
-try{res=await fetch(url,{method:'GET',headers:{'Authorization':'Bearer '+getApiKey()}});responseText=await res.text()}catch(e){log('Polling erreur réseau : '+e.message);continue}
+try{
+res=await fetch(url,{method:'GET',headers:{'Authorization':'Bearer '+getApiKey()}});
+responseText=await res.text();
+}catch(e){log('Polling erreur réseau : '+e.message);continue}
+
 log('Polling HTTP '+res.status);
 log('Polling corps : '+responseText.slice(0,300));
-if(res.status===429||res.status===503){log('Rate limit → attente 30s');await sleep(30000);continue}
-let d;try{d=JSON.parse(responseText)}catch(e){log('Polling : non-JSON');continue}
+
+if(res.status===429||res.status===503){
+log('Rate limit → attente 30s');
+await sleep(30000);continue;
+}
+
+let d;
+try{d=JSON.parse(responseText)}catch(e){log('Polling : non-JSON');continue}
+
 const status=(d.status||d.internal_status||'unknown').toLowerCase();
 const progress=d.progress||d.internal_progress||0;
 const completedAt=d.completed_at;
+
 onProgress('Création… — '+progress+'%');
+
 const isCompleted=(
 (completedAt!==null&&completedAt!==undefined)||
 progress>=100||
 ['completed','succeeded','done','success','finished'].includes(status)
 );
+
 if(isCompleted){
 let videoUrl=null;
 if(d.metadata&&d.metadata.url)videoUrl=d.metadata.url;
@@ -584,28 +607,29 @@ if(!videoUrl){log('URL vidéo manquante : '+responseText.slice(0,500));throw new
 log('✓ Vidéo prête : '+videoUrl);
 return videoUrl;
 }
-if(['failed','error','cancelled','canceled'].includes(status)||d.error){throw new Error('Échec : '+(d.error||status))}
+if(['failed','error','cancelled','canceled'].includes(status)||d.error){
+throw new Error('Échec : '+(d.error||status));
+}
 }
 throw new Error('Délai maximal dépassé');
 }
 
 // QUEUE
-function renderQueue(){const queueEl=document.getElementById('queue');if(!state.queue.length){queueEl.style.display='none';return}queueEl.style.display='block';const total=state.queue.length;const done=state.completed+state.failed;const inProgress=state.queue.filter(q=>q.status==='processing').length;const pending=total-done-inProgress;const estGen=estimateGenerationTime(state.durationFrames)/1000;const eta=pending>0?(pending*(createIntervalMs/1000))+estGen:(inProgress*estGen/Math.max(inProgress,1));let html='<div class="queue-summary"><span>Progression : '+done+'/'+total+'</span><span>'+(done<total?'≈ '+formatEta(eta)+' restant':'Terminé')+'</span></div>';const theme=THEMES[state.theme];html+=state.queue.slice(0,MAX_VISIBLE_QUEUE).map(item=>{let icon='○',statusText='En attente',cls='pending';if(item.status==='uploading'){icon='⬆️';statusText='Upload…';cls='processing'}else if(item.status==='creating'){icon='◐';statusText='Préparation…';cls='processing'}else if(item.status==='processing'){icon=theme.emoji;statusText=item.progress||'En cours…';cls='processing'}else if(item.status==='done'){icon='●';statusText='Terminé';cls='done'}else if(item.status==='failed'){icon='✕';statusText='Échec';cls='failed'}return'<div class="queue-item '+cls+'"><div class="q-icon">'+icon+'</div><div class="q-name">Image '+(item.imageIndex+1)+'</div><div class="q-status">'+esc(statusText)+'</div></div>'}).join('');queueEl.innerHTML=html}
+function renderQueue(){const queueEl=document.getElementById('queue');if(!state.queue.length){queueEl.style.display='none';return}queueEl.style.display='block';const total=state.queue.length;const done=state.completed+state.failed;let html='<div class="queue-summary"><span>Progression : '+done+'/'+total+'</span><span>'+(done<total?'En cours…':'Terminé')+'</span></div>';const theme=THEMES[state.theme];html+=state.queue.slice(0,MAX_VISIBLE_QUEUE).map(item=>{let icon='○',statusText='En attente',cls='pending';if(item.status==='uploading'){icon='⬆️';statusText='Upload…';cls='processing'}else if(item.status==='processing'){icon=theme.emoji;statusText=item.progress||'En cours…';cls='processing'}else if(item.status==='done'){icon='●';statusText='Terminé';cls='done'}else if(item.status==='failed'){icon='✕';statusText='Échec';cls='failed'}return'<div class="queue-item '+cls+'"><div class="q-icon">'+icon+'</div><div class="q-name">Image '+(item.imageIndex+1)+'</div><div class="q-status">'+esc(statusText)+'</div></div>'}).join('');queueEl.innerHTML=html}
 
 // GALERIE
 function addToGallery(videoUrl,label){const galleryEl=document.getElementById('gallery');const galleryGrid=document.getElementById('gallery-grid');galleryEl.style.display='block';const el=document.createElement('div');el.className='gallery-item';el.innerHTML='<video controls preload="metadata" muted playsinline loop><source src="'+videoUrl+'" type="video/mp4"></video><div class="g-caption"><span>'+esc(label)+'</span><a href="'+videoUrl+'" download="studio-video-'+Date.now()+'.mp4" style="color:var(--accent);text-decoration:none;font-weight:700">⬇</a></div>';galleryGrid.appendChild(el)}
 
 // PIPELINE
 async function createTaskOnly(item){item.status='uploading';item.progress='Upload…';renderQueue();const prompt=buildPrompt();item.prompt=prompt;const videoId=await createVideoTask(item.image.dataUri,prompt);item.videoId=videoId;item.startTime=Date.now();item.status='processing';item.progress='En cours…';renderQueue();return videoId}
-async function pollTaskAndDisplay(item){try{const videoUrl=await pollVideo(item.videoId,(prog)=>{item.progress=prog;renderQueue()});const elapsed=Date.now()-item.startTime;recordGenerationTime(state.durationFrames,elapsed);item.status='done';item.videoUrl=videoUrl;item.progress='Terminé';state.completed++;renderQueue();updateGenerateBtn();addToGallery(videoUrl,'Vidéo '+(item.imageIndex+1));addToHistory(videoUrl,state.theme,item.prompt,item.image.thumbnail)}catch(e){if(e.message==='Arrêt demandé'){item.status='failed';item.progress='Arrêté'}else{log('[Image '+(item.imageIndex+1)+'] '+e.message);item.status='failed';item.progress='Échec';state.failed++}renderQueue();updateGenerateBtn()}}
+async function pollTaskAndDisplay(item){try{const videoUrl=await pollVideo(item.videoId,(prog)=>{item.progress=prog;renderQueue()});item.status='done';item.videoUrl=videoUrl;item.progress='Terminé';state.completed++;renderQueue();updateGenerateBtn();addToGallery(videoUrl,'Vidéo '+(item.imageIndex+1));addToHistory(videoUrl,state.theme,item.prompt,item.image.thumbnail)}catch(e){if(e.message==='Arrêt demandé'){item.status='failed';item.progress='Arrêté'}else{log('[Image '+(item.imageIndex+1)+'] '+e.message);item.status='failed';item.progress='Échec';state.failed++}renderQueue();updateGenerateBtn()}}
 async function startGeneration(){
 if(state.isRunning||!state.images.length)return;
 if(!getApiKey()){showToast('Ajoutez votre clé Agnes','error');document.getElementById('api-key-input').focus();return}
 if(!getImgbbKey()){showToast('Ajoutez votre clé imgbb','error');document.getElementById('imgbb-key-input').focus();return}
 state.mainPrompt=document.getElementById('main-prompt').value.trim();
 if(!state.mainPrompt&&!state.selectedEffect){if(!confirm('Ni prompt ni style. Continuer ?'))return}
-state.isRunning=true;state.stopRequested=false;state.completed=0;state.failed=0;state.creationAttemptsSinceLastError=0;
-createIntervalMs=CREATE_INTERVAL_MIN;
+state.isRunning=true;state.stopRequested=false;state.completed=0;state.failed=0;
 state.queue=state.images.map((img,i)=>({imageIndex:i,image:img,status:'pending',progress:null,videoId:null,videoUrl:null,prompt:null,startTime:null}));
 document.getElementById('gallery-grid').innerHTML='';
 document.getElementById('gallery').style.display='none';
@@ -619,8 +643,10 @@ for(let i=0;i<state.queue.length;i++){
 if(state.stopRequested)break;
 const item=state.queue[i];
 try{await createTaskOnly(item);pollingTasks.push(pollTaskAndDisplay(item))}
-catch(e){if(e.message==='Arrêt demandé')break;log('[Image '+(i+1)+'] Échec création : '+e.message);item.status='failed';item.progress='Échec';state.failed++;renderQueue();updateGenerateBtn()}
-if(i<state.queue.length-1&&!state.stopRequested){const waitSec=Math.ceil(createIntervalMs/1000);for(let r=waitSec;r>0;r--){if(state.stopRequested)break;setStatus('Respiration… — Image '+(i+2)+'/'+state.queue.length+' dans '+r+'s');await sleep(1000)}}
+catch(e){if(e.message==='Arrêt demandé')break;log('[Image '+(i+1)+'] Échec : '+e.message);item.status='failed';item.progress='Échec';state.failed++;renderQueue();updateGenerateBtn()}
+if(i<state.queue.length-1&&!state.stopRequested){
+for(let r=10;r>0;r--){if(state.stopRequested)break;setStatus('Respiration… Image '+(i+2)+'/'+state.queue.length+' dans '+r+'s');await sleep(1000)}
+}
 }
 if(pollingTasks.length>0){setStatus('Finalisation…');await Promise.allSettled(pollingTasks)}
 const totalElapsed=(Date.now()-totalStart)/1000;
@@ -658,9 +684,8 @@ const uploadZone=document.getElementById('upload-zone');const fileInput=document
 uploadZone.addEventListener('click',()=>fileInput.click());
 fileInput.addEventListener('change',e=>{handleFiles(e.target.files);fileInput.value=''});
 document.getElementById('main-prompt').addEventListener('input',e=>{state.mainPrompt=e.target.value});
-document.getElementById('duration-select').addEventListener('change',e=>{state.durationFrames=parseInt(e.target.value,10)});
-document.getElementById('resolution-select').addEventListener('change',e=>{state.resolution=e.target.value});
-document.getElementById('steps-select').addEventListener('change',e=>{state.steps=parseInt(e.target.value,10)});
+document.getElementById('duration-select').addEventListener('change',e=>{state.duration=parseInt(e.target.value,10)});
+document.getElementById('aspect-select').addEventListener('change',e=>{state.aspect=e.target.value});
 document.getElementById('framing-select').addEventListener('change',e=>{state.framing=e.target.value});
 document.getElementById('intensity-select').addEventListener('change',e=>{state.intensity=e.target.value});
 document.getElementById('generate-btn').addEventListener('click',startGeneration);
@@ -672,9 +697,9 @@ bindEditEvents();
 try{const saved=localStorage.getItem(WAKE_LOCK_PREF);wakeLockEnabled=saved==='1'}catch(e){}
 if(wakeLockEnabled)activateWakeLock().then(()=>updateWakeStatus());
 try{const savedTheme=localStorage.getItem(THEME_STORAGE);if(savedTheme&&THEMES[savedTheme])state.theme=savedTheme}catch(e){}
-updateApiPanel();updateTimingDisplay();updateWakeStatus();renderCategoryChips();renderFavorites();renderHistory();
+updateApiPanel();updateWakeStatus();renderCategoryChips();renderFavorites();renderHistory();
 setTheme(state.theme);renderImages();renderQueue();updateGenerateBtn();
-log('Studio IA prêt — '+Object.keys(THEMES).length+' thèmes');
+log('Studio IA Agnes Flash prêt — '+Object.keys(THEMES).length+' thèmes');
 })();
 </script>
 
