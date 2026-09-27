@@ -1,0 +1,1921 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agnes IA — Console</title>
+<style>
+  :root{
+    --bg:#0e1015; --panel:#161922; --panel-2:#1c202b; --border:#262b38;
+    --text:#e7eaf1; --muted:#8b93a7; --accent:#6c8cff; --accent-2:#a06cff;
+    --ok:#3ddc97; --err:#ff6b6b; --warn:#ffb86b;
+    --tiktok:#ff2d55; --tiktok-2:#25f4ee; --radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--bg);color:var(--text);
+    display:flex;overflow:hidden;font-size:15px;line-height:1.6;
+  }
+  aside{
+    width:320px;flex-shrink:0;background:var(--panel);
+    border-right:1px solid var(--border);display:flex;flex-direction:column;
+    overflow-y:auto;transition:transform .25s ease;z-index:50;
+  }
+  .brand{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .logo{
+    width:32px;height:32px;border-radius:9px;flex-shrink:0;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:grid;place-items:center;font-weight:800;font-size:15px;color:#fff;
+  }
+  .brand h1{font-size:15px;font-weight:600;letter-spacing:-.2px}
+  .brand p{font-size:11px;color:var(--muted)}
+  .section{padding:16px 20px;border-bottom:1px solid var(--border)}
+  .section h2{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600;margin-bottom:12px}
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}
+  input[type=text],input[type=password],input[type=number],select,textarea{
+    width:100%;background:var(--panel-2);border:1px solid var(--border);
+    color:var(--text);padding:9px 11px;border-radius:9px;font-size:13px;
+    font-family:inherit;outline:none;transition:border-color .15s;
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+  textarea{resize:vertical;min-height:70px;line-height:1.5}
+  .field{margin-bottom:14px}
+  .field:last-child{margin-bottom:0}
+  .hint{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.4}
+  .key-wrap{position:relative;display:flex;gap:6px}
+  .key-wrap input{flex:1;padding-right:38px}
+  .eye-btn{
+    position:absolute;right:6px;top:50%;transform:translateY(-50%);
+    background:none;border:none;color:var(--muted);cursor:pointer;
+    padding:6px;border-radius:6px;display:grid;place-items:center;transition:.15s;
+  }
+  .eye-btn:hover{background:var(--panel);color:var(--text)}
+  .save-indicator{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--ok);margin-top:5px;opacity:0;transition:opacity .3s}
+  .save-indicator.show{opacity:1}
+  .save-indicator .dot-save{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok)}
+  .row{display:flex;gap:8px}
+  .row>*{flex:1}
+  input[type=range]{width:100%;-webkit-appearance:none;background:transparent;height:20px;cursor:pointer}
+  input[type=range]::-webkit-slider-runnable-track{height:4px;background:var(--panel-2);border-radius:2px;border:1px solid var(--border)}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);margin-top:-6px;border:2px solid var(--panel)}
+  input[type=range]::-moz-range-track{height:4px;background:var(--panel-2);border-radius:2px}
+  input[type=range]::-moz-range-thumb{width:12px;height:12px;border:2px solid var(--panel);background:var(--accent);border-radius:50%}
+  .switch{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:4px 0}
+  .switch span{font-size:13px}
+  .toggle{width:40px;height:22px;border-radius:11px;background:var(--panel-2);border:1px solid var(--border);position:relative;transition:.2s;flex-shrink:0}
+  .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--muted);transition:.2s}
+  .toggle.on{background:rgba(108,140,255,.25);border-color:var(--accent)}
+  .toggle.on::after{transform:translateX(18px);background:var(--accent)}
+  .btn{width:100%;padding:10px;border-radius:9px;border:1px solid var(--border);background:var(--panel-2);color:var(--text);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:.15s;display:flex;align-items:center;justify-content:center;gap:7px}
+  .btn:hover{background:#232838;border-color:#39405a}
+  .btn.danger:hover{background:rgba(255,107,107,.12);border-color:var(--err);color:var(--err)}
+  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));border:none;color:#fff}
+  .btn.primary:hover{opacity:.9}
+  .btn.tiktok{background:linear-gradient(135deg,var(--tiktok),#e0144a);border:none;color:#fff;font-weight:600}
+  .btn.tiktok:hover{opacity:.9;transform:scale(1.01)}
+  .btn.tiktok-2{background:linear-gradient(135deg,var(--tiktok-2),#0fd8d2);border:none;color:#0e1015;font-weight:600}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.sm{padding:7px 12px;font-size:12px;width:auto}
+  main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+  header{height:58px;flex-shrink:0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 20px;background:var(--panel)}
+  .menu-btn{display:none;background:none;border:none;color:var(--text);font-size:20px;cursor:pointer;padding:4px}
+  .tabs{display:flex;gap:4px;background:var(--panel-2);padding:3px;border-radius:9px;border:1px solid var(--border)}
+  .tab{padding:6px 14px;border-radius:7px;font-size:13px;font-weight:500;background:none;border:none;color:var(--muted);cursor:pointer;font-family:inherit;transition:.15s;white-space:nowrap}
+  .tab.active{background:var(--panel);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+  .status{margin-left:auto;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+  .dot.on{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+  .dot.busy{background:var(--accent);animation:pulse 1s infinite}
+  .dot.retry{background:var(--warn);animation:pulse .6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  #chat-view{flex:1;display:flex;flex-direction:column;min-height:0}
+  #messages{flex:1;overflow-y:auto;padding:24px 0;scroll-behavior:smooth}
+  .empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--muted);gap:16px;padding:40px}
+  .empty .big{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-size:28px;font-weight:800;color:#fff}
+  .empty h3{color:var(--text);font-size:19px;font-weight:600}
+  .empty p{font-size:13.5px;max-width:420px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px}
+  .chip{padding:8px 14px;border-radius:20px;background:var(--panel);border:1px solid var(--border);font-size:12.5px;color:var(--text);cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--accent);background:var(--panel-2)}
+  .msg{display:flex;gap:14px;padding:18px 0;border-bottom:1px solid rgba(38,43,56,.5)}
+  .msg:last-child{border-bottom:none}
+  .avatar{width:30px;height:30px;border-radius:8px;flex-shrink:0;display:grid;place-items:center;font-size:13px;font-weight:700}
+  .avatar.user{background:var(--panel-2);border:1px solid var(--border);color:var(--muted)}
+  .avatar.ai{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff}
+  .msg-body{flex:1;min-width:0}
+  .msg-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .msg-name{font-size:12.5px;font-weight:600;color:var(--muted)}
+  .msg-actions{margin-left:auto;display:flex;gap:4px;opacity:0;transition:.15s}
+  .msg:hover .msg-actions{opacity:1}
+  .icon-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;border-radius:6px;font-size:12px;line-height:1}
+  .icon-btn:hover{background:var(--panel-2);color:var(--text)}
+  .content{font-size:14.5px;word-wrap:break-word;overflow-wrap:break-word}
+  .content p{margin:0 0 12px}
+  .content h1,.content h2,.content h3,.content h4{margin:20px 0 10px;font-weight:600;line-height:1.3}
+  .content ul,.content ol{margin:0 0 12px;padding-left:24px}
+  .content li{margin-bottom:5px}
+  .content a{color:var(--accent);text-decoration:none}
+  .content code{background:var(--panel-2);padding:2px 6px;border-radius:5px;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:12.5px;border:1px solid var(--border)}
+  .codeblock{background:#0b0d12;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:0 0 12px}
+  .cb-head{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:var(--panel-2);border-bottom:1px solid var(--border)}
+  .cb-head span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+  .cb-head button{background:none;border:none;color:var(--muted);font-size:11.5px;cursor:pointer;font-family:inherit;padding:3px 8px;border-radius:6px}
+  .cb-head button:hover{background:var(--panel);color:var(--text)}
+  .codeblock pre{padding:13px;overflow-x:auto;margin:0}
+  .codeblock code{background:none;border:none;padding:0;font-size:12.5px;line-height:1.6;font-family:'SF Mono',Menlo,Consolas,monospace;color:#c9d1d9}
+  .attachments{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+  .attachments img{max-width:160px;max-height:160px;border-radius:8px;border:1px solid var(--border)}
+  .cursor-blink{display:inline-block;width:7px;height:15px;background:var(--accent);vertical-align:text-bottom;animation:pulse .9s infinite;border-radius:1px}
+  .retry-banner{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:rgba(255,184,107,.08);border:1px solid rgba(255,184,107,.3);color:var(--warn);font-size:12.5px;margin-top:10px}
+  .retry-banner .spinner{width:14px;height:14px;border:2px solid rgba(255,184,107,.3);border-top-color:var(--warn);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .composer{padding:14px 20px 20px;border-top:1px solid var(--border);background:var(--panel)}
+  .composer-inner{max-width:820px;margin:0 auto;background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:10px 10px 10px 16px;display:flex;align-items:flex-end;gap:10px;transition:border-color .15s}
+  .composer-inner:focus-within{border-color:var(--accent)}
+  #prompt{flex:1;background:none;border:none;color:var(--text);font-size:14.5px;font-family:inherit;resize:none;outline:none;max-height:200px;min-height:24px;line-height:1.5;padding:4px 0}
+  #prompt::placeholder{color:var(--muted)}
+  .send{width:34px;height:34px;border-radius:9px;border:none;flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;cursor:pointer;display:grid;place-items:center;transition:.15s}
+  .send:hover:not(:disabled){transform:scale(1.06)}
+  .send:disabled{opacity:.35;cursor:not-allowed}
+  .send.stop{background:var(--err)}
+  .composer-foot{max-width:820px;margin:8px auto 0;display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+  .media-view{flex:1;overflow-y:auto;padding:28px 20px;display:none}
+  .media-view.active{display:block}
+  .media-panel{max-width:860px;margin:0 auto}
+  .media-panel h2{font-size:18px;font-weight:600;margin-bottom:6px}
+  .media-panel > p{font-size:13px;color:var(--muted);margin-bottom:22px}
+  .preset-section{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:20px}
+  .preset-section h3{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .preset-section h3 .preset-label{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.4px}
+  .preset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+  .preset-card{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:10px 8px;cursor:pointer;text-align:center;transition:.15s;position:relative;overflow:hidden}
+  .preset-card:hover{transform:translateY(-2px);border-color:var(--accent)}
+  .preset-card.active{border-color:var(--accent);background:linear-gradient(135deg,rgba(108,140,255,.1),rgba(160,108,255,.08));box-shadow:0 0 0 1px rgba(108,140,255,.3)}
+  .preset-card .preset-icon{font-size:20px;line-height:1;margin-bottom:5px;display:block}
+  .preset-card .preset-name{font-size:11.5px;font-weight:600;color:var(--text);margin-bottom:3px;line-height:1.2}
+  .preset-card .preset-dim{font-size:10px;color:var(--muted);font-family:'SF Mono',Menlo,Consolas,monospace;line-height:1.3}
+  .preset-card .preset-badge{position:absolute;top:5px;right:5px;font-size:9px;font-weight:700;padding:2px 5px;border-radius:8px;background:rgba(255,255,255,.08);color:var(--muted);letter-spacing:.3px}
+  .preset-card.active .preset-badge{background:rgba(108,140,255,.2);color:var(--accent)}
+  .preset-info{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;padding:10px 12px;background:var(--panel-2);border-radius:9px;border:1px dashed var(--border);font-size:11.5px}
+  .preset-info .info-item{display:flex;align-items:center;gap:5px;color:var(--muted)}
+  .preset-info .info-item b{color:var(--text);font-weight:600;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11.5px}
+  .preset-info .info-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:22px}
+  .img-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative}
+  .img-card img{width:100%;display:block;cursor:zoom-in}
+  .img-card .meta{padding:9px 12px;font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .img-card .meta a{color:var(--accent);text-decoration:none}
+  .img-card .img-badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.75);color:#fff;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:600;backdrop-filter:blur(4px)}
+  .multi-img-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .multi-img-count{font-size:11px;color:var(--muted);background:var(--panel-2);padding:3px 9px;border-radius:20px;border:1px solid var(--border)}
+  .multi-img-count.has{color:var(--ok);border-color:rgba(61,220,151,.4)}
+  .multi-img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin-top:8px}
+  .multi-img-item{position:relative;aspect-ratio:1;border-radius:9px;overflow:hidden;border:1px solid var(--border);background:var(--panel-2);transition:transform .15s}
+  .multi-img-item:hover{transform:scale(1.02)}
+  .multi-img-item img{width:100%;height:100%;object-fit:cover;display:block}
+  .multi-img-item .multi-img-index{position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.7);color:#fff;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;line-height:1.3}
+  .multi-img-remove{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.75);border:none;color:#fff;cursor:pointer;display:grid;place-items:center;font-size:14px;line-height:1;opacity:0;transition:opacity .15s}
+  .multi-img-item:hover .multi-img-remove{opacity:1}
+  .multi-img-remove:hover{background:var(--err)}
+  .multi-img-add{aspect-ratio:1;border:2px dashed var(--border);border-radius:9px;display:grid;place-items:center;cursor:pointer;color:var(--muted);transition:.15s;background:var(--panel-2);font-size:24px;user-select:none}
+  .multi-img-add:hover{border-color:var(--accent);color:var(--accent);background:rgba(108,140,255,.05)}
+  .multi-img-add.over{border-color:var(--accent);background:rgba(108,140,255,.1);color:var(--accent)}
+  .multi-img-add small{display:block;font-size:10px;color:var(--muted);margin-top:4px;text-align:center}
+  .url-add-row{display:flex;gap:6px;margin-top:8px}
+  .url-add-row input{flex:1}
+  .url-add-btn{padding:9px 14px;border-radius:9px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);cursor:pointer;font-family:inherit;font-size:13px;transition:.15s;flex-shrink:0}
+  .url-add-btn:hover{background:#232838;border-color:var(--accent);color:var(--accent)}
+  .drop-zone{border:2px dashed var(--border);border-radius:12px;padding:22px;text-align:center;color:var(--muted);font-size:13px;transition:.15s;cursor:pointer;margin-top:6px}
+  .drop-zone:hover,.drop-zone.over{border-color:var(--accent);background:rgba(108,140,255,.05)}
+  .drop-zone .drop-title{font-size:13.5px;color:var(--text);font-weight:500;margin-bottom:4px}
+  .video-list{display:flex;flex-direction:column;gap:16px;margin-top:22px}
+  .video-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s}
+  .video-card.done{border-color:rgba(61,220,151,.4)}
+  .video-card.failed{border-color:rgba(255,107,107,.4)}
+  .video-card.tiktok-card{border-color:rgba(255,45,85,.25)}
+  .video-card .vc-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--panel-2)}
+  .vc-status{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:3px 9px;border-radius:20px}
+  .vc-status.queued{background:rgba(108,140,255,.15);color:var(--accent)}
+  .vc-status.processing{background:rgba(160,108,255,.15);color:var(--accent-2)}
+  .vc-status.completed{background:rgba(61,220,151,.15);color:var(--ok)}
+  .vc-status.failed{background:rgba(255,107,107,.15);color:var(--err)}
+  .vc-model{font-size:11.5px;color:var(--muted);margin-left:auto}
+  .vc-body{padding:14px 16px}
+  .vc-prompt{font-size:13px;color:var(--muted);font-style:italic;margin-bottom:10px;line-height:1.5}
+  .vc-thumbs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .vc-thumb{max-height:70px;border-radius:8px;border:1px solid var(--border);display:block}
+  .vc-progress{height:6px;background:var(--panel-2);border-radius:3px;overflow:hidden;border:1px solid var(--border);margin:10px 0}
+  .vc-progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:3px;transition:width .4s ease;width:0%}
+  .vc-info{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:10px}
+  .vc-video{width:100%;border-radius:10px;display:block;background:#000;margin-top:4px}
+  .vc-video.tiktok-video{max-width:340px;margin:0 auto}
+  .vc-err{font-size:12.5px;color:var(--err);margin-top:8px;line-height:1.5}
+  .vc-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .tiktok-banner{background:linear-gradient(135deg,rgba(255,45,85,.12),rgba(37,244,238,.08));border:1px solid rgba(255,45,85,.25);border-radius:12px;padding:16px 18px;margin-bottom:22px;display:flex;align-items:center;gap:14px}
+  .tiktok-banner .tt-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--tiktok),var(--tiktok-2));display:grid;place-items:center;font-size:22px;flex-shrink:0;color:#fff;font-weight:800}
+  .tiktok-banner h3{font-size:15px;font-weight:600;color:var(--text)}
+  .tiktok-banner p{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .tt-section{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px}
+  .tt-section h4{font-size:13px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .tt-section h4 .tt-dot{width:8px;height:8px;border-radius:50%;background:var(--tiktok)}
+  .tt-niche-grid{display:flex;flex-wrap:wrap;gap:8px}
+  .tt-niche{padding:8px 14px;border-radius:20px;background:var(--panel-2);border:1px solid var(--border);font-size:12.5px;cursor:pointer;transition:.15s;user-select:none}
+  .tt-niche:hover{border-color:var(--tiktok);color:var(--tiktok)}
+  .tt-niche.active{background:rgba(255,45,85,.12);border-color:var(--tiktok);color:var(--tiktok);font-weight:600}
+  .tt-duration-row{display:flex;gap:8px;flex-wrap:wrap}
+  .tt-duration{padding:8px 16px;border-radius:9px;background:var(--panel-2);border:1px solid var(--border);font-size:12.5px;cursor:pointer;transition:.15s;text-align:center;flex:1;min-width:70px}
+  .tt-duration:hover{border-color:var(--tiktok-2);color:var(--tiktok-2)}
+  .tt-duration.active{background:rgba(37,244,238,.1);border-color:var(--tiktok-2);color:var(--tiktok-2);font-weight:600}
+  .tt-duration small{display:block;font-size:10px;color:var(--muted);margin-top:2px}
+  .tt-script-output{background:var(--panel-2);border:1px solid var(--border);border-radius:12px;padding:16px;font-size:13.5px;line-height:1.7;white-space:pre-wrap;word-wrap:break-word;max-height:420px;overflow-y:auto;color:var(--text)}
+  .tt-script-output:empty::before{content:'Le script généré apparaîtra ici…';color:var(--muted);font-style:italic}
+  .tt-hook-list{display:flex;flex-direction:column;gap:8px}
+  .tt-hook-item{background:var(--panel-2);border:1px solid var(--border);border-radius:9px;padding:11px 14px;font-size:13px;cursor:pointer;transition:.15s;display:flex;align-items:flex-start;gap:10px}
+  .tt-hook-item:hover{border-color:var(--tiktok);background:rgba(255,45,85,.04)}
+  .tt-hook-item .hook-num{font-size:11px;font-weight:700;color:var(--tiktok);background:rgba(255,45,85,.12);width:22px;height:22px;border-radius:6px;display:grid;place-items:center;flex-shrink:0}
+  .tt-hook-item .hook-text{flex:1}
+  .tt-caption-box{background:var(--panel-2);border:1px solid var(--border);border-radius:12px;padding:14px;font-size:13.5px;line-height:1.6;position:relative}
+  .tt-caption-box .copy-caption{position:absolute;top:10px;right:10px;background:var(--panel);border:1px solid var(--border);color:var(--muted);font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:inherit;transition:.15s}
+  .tt-caption-box .copy-caption:hover{border-color:var(--accent);color:var(--accent)}
+  .tt-hashtags{color:var(--tiktok-2);word-break:break-word}
+  .tt-steps{display:flex;flex-direction:column;gap:10px}
+  .tt-step{display:flex;gap:12px;align-items:flex-start}
+  .tt-step .step-num{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--tiktok),var(--tiktok-2));color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center;flex-shrink:0}
+  .tt-step .step-content{flex:1;font-size:13px;line-height:1.6}
+  .tt-step .step-content b{color:var(--text)}
+  .tt-sound-hint{background:rgba(37,244,238,.06);border:1px solid rgba(37,244,238,.2);border-radius:10px;padding:12px 14px;font-size:12.5px;line-height:1.6;color:var(--muted)}
+  .tt-sound-hint b{color:var(--tiktok-2)}
+  .tt-loading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;padding:14px 0}
+  .tt-loading .spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--tiktok);border-radius:50%;animation:spin .8s linear infinite}
+  .tt-gen-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  #overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:40;backdrop-filter:blur(2px)}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:5px;border:2px solid var(--bg)}
+  ::-webkit-scrollbar-thumb:hover{background:#39405a}
+  @media(max-width:820px){
+    aside{position:fixed;inset:0 auto 0 0;transform:translateX(-100%)}
+    aside.open{transform:translateX(0)}
+    .menu-btn{display:block}
+    #overlay.show{display:block}
+    .composer{padding:12px 14px 16px}
+    .tabs .tab{padding:6px 10px;font-size:12px}
+    .multi-img-grid{grid-template-columns:repeat(auto-fill,minmax(80px,1fr))}
+    .tt-gen-grid{grid-template-columns:1fr}
+    .preset-grid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+  }
+</style>
+</head>
+<body>
+
+<aside id="sidebar">
+  <div class="brand">
+    <div class="logo">A</div>
+    <div><h1>Agnes IA</h1><p>Console multimodale</p></div>
+  </div>
+
+  <div class="section">
+    <h2>Connexion</h2>
+    <div class="field">
+      <label for="apiKey">Clé API</label>
+      <div class="key-wrap">
+        <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off" spellcheck="false">
+        <button class="eye-btn" id="eyeBtn" title="Afficher / masquer">
+          <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
+      </div>
+      <div class="save-indicator" id="saveIndicator"><span class="dot-save"></span> Clé enregistrée automatiquement</div>
+      <div class="hint">Stockée uniquement dans votre navigateur.</div>
+    </div>
+    <div class="field">
+      <label for="baseUrl">URL de base</label>
+      <input type="text" id="baseUrl" value="https://apihub.agnes-ai.com/v1" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="model">Modèle (chat)</label>
+      <input type="text" id="model" list="models" value="agnes-2.5-flash">
+      <datalist id="models">
+        <option value="agnes-3.0-flash">Texte, code, outils</option>
+        <option value="agnes-2.5-flash">Chat + vision</option>
+      </datalist>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Paramètres</h2>
+    <div class="field">
+      <label>Prompt système</label>
+      <textarea id="systemPrompt">Tu es un assistant utile, précis et concis. Réponds en français sauf demande contraire.</textarea>
+    </div>
+    <div class="field">
+      <label>Température : <span id="tempVal">0.7</span></label>
+      <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7">
+    </div>
+    <div class="field">
+      <label for="maxTokens">Tokens max (0 = auto)</label>
+      <input type="number" id="maxTokens" value="0" min="0" step="128">
+    </div>
+    <label class="switch" for="streaming"><span>Streaming</span><div class="toggle on" id="streamToggle"></div></label>
+    <input type="checkbox" id="streaming" checked hidden>
+  </div>
+
+  <div class="section">
+    <h2>Reprise sur erreur</h2>
+    <label class="switch" for="autoRetry"><span>Retry automatique</span><div class="toggle on" id="retryToggle"></div></label>
+    <input type="checkbox" id="autoRetry" checked hidden>
+    <div class="field" style="margin-top:12px">
+      <label for="maxRetries">Tentatives max</label>
+      <input type="number" id="maxRetries" value="8" min="1" max="10">
+    </div>
+    <div class="field">
+      <label>Délai initial : <span id="delayVal">3</span>s</label>
+      <input type="range" id="retryDelay" min="1" max="10" step="1" value="3">
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Actions</h2>
+    <div class="field"><button class="btn" id="newChat">✚ Nouvelle conversation</button></div>
+    <div class="field"><button class="btn danger" id="clearAll">🗑 Tout effacer</button></div>
+  </div>
+
+  <div class="section" style="border-bottom:none;margin-top:auto">
+    <p class="hint">Servez ce fichier via un serveur local (<code>python -m http.server 8000</code>) pour éviter les blocages CORS.</p>
+  </div>
+</aside>
+
+<div id="overlay"></div>
+
+<main>
+  <header>
+    <button class="menu-btn" id="menuBtn">☰</button>
+    <div class="tabs">
+      <button class="tab active" data-view="chat">💬 Chat</button>
+      <button class="tab" data-view="image">🎨 Image</button>
+      <button class="tab" data-view="video">🎬 Vidéo</button>
+      <button class="tab" data-view="tiktok">📱 TikTok</button>
+    </div>
+    <div class="status">
+      <div class="dot" id="statusDot"></div>
+      <span id="statusText">Non connecté</span>
+    </div>
+  </header>
+
+  <div id="chat-view">
+    <div id="messages">
+      <div class="empty" id="emptyState">
+        <div class="big">A</div>
+        <h3>Comment puis-je vous aider ?</h3>
+        <p>Posez une question, collez du code, ou lancez une génération d'image ou de vidéo.</p>
+        <div class="chips">
+          <button class="chip" data-prompt="Explique-moi les bases de l'apprentissage automatique.">Expliquer un concept</button>
+          <button class="chip" data-prompt="Écris une fonction Python qui trie une liste de dictionnaires par clé.">Générer du code</button>
+          <button class="chip" data-prompt="Résume en 5 points les avantages des API compatibles OpenAI.">Résumer</button>
+        </div>
+      </div>
+    </div>
+    <div class="composer">
+      <div class="composer-inner">
+        <textarea id="prompt" rows="1" placeholder="Écrivez votre message…"></textarea>
+        <button class="send" id="sendBtn" title="Envoyer">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline>
+          </svg>
+        </button>
+      </div>
+      <div class="composer-foot">
+        <span>Entrée pour envoyer · Maj+Entrée pour un saut de ligne</span>
+        <span id="tokenInfo"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ IMAGE ══════════ -->
+  <div id="image-view" class="media-view">
+    <div class="media-panel">
+      <h2>Images</h2>
+      <p>Modèle <code>agnes-image-2.1-flash</code> — génération, transformation et adaptation de résolution.</p>
+
+      <div class="preset-section">
+        <h3>📐 Résolution cible <span class="preset-label">Presets plateforme</span></h3>
+        <div class="preset-grid" id="imgPresetGrid"></div>
+        <div class="preset-info" id="imgPresetInfo"></div>
+      </div>
+
+      <div class="field">
+        <label>Mode</label>
+        <div class="tabs" style="width:fit-content">
+          <button class="tab active" data-imode="generate">✨ Générer</button>
+          <button class="tab" data-imode="edit">🖼️ Transformer</button>
+          <button class="tab" data-imode="adapt">📐 Adapter</button>
+        </div>
+      </div>
+
+      <div class="field" id="imgEditField" style="display:none">
+        <div class="multi-img-header">
+          <label style="margin:0">Images source(s)</label>
+          <span class="multi-img-count" id="imgCountBadge">0 image</span>
+        </div>
+        <div class="hint" style="margin-bottom:8px">Ajoutez une ou plusieurs images pour guider la transformation.</div>
+        <div class="multi-img-grid" id="imgMultiGrid"></div>
+        <div class="url-add-row">
+          <input type="text" id="imgSourceUrl" placeholder="https://exemple.com/mon-image.jpg" spellcheck="false">
+          <button class="url-add-btn" id="imgUrlAdd">+ URL</button>
+        </div>
+        <div class="drop-zone" id="imgDrop">
+          <div class="drop-title">Déposez vos images ici</div>
+          <div>ou cliquez pour parcourir — plusieurs fichiers acceptés</div>
+          <input type="file" id="imgFile" accept="image/*" multiple hidden>
+        </div>
+      </div>
+
+      <div class="field" id="imgAdaptHint" style="display:none">
+        <div class="hint" style="padding:10px 12px;background:rgba(108,140,255,.06);border-radius:9px;border:1px dashed rgba(108,140,255,.3);color:var(--muted);font-size:12px">
+          📐 <b style="color:var(--accent)">Mode Adapter</b> — Le contenu de vos images sera <b>régénéré</b> dans la résolution cible choisie (ci-dessus).
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="imgPrompt">Description / Instruction</label>
+        <textarea id="imgPrompt" placeholder="Ex : Fusionne ces images en une scène cohérente de style aquarelle…"></textarea>
+      </div>
+
+      <div class="row field">
+        <div>
+          <label for="imgSize">Dimensions (auto depuis preset)</label>
+          <select id="imgSize">
+            <option value="1024x1024">1024 × 1024 (carré 1:1)</option>
+            <option value="1024x576">1024 × 576 (paysage 16:9)</option>
+            <option value="1024x768">1024 × 768 (paysage 4:3)</option>
+            <option value="1024x1792">1024 × 1792 (portrait 9:16)</option>
+            <option value="768x1024">768 × 1024 (portrait 3:4)</option>
+            <option value="1024x1536">1024 × 1536 (portrait 2:3)</option>
+            <option value="512x512">512 × 512 (mini carré)</option>
+          </select>
+        </div>
+        <div>
+          <label for="imgCount">Nombre de sorties</label>
+          <input type="number" id="imgCount" value="1" min="1" max="4">
+        </div>
+      </div>
+      <button class="btn primary" id="genImg">✨ Générer l'image</button>
+      <div class="img-grid" id="imgGrid"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ VIDÉO ══════════ -->
+  <div id="video-view" class="media-view">
+    <div class="media-panel">
+      <h2>Génération de vidéos</h2>
+      <p>Modèles <code>agnes-video-2.5</code> et <code>agnes-video-2.5-flash</code> — texte-vers-vidéo, image-vers-vidéo et adaptation de résolution.</p>
+
+      <div class="preset-section">
+        <h3>📐 Résolution cible <span class="preset-label">Presets plateforme</span></h3>
+        <div class="preset-grid" id="videoPresetGrid"></div>
+        <div class="preset-info" id="videoPresetInfo"></div>
+      </div>
+
+      <div class="field">
+        <label>Mode de génération</label>
+        <div class="tabs" style="width:fit-content">
+          <button class="tab active" data-vmode="text">📝 Texte</button>
+          <button class="tab" data-vmode="image">🖼️ Image</button>
+          <button class="tab" data-vmode="adapt">📐 Adapter</button>
+        </div>
+      </div>
+
+      <div class="field" id="vImageField" style="display:none">
+        <div class="multi-img-header">
+          <label style="margin:0">Images de référence</label>
+          <span class="multi-img-count" id="videoCountBadge">0 image</span>
+        </div>
+        <div class="hint" style="margin-bottom:8px">Une ou plusieurs images pour guider la vidéo.</div>
+        <div class="multi-img-grid" id="videoMultiGrid"></div>
+        <div class="url-add-row">
+          <input type="text" id="videoImageUrl" placeholder="https://exemple.com/mon-image.jpg" spellcheck="false">
+          <button class="url-add-btn" id="videoUrlAdd">+ URL</button>
+        </div>
+        <div class="drop-zone" id="videoDrop">
+          <div class="drop-title">Déposez vos images ici</div>
+          <div>ou cliquez pour parcourir — plusieurs fichiers acceptés</div>
+          <input type="file" id="videoFile" accept="image/*" multiple hidden>
+        </div>
+      </div>
+
+      <div class="field" id="vAdaptHint" style="display:none">
+        <div class="hint" style="padding:10px 12px;background:rgba(108,140,255,.06);border-radius:9px;border:1px dashed rgba(108,140,255,.3);color:var(--muted);font-size:12px;margin-bottom:10px">
+          📐 <b style="color:var(--accent)">Mode Adapter</b> — Choisissez une image de référence. Elle servira de première frame pour générer une vidéo dans le format cible.
+        </div>
+        <div class="multi-img-header">
+          <label style="margin:0">Image de départ</label>
+          <span class="multi-img-count" id="videoAdaptCountBadge">0 image</span>
+        </div>
+        <div class="multi-img-grid" id="videoAdaptGrid"></div>
+        <div class="url-add-row">
+          <input type="text" id="videoAdaptUrl" placeholder="https://exemple.com/mon-image.jpg" spellcheck="false">
+          <button class="url-add-btn" id="videoAdaptUrlAdd">+ URL</button>
+        </div>
+        <div class="drop-zone" id="videoAdaptDrop">
+          <div class="drop-title">Déposez une image ici</div>
+          <div>ou cliquez pour parcourir</div>
+          <input type="file" id="videoAdaptFile" accept="image/*" hidden>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="videoPrompt">Description</label>
+        <textarea id="videoPrompt" placeholder="Une rue de ville futuriste après la pluie, néons reflétés sur le sol…"></textarea>
+      </div>
+
+      <!-- ▼▼ MODÈLE PAR DÉFAUT : agnes-video-2.5 ▼▼ -->
+      <div class="row field">
+        <div>
+          <label for="videoModel">Modèle</label>
+          <select id="videoModel">
+            <option value="agnes-video-2.5" selected>agnes-video-2.5 (qualité HD, 720P–2K)</option>
+            <option value="agnes-video-2.5-flash">agnes-video-2.5-flash (rapide, 720P uniquement)</option>
+            <option value="agnes-video-v2.0">agnes-video-v2.0 (compatibilité)</option>
+          </select>
+        </div>
+        <div>
+          <label for="videoSeconds">Durée (s)</label>
+          <select id="videoSeconds">
+            <option value="5">5 secondes</option>
+            <option value="4">4 secondes</option>
+            <option value="8">8 secondes</option>
+            <option value="10" selected>10 secondes</option>
+            <option value="12">12 secondes</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row field">
+        <div>
+          <label for="videoSize">Résolution</label>
+          <select id="videoSize">
+            <option value="720P">720P</option>
+            <option value="1080P" selected>1080P</option>
+            <option value="1K">1K</option>
+            <option value="2K">2K</option>
+          </select>
+        </div>
+        <div>
+          <label for="videoAspect">Ratio</label>
+          <select id="videoAspect">
+            <option value="16:9">16:9 (paysage)</option>
+            <option value="9:16" selected>9:16 (portrait)</option>
+            <option value="1:1">1:1 (carré)</option>
+            <option value="21:9">21:9 (ultra-large)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="videoSeed">Seed (optionnel)</label>
+        <input type="number" id="videoSeed" placeholder="Laisser vide pour aléatoire">
+      </div>
+
+      <button class="btn primary" id="genVideo">🎬 Lancer la génération vidéo</button>
+      <div class="video-list" id="videoList"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ TIKTOK ══════════ -->
+  <div id="tiktok-view" class="media-view">
+    <div class="media-panel">
+      <div class="tiktok-banner">
+        <div class="tt-icon">📱</div>
+        <div>
+          <h3>Mode TikTok</h3>
+          <p>Générez un script viral complet, des hooks alternatifs, une caption et lancez la vidéo en 9:16 vertical.</p>
+        </div>
+      </div>
+
+      <div class="tt-section">
+        <h4><span class="tt-dot"></span> 1. Sujet de la vidéo</h4>
+        <div class="field">
+          <label for="ttTopic">Décrivez votre idée, produit ou sujet</label>
+          <textarea id="ttTopic" placeholder="Ex : Les 3 erreurs qui font perdre des clients à un freelance débutant…"></textarea>
+        </div>
+        <div class="field">
+          <label>Niche (optionnel)</label>
+          <div class="tt-niche-grid" id="ttNicheGrid">
+            <button class="tt-niche" data-niche="">Aucune</button>
+            <button class="tt-niche" data-niche="business / entrepreneuriat">Business</button>
+            <button class="tt-niche" data-niche="développement personnel / motivation">Motivation</button>
+            <button class="tt-niche" data-niche="technologie / IA / gadgets">Tech & IA</button>
+            <button class="tt-niche" data-niche="fitness / santé / nutrition">Fitness</button>
+            <button class="tt-niche" data-niche="cuisine / recettes rapides">Cuisine</button>
+            <button class="tt-niche" data-niche="finance / investissement / épargne">Finance</button>
+            <button class="tt-niche" data-niche="mode / lifestyle">Mode</button>
+            <button class="tt-niche" data-niche="humour / divertissement">Humour</button>
+            <button class="tt-niche" data-niche="éducation / apprentissage">Éducation</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tt-section">
+        <h4><span class="tt-dot"></span> 2. Format & durée</h4>
+        <div class="field">
+          <label>Durée cible</label>
+          <div class="tt-duration-row" id="ttDurationRow">
+            <div class="tt-duration" data-duration="7">7s<small>Viral hook</small></div>
+            <div class="tt-duration active" data-duration="15">15s<small>Recommandé</small></div>
+            <div class="tt-duration" data-duration="30">30s<small>Storytelling</small></div>
+            <div class="tt-duration" data-duration="60">60s<small>Éducatif</small></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="ttStyle">Style visuel</label>
+          <select id="ttStyle">
+            <option value="cinématique réaliste, éclairage naturel">Cinématique réaliste</option>
+            <option value="vlog dynamique, caméra à la main">Vlog dynamique</option>
+            <option value="cyberpunk néon, ambiance futuriste">Cyberpunk / Néon</option>
+            <option value="aesthetic minimaliste, couleurs douces">Aesthetic minimaliste</option>
+            <option value="animation 3D stylisée">Animation 3D</option>
+            <option value="documentaire, tons chauds">Documentaire</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="tt-section">
+        <h4><span class="tt-dot"></span> 3. Script généré</h4>
+        <div class="tt-script-output" id="ttScript"></div>
+        <div class="tt-gen-grid">
+          <button class="btn tiktok" id="ttGenScript">✍️ Générer le script</button>
+          <button class="btn tiktok-2" id="ttGenVariations">🔄 Variantes de hook</button>
+        </div>
+      </div>
+
+      <div class="tt-section" id="ttHooksSection" style="display:none">
+        <h4><span class="tt-dot"></span> 4. Hooks alternatifs</h4>
+        <div class="tt-hook-list" id="ttHookList"></div>
+      </div>
+
+      <div class="tt-section">
+        <h4><span class="tt-dot"></span> 5. Caption & hashtags</h4>
+        <div class="tt-caption-box" id="ttCaptionBox">
+          <button class="copy-caption" id="ttCopyCaption">Copier</button>
+          <span id="ttCaptionText">La caption apparaîtra ici après génération du script.</span>
+        </div>
+      </div>
+
+      <div class="tt-section">
+        <h4><span class="tt-dot"></span> 6. Conseils de publication</h4>
+        <div class="tt-steps" id="ttTips">
+          <div class="tt-step"><div class="step-num">1</div><div class="step-content"><b>Hook en 2 secondes.</b> Les 2 premières secondes décident si le viewer reste.</div></div>
+          <div class="tt-step"><div class="step-num">2</div><div class="step-content"><b>Texte à l'écran.</b> Ajoutez du texte overlay dès la première seconde.</div></div>
+          <div class="tt-step"><div class="step-num">3</div><div class="step-content"><b>Son tendance.</b> Utilisez un audio en forte croissance.</div></div>
+          <div class="tt-step"><div class="step-num">4</div><div class="step-content"><b>Postez à l'heure.</b> Créneaux : 6h–9h, 12h–14h, 19h–22h.</div></div>
+          <div class="tt-step"><div class="step-num">5</div><div class="step-content"><b>CTA dans les commentaires.</b> Convertissent mieux que la bio.</div></div>
+        </div>
+      </div>
+
+      <div class="tt-section">
+        <h4><span class="tt-dot"></span> 7. Lancer la génération vidéo TikTok</h4>
+        <div class="tt-sound-hint" style="margin-bottom:14px">
+          <b>Conseil son :</b> ajoutez un audio tendance après génération.
+        </div>
+        <button class="btn tiktok" id="ttGenVideo" style="font-size:14px;padding:14px">
+          🎬 Générer la vidéo TikTok (9:16 · 720P)
+        </button>
+        <div class="hint" style="margin-top:8px;text-align:center">
+          La vidéo sera créée en vertical 9:16 (720×1280) avec le prompt du script.
+        </div>
+        <div class="video-list" id="ttVideoList"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+/* ══════════════════════════════════════════════
+   PRESETS DE PLATEFORMES
+   ══════════════════════════════════════════════ */
+const PRESETS = {
+  custom: { name: 'Manuel', icon: '⚙️', color: '#8b93a7', badge: 'AUTO', image: null, video: null },
+  tiktok: {
+    name: 'TikTok', icon: '📱', color: '#ff2d55', badge: '9:16',
+    image: { size: '1024x1792', ratio: '9:16', dims: '1080 × 1920' },
+    video: { aspect: '9:16', size: '1080P', seconds: 10, model: 'agnes-video-2.5-flash', dims: '1080 × 1920' }
+  },
+  insta_post: {
+    name: 'Instagram Post', icon: '📷', color: '#E1306C', badge: '1:1',
+    image: { size: '1024x1024', ratio: '1:1', dims: '1080 × 1080' },
+    video: { aspect: '1:1', size: '1080P', seconds: 8, model: 'agnes-video-2.5', dims: '1080 × 1080' }
+  },
+  insta_reel: {
+    name: 'Instagram Reels', icon: '🎬', color: '#C13584', badge: '9:16',
+    image: { size: '1024x1792', ratio: '9:16', dims: '1080 × 1920' },
+    video: { aspect: '9:16', size: '1080P', seconds: 10, model: 'agnes-video-2.5', dims: '1080 × 1920' }
+  },
+  insta_story: {
+    name: 'Instagram Story', icon: '📖', color: '#833AB4', badge: '9:16',
+    image: { size: '1024x1792', ratio: '9:16', dims: '1080 × 1920' },
+    video: { aspect: '9:16', size: '1080P', seconds: 8, model: 'agnes-video-2.5', dims: '1080 × 1920' }
+  },
+  youtube: {
+    name: 'YouTube', icon: '▶️', color: '#FF0000', badge: '16:9',
+    image: { size: '1024x576', ratio: '16:9', dims: '1920 × 1080' },
+    video: { aspect: '16:9', size: '1080P', seconds: 12, model: 'agnes-video-2.5', dims: '1920 × 1080' }
+  },
+  youtube_short: {
+    name: 'YouTube Shorts', icon: '⚡', color: '#FF0000', badge: '9:16',
+    image: { size: '1024x1792', ratio: '9:16', dims: '1080 × 1920' },
+    video: { aspect: '9:16', size: '1080P', seconds: 10, model: 'agnes-video-2.5-flash', dims: '1080 × 1920' }
+  },
+  twitter: {
+    name: 'X / Twitter', icon: '𝕏', color: '#000000', badge: '16:9',
+    image: { size: '1024x576', ratio: '16:9', dims: '1600 × 900' },
+    video: { aspect: '16:9', size: '1080P', seconds: 8, model: 'agnes-video-2.5', dims: '1280 × 720' }
+  },
+  facebook: {
+    name: 'Facebook', icon: '📘', color: '#1877F2', badge: '16:9',
+    image: { size: '1024x576', ratio: '16:9', dims: '1200 × 630' },
+    video: { aspect: '16:9', size: '1080P', seconds: 10, model: 'agnes-video-2.5', dims: '1280 × 720' }
+  },
+  linkedin: {
+    name: 'LinkedIn', icon: '💼', color: '#0A66C2', badge: '1:1',
+    image: { size: '1024x1024', ratio: '1:1', dims: '1200 × 1200' },
+    video: { aspect: '1:1', size: '1080P', seconds: 10, model: 'agnes-video-2.5', dims: '1080 × 1080' }
+  },
+  pinterest: {
+    name: 'Pinterest', icon: '📌', color: '#E60023', badge: '2:3',
+    image: { size: '1024x1536', ratio: '2:3', dims: '1000 × 1500' },
+    video: { aspect: '9:16', size: '1080P', seconds: 8, model: 'agnes-video-2.5', dims: '1000 × 1500' }
+  }
+};
+
+/* ══════════════════════════════════════════════
+   PERSISTANCE
+   ══════════════════════════════════════════════ */
+const LS = 'agnes-console-v9';
+
+function persist(data) {
+  const json = JSON.stringify(data);
+  try { localStorage.setItem(LS, json); } catch (e) {}
+  try { sessionStorage.setItem(LS, json); } catch (e) {}
+}
+function retrieve() {
+  let raw = null;
+  try { raw = localStorage.getItem(LS); } catch (e) {}
+  if (!raw) { try { raw = sessionStorage.getItem(LS); } catch (e) {} }
+  if (!raw) {
+    for (const old of ['agnes-console-v8','agnes-console-v7','agnes-console-v6','agnes-console-v5','agnes-console-v4','agnes-console-v3','agnes-console-v2','agnes-console-v1']) {
+      try { const legacy = localStorage.getItem(old); if (legacy) { raw = legacy; break; } } catch (e) {}
+    }
+  }
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch (e) { return null; }
+}
+function wipeStorage() {
+  ['agnes-console-v9','agnes-console-v8','agnes-console-v7','agnes-console-v6','agnes-console-v5','agnes-console-v4','agnes-console-v3','agnes-console-v2','agnes-console-v1'].forEach(k => {
+    try { localStorage.removeItem(k); } catch (e) {}
+    try { sessionStorage.removeItem(k); } catch (e) {}
+  });
+}
+
+/* ══════════════════════════════════════════════
+   ÉTAT
+   ══════════════════════════════════════════════ */
+const MAX_IMAGES = 10;
+
+const state = {
+  apiKey: '', baseUrl: 'https://apihub.agnes-ai.com/v1', model: 'agnes-2.5-flash',
+  temperature: 0.7,
+  systemPrompt: 'Tu es un assistant utile, précis et concis. Réponds en français sauf demande contraire.',
+  streaming: true, maxTokens: 0,
+  autoRetry: true, maxRetries: 8, retryDelay: 3,
+  history: [], busy: false, controller: null,
+  imageMode: 'generate', imageSources: [], imagePreset: 'custom',
+  videoMode: 'text', videoImages: [], videoAdaptImages: [], videoPreset: 'custom',
+  videoTasks: [],
+  tiktokNiche: '', tiktokDuration: 15,
+  tiktokScript: '', tiktokHooks: [], tiktokCaption: '',
+  tiktokVideoTasks: []
+};
+
+/* ══════════════════════════════════════════════
+   RÉFÉRENCES DOM
+   ══════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const el = {
+  apiKey: $('apiKey'), baseUrl: $('baseUrl'), model: $('model'),
+  systemPrompt: $('systemPrompt'), temperature: $('temperature'),
+  tempVal: $('tempVal'), maxTokens: $('maxTokens'),
+  streaming: $('streaming'), streamToggle: $('streamToggle'),
+  autoRetry: $('autoRetry'), retryToggle: $('retryToggle'),
+  maxRetries: $('maxRetries'), retryDelay: $('retryDelay'), delayVal: $('delayVal'),
+  messages: $('messages'), emptyState: $('emptyState'),
+  prompt: $('prompt'), sendBtn: $('sendBtn'),
+  newChat: $('newChat'), clearAll: $('clearAll'),
+  statusDot: $('statusDot'), statusText: $('statusText'),
+  sidebar: $('sidebar'), menuBtn: $('menuBtn'), overlay: $('overlay'),
+  eyeBtn: $('eyeBtn'), eyeIcon: $('eyeIcon'), saveIndicator: $('saveIndicator'),
+  imgPresetGrid: $('imgPresetGrid'), imgPresetInfo: $('imgPresetInfo'),
+  imgPrompt: $('imgPrompt'), imgSize: $('imgSize'), imgCount: $('imgCount'),
+  genImg: $('genImg'), imgGrid: $('imgGrid'),
+  imgEditField: $('imgEditField'), imgAdaptHint: $('imgAdaptHint'),
+  imgSourceUrl: $('imgSourceUrl'), imgUrlAdd: $('imgUrlAdd'),
+  imgMultiGrid: $('imgMultiGrid'), imgCountBadge: $('imgCountBadge'),
+  imgDrop: $('imgDrop'), imgFile: $('imgFile'),
+  videoPresetGrid: $('videoPresetGrid'), videoPresetInfo: $('videoPresetInfo'),
+  videoModel: $('videoModel'), videoPrompt: $('videoPrompt'),
+  videoSeconds: $('videoSeconds'), videoSize: $('videoSize'),
+  videoAspect: $('videoAspect'), videoSeed: $('videoSeed'),
+  videoImageUrl: $('videoImageUrl'), videoUrlAdd: $('videoUrlAdd'),
+  videoImageField: $('vImageField'), vAdaptHint: $('vAdaptHint'),
+  videoMultiGrid: $('videoMultiGrid'), videoCountBadge: $('videoCountBadge'),
+  videoDrop: $('videoDrop'), videoFile: $('videoFile'),
+  videoAdaptGrid: $('videoAdaptGrid'), videoAdaptCountBadge: $('videoAdaptCountBadge'),
+  videoAdaptDrop: $('videoAdaptDrop'), videoAdaptFile: $('videoAdaptFile'),
+  videoAdaptUrl: $('videoAdaptUrl'), videoAdaptUrlAdd: $('videoAdaptUrlAdd'),
+  genVideo: $('genVideo'), videoList: $('videoList'),
+  ttTopic: $('ttTopic'), ttNicheGrid: $('ttNicheGrid'),
+  ttDurationRow: $('ttDurationRow'), ttStyle: $('ttStyle'),
+  ttScript: $('ttScript'), ttGenScript: $('ttGenScript'),
+  ttGenVariations: $('ttGenVariations'),
+  ttHooksSection: $('ttHooksSection'), ttHookList: $('ttHookList'),
+  ttCaptionBox: $('ttCaptionBox'), ttCaptionText: $('ttCaptionText'),
+  ttCopyCaption: $('ttCopyCaption'), ttGenVideo: $('ttGenVideo'),
+  ttVideoList: $('ttVideoList')
+};
+
+/* ══════════════════════════════════════════════
+   SAUVEGARDE
+   ══════════════════════════════════════════════ */
+let indicatorTimer = null;
+function flashSaved() {
+  if (!el.saveIndicator) return;
+  el.saveIndicator.classList.add('show');
+  clearTimeout(indicatorTimer);
+  indicatorTimer = setTimeout(() => el.saveIndicator.classList.remove('show'), 1800);
+}
+function save(showIndicator = false) {
+  persist({
+    apiKey: state.apiKey, baseUrl: state.baseUrl, model: state.model,
+    temperature: state.temperature, systemPrompt: state.systemPrompt,
+    streaming: state.streaming, maxTokens: state.maxTokens,
+    autoRetry: state.autoRetry, maxRetries: state.maxRetries, retryDelay: state.retryDelay,
+    history: state.history, videoTasks: state.videoTasks.slice(0, 20),
+    tiktokVideoTasks: state.tiktokVideoTasks.slice(0, 10),
+    imagePreset: state.imagePreset, videoPreset: state.videoPreset
+  });
+  if (showIndicator) flashSaved();
+}
+function load() {
+  const d = retrieve();
+  if (!d) return;
+  Object.assign(state, {
+    apiKey: d.apiKey || '', baseUrl: d.baseUrl || state.baseUrl, model: d.model || state.model,
+    temperature: d.temperature ?? 0.7,
+    systemPrompt: d.systemPrompt ?? state.systemPrompt,
+    streaming: d.streaming ?? true, maxTokens: d.maxTokens ?? 0,
+    autoRetry: d.autoRetry ?? true, maxRetries: d.maxRetries ?? 8, retryDelay: d.retryDelay ?? 3,
+    history: Array.isArray(d.history) ? d.history : [],
+    videoTasks: Array.isArray(d.videoTasks) ? d.videoTasks : [],
+    tiktokVideoTasks: Array.isArray(d.tiktokVideoTasks) ? d.tiktokVideoTasks : [],
+    imagePreset: d.imagePreset || 'custom',
+    videoPreset: d.videoPreset || 'custom'
+  });
+}
+function syncUI() {
+  el.apiKey.value = state.apiKey; el.baseUrl.value = state.baseUrl; el.model.value = state.model;
+  el.systemPrompt.value = state.systemPrompt; el.temperature.value = state.temperature;
+  el.tempVal.textContent = state.temperature; el.maxTokens.value = state.maxTokens;
+  el.streaming.checked = state.streaming; el.streamToggle.classList.toggle('on', state.streaming);
+  el.autoRetry.checked = state.autoRetry; el.retryToggle.classList.toggle('on', state.autoRetry);
+  el.maxRetries.value = state.maxRetries; el.retryDelay.value = state.retryDelay;
+  el.delayVal.textContent = state.retryDelay;
+  updateStatus();
+}
+function updateStatus(customClass, customText) {
+  if (customClass) { el.statusDot.className = 'dot ' + customClass; el.statusText.textContent = customText || ''; return; }
+  const has = !!state.apiKey.trim();
+  el.statusDot.className = 'dot' + (state.busy ? ' busy' : has ? ' on' : '');
+  el.statusText.textContent = state.busy ? 'Génération…' : has ? 'Prêt' : 'Clé API requise';
+}
+
+/* ══════════════════════════════════════════════
+   MARKDOWN
+   ══════════════════════════════════════════════ */
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function inlineFmt(s) {
+  s = escapeHtml(s);
+  s = s.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+  s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/__([^_\n]+)__/g, '<strong>$1</strong>');
+  s = s.replace(/(^|[^*\w])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
+  s = s.replace(/(^|[^_\w])_([^_\n]+)_(?!_)/g, '$1<em>$2</em>');
+  s = s.replace(/~~([^~\n]+)~~/g, '<del>$1</del>');
+  s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  return s;
+}
+function renderMarkdown(src) {
+  const blocks = [];
+  src = String(src).replace(/```([\w+#.-]*)[ \t]*\r?\n?([\s\S]*?)```/g, (m, lang, code) => {
+    blocks.push({ lang: lang || 'code', code: code.replace(/\n$/, '') });
+    return `\u0000B${blocks.length - 1}\u0000`;
+  });
+  const lines = src.split('\n');
+  let html = '', listType = null, para = [];
+  const flushPara = () => { if (para.length) { html += '<p>' + inlineFmt(para.join('\n')).replace(/\n/g, '<br>') + '</p>'; para = []; } };
+  const closeList = () => { if (listType) { html += `</${listType}>`; listType = null; } };
+  for (const line of lines) {
+    const cb = line.match(/^\u0000B(\d+)\u0000\s*$/);
+    if (cb) { flushPara(); closeList();
+      const b = blocks[+cb[1]];
+      html += `<div class="codeblock"><div class="cb-head"><span>${escapeHtml(b.lang)}</span><button class="copy-code" data-code="${encodeURIComponent(b.code)}">Copier</button></div><pre><code>${escapeHtml(b.code)}</code></pre></div>`;
+      continue;
+    }
+    const h = line.match(/^(#{1,6})\s+(.*)$/);
+    if (h) { flushPara(); closeList(); const n = h[1].length; html += `<h${n}>${inlineFmt(h[2])}</h${n}>`; continue; }
+    if (/^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/.test(line)) { flushPara(); closeList(); html += '<hr>'; continue; }
+    const ul = line.match(/^\s*[-*+]\s+(.*)$/);
+    const ol = line.match(/^\s*\d+[.)]\s+(.*)$/);
+    if (ul) { flushPara(); if (listType !== 'ul') { closeList(); html += '<ul>'; listType = 'ul'; } html += `<li>${inlineFmt(ul[1])}</li>`; continue; }
+    if (ol) { flushPara(); if (listType !== 'ol') { closeList(); html += '<ol>'; listType = 'ol'; } html += `<li>${inlineFmt(ol[1])}</li>`; continue; }
+    const bq = line.match(/^\s*>\s?(.*)$/);
+    if (bq) { flushPara(); closeList(); html += `<blockquote>${inlineFmt(bq[1])}</blockquote>`; continue; }
+    if (!line.trim()) { flushPara(); closeList(); continue; }
+    para.push(line);
+  }
+  flushPara(); closeList();
+  html = html.replace(/\u0000B(\d+)\u0000/g, (m, i) => {
+    const b = blocks[+i];
+    return `<div class="codeblock"><div class="cb-head"><span>${escapeHtml(b.lang)}</span><button class="copy-code" data-code="${encodeURIComponent(b.code)}">Copier</button></div><pre><code>${escapeHtml(b.code)}</code></pre></div>`;
+  });
+  return html;
+}
+
+/* ══════════════════════════════════════════════
+   CHAT
+   ══════════════════════════════════════════════ */
+function messageText(c) { if (typeof c === 'string') return c; if (Array.isArray(c)) return c.filter(p => p.type === 'text').map(p => p.text).join('\n'); return ''; }
+function messageImages(c) { if (!Array.isArray(c)) return []; return c.filter(p => p.type === 'image_url').map(p => p.image_url.url); }
+function scrollIfNearBottom() { const m = el.messages; if (m.scrollHeight - m.scrollTop - m.clientHeight < 160) m.scrollTop = m.scrollHeight; }
+
+function addMessageEl(role, content, opts = {}) {
+  if (el.emptyState) el.emptyState.remove();
+  const wrap = document.createElement('div');
+  wrap.className = 'msg'; wrap.dataset.role = role;
+  const isUser = role === 'user';
+  const name = opts.name || (isUser ? 'Vous' : state.model);
+  wrap.innerHTML = `
+    <div class="avatar ${isUser ? 'user' : 'ai'}">${isUser ? 'V' : 'A'}</div>
+    <div class="msg-body">
+      <div class="msg-head"><span class="msg-name"></span>
+        <div class="msg-actions">
+          <button class="icon-btn act-copy" title="Copier">Copier</button>
+          ${opts.canRegenerate ? '<button class="icon-btn act-retry" title="Régénérer">↻</button>' : ''}
+        </div>
+      </div>
+      <div class="content"></div>
+    </div>`;
+  wrap.querySelector('.msg-name').textContent = name;
+  const contentEl = wrap.querySelector('.content');
+  const imgs = messageImages(content);
+  if (imgs.length) {
+    const box = document.createElement('div'); box.className = 'attachments';
+    imgs.forEach(src => { const img = document.createElement('img'); img.src = src; box.appendChild(img); });
+    contentEl.appendChild(box);
+  }
+  const text = messageText(content);
+  if (text) {
+    const div = document.createElement('div'); div.className = 'md';
+    div.innerHTML = renderMarkdown(text); contentEl.appendChild(div);
+  } else if (!imgs.length) { contentEl.innerHTML = '<div class="md"></div>'; }
+  el.messages.appendChild(wrap); scrollIfNearBottom(); return wrap;
+}
+
+function createStreamingEl() {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg'; wrap.dataset.role = 'assistant';
+  wrap.innerHTML = `
+    <div class="avatar ai">A</div>
+    <div class="msg-body">
+      <div class="msg-head"><span class="msg-name">${escapeHtml(state.model)}</span></div>
+      <div class="content"><div class="md"></div><span class="cursor-blink"></span></div>
+    </div>`;
+  el.messages.appendChild(wrap); scrollIfNearBottom(); return wrap;
+}
+function updateStreamingEl(wrap, text) { const md = wrap.querySelector('.md'); if (md) md.innerHTML = renderMarkdown(text); scrollIfNearBottom(); }
+function finalizeStreamingEl(wrap, text) {
+  const cur = wrap.querySelector('.cursor-blink'); if (cur) cur.remove();
+  const head = wrap.querySelector('.msg-head');
+  if (head && !head.querySelector('.msg-actions')) {
+    const acts = document.createElement('div'); acts.className = 'msg-actions';
+    acts.innerHTML = `<button class="icon-btn act-copy">Copier</button><button class="icon-btn act-retry">↻</button>`;
+    head.appendChild(acts);
+  }
+  if (!text.trim()) wrap.querySelector('.content').innerHTML = '<div class="md" style="color:var(--muted);font-style:italic">(réponse vide)</div>';
+}
+function renderHistory() {
+  el.messages.innerHTML = '';
+  if (!state.history.length) { el.messages.appendChild(buildEmptyState()); return; }
+  state.history.forEach(m => addMessageEl(m.role, m.content));
+  el.messages.scrollTop = el.messages.scrollHeight;
+}
+function buildEmptyState() {
+  const d = document.createElement('div');
+  d.className = 'empty'; d.id = 'emptyState';
+  d.innerHTML = `
+    <div class="big">A</div>
+    <h3>Comment puis-je vous aider ?</h3>
+    <p>Posez une question, collez du code, ou lancez une génération d'image ou de vidéo.</p>
+    <div class="chips">
+      <button class="chip" data-prompt="Explique-moi les bases de l'apprentissage automatique.">Expliquer un concept</button>
+      <button class="chip" data-prompt="Écris une fonction Python qui trie une liste de dictionnaires par clé.">Générer du code</button>
+      <button class="chip" data-prompt="Résume en 5 points les avantages des API compatibles OpenAI.">Résumer</button>
+    </div>`;
+  return d;
+}
+function showRetryBanner(container, info) {
+  let banner = container.querySelector('.retry-banner');
+  if (!banner) { banner = document.createElement('div'); banner.className = 'retry-banner'; container.appendChild(banner); }
+  const seconds = Math.ceil(info.delayMs / 1000);
+  banner.innerHTML = `<span class="spinner"></span><span><b>Tentative ${info.attempt}/${info.maxAttempts}</b> — ${escapeHtml(info.reason)}. Nouvelle tentative dans <b>${seconds}s</b>…</span>`;
+  scrollIfNearBottom();
+}
+function clearRetryBanner(container) { const b = container.querySelector('.retry-banner'); if (b) b.remove(); }
+
+async function callChat(onDelta, signal, retryContainer) {
+  const messages = [];
+  if (state.systemPrompt.trim()) messages.push({ role: 'system', content: state.systemPrompt.trim() });
+  state.history.forEach(m => messages.push({ role: m.role, content: m.content }));
+  const body = { model: state.model, messages, temperature: Number(state.temperature), stream: !!state.streaming };
+  if (Number(state.maxTokens) > 0) body.max_tokens = Number(state.maxTokens);
+  const res = await fetchWithRetry(
+    `${state.baseUrl.replace(/\/+$/, '')}/chat/completions`,
+    { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.apiKey.trim()}` }, body: JSON.stringify(body) },
+    { signal, onRetry: (info) => { updateStatus('retry', `Reprise ${info.attempt}/${info.maxAttempts}…`); if (retryContainer) showRetryBanner(retryContainer, info); } }
+  );
+  if (retryContainer) clearRetryBanner(retryContainer);
+  updateStatus();
+  if (!res.ok) {
+    let detail = '';
+    try { const j = await res.json(); detail = j.error?.message || j.message || JSON.stringify(j); } catch { detail = await res.text().catch(() => ''); }
+    throw new Error(`HTTP ${res.status} — ${detail || res.statusText}`);
+  }
+  if (!state.streaming || !res.body) {
+    const json = await res.json();
+    const text = json.choices?.[0]?.message?.content ?? '';
+    if (text) onDelta(text, true);
+    return text;
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '', full = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n'); buffer = lines.pop() ?? '';
+    for (const raw of lines) {
+      const line = raw.trim();
+      if (!line || !line.startsWith('data:')) continue;
+      const data = line.slice(5).trim();
+      if (data === '[DONE]') continue;
+      try { const json = JSON.parse(data); const choice = json.choices?.[0]; const delta = choice?.delta?.content ?? choice?.message?.content ?? ''; if (delta) { full += delta; onDelta(delta, false); } } catch {}
+    }
+  }
+  return full;
+}
+
+async function send() {
+  if (state.busy) return;
+  const text = el.prompt.value.trim(); if (!text) return;
+  if (!state.apiKey.trim()) { alert('Veuillez saisir votre clé API.'); openSidebar(); el.apiKey.focus(); return; }
+  el.prompt.value = ''; el.prompt.style.height = 'auto';
+  state.history.push({ role: 'user', content: text }); addMessageEl('user', text); save();
+  state.busy = true; updateStatus(); setSendMode('stop');
+  const streamEl = createStreamingEl(); const contentEl = streamEl.querySelector('.content');
+  let acc = ''; const controller = new AbortController(); state.controller = controller;
+  try {
+    const full = await callChat((delta) => { acc += delta; updateStreamingEl(streamEl, acc); }, controller.signal, contentEl);
+    const finalText = full || acc;
+    if (finalText) { state.history.push({ role: 'assistant', content: finalText }); save(); }
+    finalizeStreamingEl(streamEl, finalText);
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      if (acc) { state.history.push({ role: 'assistant', content: acc }); save(); }
+      finalizeStreamingEl(streamEl, acc);
+      const note = document.createElement('div');
+      note.style.cssText = 'font-size:12px;color:var(--muted);margin-top:8px;font-style:italic';
+      note.textContent = '⏹ Génération interrompue.';
+      contentEl.appendChild(note);
+    } else { clearRetryBanner(contentEl); streamEl.remove(); showError(err.message); }
+  } finally { state.busy = false; state.controller = null; updateStatus(); setSendMode('send'); el.prompt.focus(); }
+}
+function showError(msg) {
+  const box = document.createElement('div'); box.className = 'msg';
+  box.innerHTML = `<div class="avatar ai" style="background:rgba(255,107,107,.15);color:var(--err)">!</div><div class="msg-body"><div class="msg-head"><span class="msg-name" style="color:var(--err)">Erreur</span></div><div class="content" style="font-size:13.5px;color:var(--err)"></div></div>`;
+  const c = box.querySelector('.content'); c.textContent = msg;
+  if (/CORS|Failed to fetch|NetworkError/i.test(msg)) {
+    const tip = document.createElement('div');
+    tip.style.cssText = 'margin-top:10px;font-size:12.5px;color:var(--muted);line-height:1.5';
+    tip.innerHTML = `Servez ce fichier via un serveur local.<br><code style="display:block;margin-top:6px;padding:8px;background:var(--panel-2);border-radius:6px">python -m http.server 8000</code>`;
+    c.appendChild(tip);
+  }
+  el.messages.appendChild(box); scrollIfNearBottom();
+}
+function setSendMode(mode) {
+  if (mode === 'stop') {
+    el.sendBtn.classList.add('stop'); el.sendBtn.disabled = false; el.sendBtn.title = 'Arrêter';
+    el.sendBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>';
+  } else {
+    el.sendBtn.classList.remove('stop'); el.sendBtn.disabled = false; el.sendBtn.title = 'Envoyer';
+    el.sendBtn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>';
+  }
+}
+function stopGeneration() { if (state.controller) state.controller.abort(); }
+
+/* ══════════════════════════════════════════════
+   FETCH RETRY
+   ══════════════════════════════════════════════ */
+function isRetryableStatus(s) { return s === 503 || s === 502 || s === 504 || s === 429 || s === 408 || s === 500; }
+function parseRetryAfter(r) {
+  const h = r.headers.get('retry-after'); if (!h) return null;
+  const n = Number(h); if (!isNaN(n) && n >= 0) return n * 1000;
+  const d = Date.parse(h); if (!isNaN(d)) return Math.max(0, d - Date.now());
+  return null;
+}
+function computeBackoff(a, base) {
+  const e = base * Math.pow(2, a - 1);
+  const j = e * (Math.random() * 0.4 - 0.2);
+  return Math.round(Math.max(0.5, e + j) * 1000);
+}
+async function fetchWithRetry(url, options = {}, cfg = {}) {
+  const maxAttempts = state.autoRetry ? (cfg.maxAttempts ?? state.maxRetries ?? 8) : 1;
+  const baseDelay = cfg.baseDelay ?? state.retryDelay ?? 3;
+  const signal = cfg.signal || options.signal;
+  const onRetry = typeof cfg.onRetry === 'function' ? cfg.onRetry : () => {};
+  let lastError = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    if (signal && signal.aborted) { const e = new Error('Aborted'); e.name = 'AbortError'; throw e; }
+    try {
+      const res = await fetch(url, { ...options, signal });
+      if (res.ok) return res;
+      if (!isRetryableStatus(res.status)) return res;
+      lastError = new Error(`HTTP ${res.status}`);
+      if (attempt < maxAttempts) {
+        const serverDelay = parseRetryAfter(res);
+        const delayMs = serverDelay !== null ? Math.min(serverDelay, baseDelay * 1000 * 4) : computeBackoff(attempt, baseDelay);
+        onRetry({ attempt, maxAttempts, delayMs, status: res.status, reason: `HTTP ${res.status}` });
+        await abortableSleep(delayMs, signal); continue;
+      }
+      return res;
+    } catch (err) {
+      if (err.name === 'AbortError') throw err;
+      lastError = err;
+      if (attempt < maxAttempts) {
+        const delayMs = computeBackoff(attempt, baseDelay);
+        onRetry({ attempt, maxAttempts, delayMs, status: 0, reason: /Failed to fetch|NetworkError/i.test(err.message) ? 'Erreur réseau / CORS' : err.message });
+        await abortableSleep(delayMs, signal); continue;
+      }
+      throw err;
+    }
+  }
+  throw lastError || new Error('Échec après plusieurs tentatives.');
+}
+function abortableSleep(ms, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal && signal.aborted) { const e = new Error('Aborted'); e.name = 'AbortError'; return reject(e); }
+    const t = setTimeout(() => { if (signal) signal.removeEventListener('abort', onAbort); resolve(); }, ms);
+    const onAbort = () => { clearTimeout(t); const e = new Error('Aborted'); e.name = 'AbortError'; reject(e); };
+    if (signal) signal.addEventListener('abort', onAbort, { once: true });
+  });
+}
+
+/* ══════════════════════════════════════════════
+   MULTI-IMAGES
+   ══════════════════════════════════════════════ */
+function addImages(arr, sources, gridEl, badgeEl, max = MAX_IMAGES) {
+  let added = 0;
+  for (const src of sources) {
+    if (!src) continue;
+    if (arr.length >= max) { alert(`Maximum ${max} images.`); break; }
+    if (!arr.includes(src)) { arr.push(src); added++; }
+  }
+  renderMultiGrid(arr, gridEl, badgeEl, max); return added;
+}
+function renderMultiGrid(arr, gridEl, badgeEl, max = MAX_IMAGES) {
+  gridEl.innerHTML = '';
+  arr.forEach((src, i) => {
+    const item = document.createElement('div'); item.className = 'multi-img-item';
+    item.innerHTML = `<img src="${escapeHtml(src)}" alt="image ${i + 1}" loading="lazy"><span class="multi-img-index">${i + 1}</span><button class="multi-img-remove" title="Retirer">×</button>`;
+    item.querySelector('.multi-img-remove').addEventListener('click', (e) => { e.stopPropagation(); arr.splice(i, 1); renderMultiGrid(arr, gridEl, badgeEl, max); });
+    gridEl.appendChild(item);
+  });
+  if (arr.length < max) {
+    const addTile = document.createElement('div'); addTile.className = 'multi-img-add';
+    addTile.innerHTML = `+<small>Ajouter</small>`;
+    addTile.addEventListener('click', () => openFilePicker(arr, gridEl, badgeEl, max));
+    ['dragenter','dragover'].forEach(ev => addTile.addEventListener(ev, e => { e.preventDefault(); addTile.classList.add('over'); }));
+    ['dragleave','drop'].forEach(ev => addTile.addEventListener(ev, e => { e.preventDefault(); addTile.classList.remove('over'); }));
+    addTile.addEventListener('drop', e => { const files = Array.from(e.dataTransfer.files || []); handleImageFiles(files, arr, gridEl, badgeEl, max); });
+    gridEl.appendChild(addTile);
+  }
+  badgeEl.textContent = arr.length === 0 ? '0 image' : arr.length === 1 ? '1 image' : `${arr.length} images`;
+  badgeEl.classList.toggle('has', arr.length > 0);
+}
+function openFilePicker(arr, gridEl, badgeEl, max = MAX_IMAGES) {
+  const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.multiple = true;
+  input.addEventListener('change', (e) => handleImageFiles(Array.from(e.target.files || []), arr, gridEl, badgeEl, max));
+  input.click();
+}
+function handleImageFiles(files, arr, gridEl, badgeEl, max = MAX_IMAGES) {
+  const images = files.filter(f => f.type.startsWith('image/')); if (!images.length) return;
+  let pending = images.length; const results = [];
+  images.forEach((file, idx) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => { results[idx] = ev.target.result; pending--; if (pending === 0) addImages(arr, results.filter(Boolean), gridEl, badgeEl, max); };
+    reader.onerror = () => { pending--; if (pending === 0) addImages(arr, results.filter(Boolean), gridEl, badgeEl, max); };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ══════════════════════════════════════════════
+   PRESETS RENDU
+   ══════════════════════════════════════════════ */
+function renderPresetGrid(gridEl, activeKey, target, onSelect) {
+  gridEl.innerHTML = '';
+  for (const [key, preset] of Object.entries(PRESETS)) {
+    if (key === 'custom') continue;
+    const card = document.createElement('div');
+    card.className = 'preset-card' + (activeKey === key ? ' active' : '');
+    card.dataset.presetKey = key;
+    const dim = target === 'image' ? (preset.image?.dims || '—') : (preset.video?.dims || '—');
+    card.innerHTML = `
+      <span class="preset-badge">${preset.badge}</span>
+      <span class="preset-icon">${preset.icon}</span>
+      <div class="preset-name">${escapeHtml(preset.name)}</div>
+      <div class="preset-dim">${escapeHtml(dim)}</div>`;
+    card.addEventListener('click', () => onSelect(key));
+    gridEl.appendChild(card);
+  }
+  const card = document.createElement('div');
+  card.className = 'preset-card' + (activeKey === 'custom' ? ' active' : '');
+  card.dataset.presetKey = 'custom';
+  card.innerHTML = `<span class="preset-badge">AUTO</span><span class="preset-icon">⚙️</span><div class="preset-name">Manuel</div><div class="preset-dim">Libre</div>`;
+  card.addEventListener('click', () => onSelect('custom'));
+  gridEl.appendChild(card);
+}
+function renderPresetInfo(infoEl, presetKey, target) {
+  const preset = PRESETS[presetKey];
+  if (!preset || presetKey === 'custom' || !preset[target]) {
+    infoEl.innerHTML = `<div class="info-item"><span class="info-dot" style="background:var(--muted)"></span> Mode manuel — choisissez vos paramètres ci-dessous.</div>`;
+    return;
+  }
+  const data = preset[target];
+  const items = [];
+  if (target === 'image') {
+    items.push(`Ratio : <b>${data.ratio}</b>`);
+    items.push(`Dimensions cible : <b>${data.dims}</b>`);
+    items.push(`Taille API : <b>${data.size}</b>`);
+  } else {
+    items.push(`Ratio : <b>${data.aspect}</b>`);
+    items.push(`Résolution : <b>${data.dims}</b>`);
+    items.push(`Durée : <b>${data.seconds}s</b>`);
+    items.push(`Niveau : <b>${data.size}</b>`);
+  }
+  infoEl.innerHTML = `<div class="info-item"><span class="info-dot" style="background:${preset.color}"></span> <b style="color:${preset.color}">${escapeHtml(preset.name)}</b></div>` +
+    items.map(i => `<div class="info-item"><span class="info-dot"></span> ${i}</div>`).join('');
+}
+function applyImagePreset(key) {
+  state.imagePreset = key;
+  const preset = PRESETS[key];
+  if (key === 'custom' || !preset?.image) el.imgSize.disabled = false;
+  else { el.imgSize.value = preset.image.size; el.imgSize.disabled = false; }
+  renderPresetGrid(el.imgPresetGrid, state.imagePreset, 'image', applyImagePreset);
+  renderPresetInfo(el.imgPresetInfo, state.imagePreset, 'image');
+  save();
+}
+function applyVideoPreset(key) {
+  state.videoPreset = key;
+  const preset = PRESETS[key];
+  if (key === 'custom' || !preset?.video) {
+    el.videoSize.disabled = false;
+    el.videoAspect.disabled = false;
+  } else {
+    const v = preset.video;
+    el.videoAspect.value = v.aspect;
+    el.videoSize.value = v.size;
+    el.videoSeconds.value = String(v.seconds);
+    if (v.model) el.videoModel.value = v.model;
+    const isFlash = el.videoModel.value === 'agnes-video-2.5-flash';
+    el.videoSize.disabled = isFlash;
+    el.videoAspect.disabled = false;
+  }
+  renderPresetGrid(el.videoPresetGrid, state.videoPreset, 'video', applyVideoPreset);
+  renderPresetInfo(el.videoPresetInfo, state.videoPreset, 'video');
+  save();
+}
+
+/* ══════════════════════════════════════════════
+   IMAGE — GÉNÉRATION
+   ══════════════════════════════════════════════ */
+async function generateImage() {
+  const prompt = el.imgPrompt.value.trim();
+  const isAdapt = state.imageMode === 'adapt';
+  const isEdit = state.imageMode === 'edit';
+
+  if (!prompt && !isAdapt) { el.imgPrompt.focus(); return; }
+  if (!state.apiKey.trim()) { alert('Veuillez saisir votre clé API.'); openSidebar(); el.apiKey.focus(); return; }
+  if ((isEdit || isAdapt) && state.imageSources.length === 0) { alert('Veuillez ajouter au moins une image source.'); return; }
+
+  const originalLabel = el.genImg.textContent;
+  el.genImg.disabled = true;
+  el.genImg.textContent = isAdapt
+    ? `⏳ Adaptation (${state.imageSources.length} img)…`
+    : isEdit ? `⏳ Transformation (${state.imageSources.length} img)…` : '⏳ Génération en cours…';
+
+  const finalPrompt = prompt || (
+    state.imagePreset !== 'custom'
+      ? `Reproduis fidèlement le contenu, la composition et le style de cette image, en l'adaptant au format ${PRESETS[state.imagePreset].image.ratio} (${PRESETS[state.imagePreset].image.dims} pixels) pour la plateforme ${PRESETS[state.imagePreset].name}. Conserve tous les détails importants, la palette de couleurs et l'ambiance originale. Recadre intelligemment sans couper les éléments essentiels.`
+      : `Reproduis fidèlement cette image en respectant son contenu, sa composition et son style.`
+  );
+
+  const body = {
+    model: 'agnes-image-2.1-flash',
+    prompt: finalPrompt,
+    size: el.imgSize.value,
+    n: Math.max(1, Math.min(4, Number(el.imgCount.value) || 1))
+  };
+
+  if ((isEdit || isAdapt) && state.imageSources.length) {
+    body.extra_body = { image: state.imageSources.slice(), response_format: 'url' };
+  }
+
+  try {
+    const res = await fetchWithRetry(
+      `${state.baseUrl.replace(/\/+$/, '')}/images/generations`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.apiKey.trim()}` }, body: JSON.stringify(body) },
+      { onRetry: (info) => { const s = Math.ceil(info.delayMs / 1000); el.genImg.textContent = `🔁 Tentative ${info.attempt}/${info.maxAttempts} — ${s}s…`; updateStatus('retry', `Reprise ${info.attempt}/${info.maxAttempts}…`); } }
+    );
+    updateStatus();
+    if (!res.ok) {
+      let d = ''; try { const j = await res.json(); d = j.error?.message || JSON.stringify(j); } catch { d = await res.text().catch(() => ''); }
+      throw new Error(`HTTP ${res.status} — ${d || res.statusText}`);
+    }
+    const json = await res.json();
+    const items = json.data || []; if (!items.length) throw new Error('Aucune image retournée par l\'API.');
+
+    const preset = PRESETS[state.imagePreset];
+    const badgeText = isAdapt
+      ? `Adaptée${preset && state.imagePreset !== 'custom' ? ' · ' + preset.name : ''}`
+      : isEdit ? `Transformée (${state.imageSources.length} src)` : 'Générée';
+
+    items.forEach(item => {
+      const src = item.url || (item.b64_json ? `data:image/png;base64,${item.b64_json}` : null);
+      if (!src) return;
+      const card = document.createElement('div'); card.className = 'img-card';
+      card.innerHTML = `
+        <span class="img-badge">${escapeHtml(badgeText)}</span>
+        <img src="${src}" alt="${escapeHtml(finalPrompt)}" loading="lazy">
+        <div class="meta"><span>${el.imgSize.value}</span><a href="${src}" download="agnes-${Date.now()}.png" target="_blank">Télécharger</a></div>`;
+      el.imgGrid.prepend(card);
+      card.querySelector('img').addEventListener('click', () => window.open(src, '_blank'));
+    });
+  } catch (err) { alert('Erreur :\n\n' + err.message); }
+  finally { el.genImg.disabled = false; el.genImg.textContent = originalLabel; updateStatus(); }
+}
+
+/* ══════════════════════════════════════════════
+   VIDÉO
+   ══════════════════════════════════════════════ */
+function videoApiBase() { return state.baseUrl.replace(/\/+$/, ''); }
+
+function createVideoCard(task, targetList) {
+  const card = document.createElement('div');
+  card.className = 'video-card' + (task.isTiktok ? ' tiktok-card' : '');
+  card.dataset.id = task.id;
+  const thumbsHtml = (task.imageUrls && task.imageUrls.length)
+    ? `<div class="vc-thumbs">${task.imageUrls.map(u => `<img class="vc-thumb" src="${escapeHtml(u)}" alt="référence">`).join('')}</div>` : '';
+  const presetLabel = task.preset && task.preset !== 'custom'
+    ? ` · ${PRESETS[task.preset].icon} ${PRESETS[task.preset].name}` : '';
+  card.innerHTML = `
+    <div class="vc-head">
+      <span class="vc-status queued">File d'attente</span>
+      <span class="vc-model">${escapeHtml(task.model)}${presetLabel}</span>
+    </div>
+    <div class="vc-body">
+      ${thumbsHtml}
+      <div class="vc-prompt">${escapeHtml(task.prompt)}</div>
+      <div class="vc-progress"><div class="vc-progress-bar"></div></div>
+      <div class="vc-info"><span class="vc-stage">Initialisation…</span><span class="vc-pct">0 %</span></div>
+      <div class="vc-result"></div>
+    </div>`;
+  targetList.prepend(card); return card;
+}
+function updateVideoCard(card, task) {
+  const status = card.querySelector('.vc-status'); status.className = 'vc-status ' + task.status;
+  status.textContent = { queued: "File d'attente", processing: 'Génération…', completed: 'Terminé', failed: 'Échec' }[task.status] || task.status;
+  const pct = Math.max(0, Math.min(100, Number(task.progress) || 0));
+  card.querySelector('.vc-progress-bar').style.width = pct + '%';
+  card.querySelector('.vc-pct').textContent = pct + ' %';
+  card.querySelector('.vc-stage').textContent = task.stage || (task.status === 'queued' ? 'En attente…' : task.status === 'processing' ? 'Rendu en cours…' : task.status === 'completed' ? 'Prêt' : 'Erreur');
+  card.classList.toggle('done', task.status === 'completed');
+  card.classList.toggle('failed', task.status === 'failed');
+  const result = card.querySelector('.vc-result');
+  if (task.status === 'completed' && task.videoUrl) {
+    if (!result.querySelector('video')) {
+      const isVert = ['9:16'].includes(task.aspectRatio) || task.isTiktok;
+      const videoClass = isVert ? 'vc-video tiktok-video' : 'vc-video';
+      result.innerHTML = `
+        <video class="${videoClass}" src="${task.videoUrl}" controls playsinline preload="metadata"></video>
+        <div class="vc-actions">
+          <a class="btn sm" href="${task.videoUrl}" download="agnes-video-${task.id}.mp4" target="_blank">⬇ Télécharger</a>
+          <button class="btn sm vc-copy-url">Copier l'URL</button>
+        </div>`;
+      const copyBtn = result.querySelector('.vc-copy-url');
+      if (copyBtn) copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(task.videoUrl);
+        copyBtn.textContent = '✓ Copié';
+        setTimeout(() => copyBtn.textContent = 'Copier l\'URL', 1400);
+      });
+    }
+  } else if (task.status === 'failed') {
+    result.innerHTML = `<div class="vc-err">${escapeHtml(task.error || 'Échec de la génération.')}</div>`;
+  }
+}
+async function pollVideoTask(task, card) {
+  const url = `${videoApiBase()}/agnesapi?video_id=${encodeURIComponent(task.videoId)}&model_name=${encodeURIComponent(task.model)}`;
+  let attempts = 0;
+  while (attempts < 240) {
+    attempts++;
+    await new Promise(r => setTimeout(r, 2000));
+    try {
+      const res = await fetchWithRetry(url, { headers: { 'Authorization': `Bearer ${state.apiKey.trim()}` } },
+        { onRetry: (info) => { task.stage = `Reprise ${info.attempt}/${info.maxAttempts}…`; updateVideoCard(card, task); } });
+      if (!res.ok) { if (res.status === 404) continue; throw new Error(`HTTP ${res.status}`); }
+      const data = await res.json();
+      const payload = data.data || data;
+      const status = payload.status || data.status || 'processing';
+      const progress = payload.progress ?? data.progress ?? 0;
+      const stage = payload.stage || payload.message || data.message || '';
+      const videoUrl = payload.metadata?.url || payload.url || payload.video_url || data.metadata?.url || data.url || null;
+      const errorMsg = payload.error?.message || payload.error || data.error?.message || data.error || null;
+      task.status = status; task.progress = progress; task.stage = stage;
+      if (videoUrl) task.videoUrl = videoUrl;
+      if (errorMsg) task.error = String(errorMsg);
+      updateVideoCard(card, task); save();
+      if (['completed', 'succeeded', 'success'].includes(status)) {
+        task.status = 'completed';
+        if (!task.videoUrl) task.error = 'Aucune URL vidéo retournée.';
+        updateVideoCard(card, task); save(); return;
+      }
+      if (['failed', 'error'].includes(status)) {
+        task.status = 'failed';
+        if (!task.error) task.error = 'La génération a échoué.';
+        updateVideoCard(card, task); save(); return;
+      }
+    } catch (e) { task.stage = 'Nouvelle tentative…'; updateVideoCard(card, task); }
+  }
+  task.status = 'failed'; task.error = 'Délai d\'attente dépassé.';
+  updateVideoCard(card, task); save();
+}
+
+async function generateVideo() {
+  const prompt = el.videoPrompt.value.trim();
+  const isAdapt = state.videoMode === 'adapt';
+  const isImage = state.videoMode === 'image';
+
+  if (!prompt && !isAdapt) { el.videoPrompt.focus(); return; }
+  if (!state.apiKey.trim()) { alert('Veuillez saisir votre clé API.'); openSidebar(); el.apiKey.focus(); return; }
+
+  let imagesForCard = [];
+  let body;
+
+  const preset = PRESETS[state.videoPreset];
+  const presetVideo = preset?.video || null;
+
+  if (isAdapt) {
+    if (state.videoAdaptImages.length === 0) { alert('Veuillez ajouter une image de départ.'); return; }
+    imagesForCard = state.videoAdaptImages.slice(0, 1);
+    const finalPrompt = prompt || (
+      presetVideo
+        ? `Anime cette image de manière subtile et naturelle au format ${presetVideo.aspect} (${presetVideo.dims}) pour ${preset.name}. Ajoute un léger mouvement de caméra cinématique, un effet de profondeur et une ambiance cohérente. Conserve tous les détails de l'image originale.`
+        : `Anime subtilement cette image avec un mouvement de caméra cinématique léger.`
+    );
+    body = {
+      model: el.videoModel.value, prompt: finalPrompt,
+      seconds: el.videoSeconds.value, mode: 'ti2vid',
+      size: el.videoSize.value, aspect_ratio: el.videoAspect.value,
+      image: imagesForCard[0]
+    };
+  } else if (isImage) {
+    if (state.videoImages.length === 0) { alert('Veuillez ajouter au moins une image.'); return; }
+    imagesForCard = state.videoImages.slice();
+    body = {
+      model: el.videoModel.value, prompt,
+      seconds: el.videoSeconds.value, mode: 'ti2vid',
+      size: el.videoSize.value, aspect_ratio: el.videoAspect.value,
+      image: imagesForCard.length === 1 ? imagesForCard[0] : imagesForCard
+    };
+  } else {
+    body = {
+      model: el.videoModel.value, prompt,
+      seconds: el.videoSeconds.value, mode: 'text',
+      size: el.videoSize.value, aspect_ratio: el.videoAspect.value
+    };
+  }
+
+  const seed = el.videoSeed.value.trim();
+  if (seed !== '') body.seed = Number(seed);
+
+  const task = {
+    id: 'local_' + Date.now(), videoId: null,
+    model: body.model, prompt: body.prompt,
+    imageUrls: imagesForCard, status: 'queued', progress: 0,
+    stage: 'Création de la tâche…', videoUrl: null, error: null,
+    aspectRatio: body.aspect_ratio, preset: state.videoPreset, createdAt: Date.now()
+  };
+  const card = createVideoCard(task, el.videoList);
+  state.videoTasks.unshift(task); save();
+  el.genVideo.disabled = true; el.genVideo.textContent = '⏳ Création de la tâche…';
+
+  try {
+    const res = await fetchWithRetry(`${videoApiBase()}/videos`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.apiKey.trim()}` }, body: JSON.stringify(body) },
+      { onRetry: (info) => { const s = Math.ceil(info.delayMs / 1000); el.genVideo.textContent = `🔁 Tentative ${info.attempt}/${info.maxAttempts} — ${s}s…`; task.stage = `Reprise ${info.attempt}/${info.maxAttempts}…`; updateVideoCard(card, task); } });
+
+    if (!res.ok) {
+      let detail = ''; try { const j = await res.json(); detail = j.error?.message || JSON.stringify(j); } catch { detail = await res.text().catch(() => ''); }
+      throw new Error(`HTTP ${res.status} — ${detail || res.statusText}`);
+    }
+    const data = await res.json();
+    const videoId = data.video_id || data.id || data.task_id;
+    if (!videoId) throw new Error('Aucun identifiant vidéo retourné.');
+    task.videoId = videoId; task.status = 'processing'; task.stage = 'Tâche créée, rendu en cours…';
+    updateVideoCard(card, task); save();
+    pollVideoTask(task, card);
+  } catch (err) {
+    task.status = 'failed'; task.error = err.message;
+    updateVideoCard(card, task); save();
+  } finally { el.genVideo.disabled = false; el.genVideo.textContent = '🎬 Lancer la génération vidéo'; }
+}
+
+function renderVideoTasks() {
+  if (state.videoTasks.length) state.videoTasks.forEach(t => { const c = createVideoCard(t, el.videoList); updateVideoCard(c, t); if (t.videoId && ['queued', 'processing'].includes(t.status)) pollVideoTask(t, c); });
+  if (state.tiktokVideoTasks.length) state.tiktokVideoTasks.forEach(t => { const c = createVideoCard(t, el.ttVideoList); updateVideoCard(c, t); if (t.videoId && ['queued', 'processing'].includes(t.status)) pollVideoTask(t, c); });
+}
+
+/* ══════════════════════════════════════════════
+   TIKTOK
+   ══════════════════════════════════════════════ */
+async function ttGenerateScript() {
+  const topic = el.ttTopic.value.trim();
+  if (!topic) { el.ttTopic.focus(); alert('Veuillez décrire votre sujet.'); return; }
+  if (!state.apiKey.trim()) { alert('Veuillez saisir votre clé API.'); openSidebar(); el.apiKey.focus(); return; }
+
+  const duration = state.tiktokDuration;
+  const niche = state.tiktokNiche || 'général';
+  const style = el.ttStyle.value;
+
+  el.ttScript.innerHTML = '<div class="tt-loading"><span class="spinner"></span> Génération du script…</div>';
+  el.ttGenScript.disabled = true; el.ttGenScript.textContent = '⏳ Génération…';
+
+  const sysPrompt = `Tu es un expert en création de contenu viral TikTok. Tu écris des scripts courts, punchy et optimisés pour l'algorithme TikTok 2026. Tu réponds uniquement avec le script, sans introduction ni commentaire.`;
+  const userPrompt = `Génère un script TikTok complet pour une vidéo de ${duration} secondes.
+
+Sujet : ${topic}
+Niche : ${niche}
+Style visuel : ${style}
+
+Structure EXACTE :
+
+---
+🎬 SCRIPT TIKTOK (${duration}s)
+
+HOOK (0-3s) :
+[texte exact à dire]
+
+CONTENU (3-${Math.max(4, duration - 5)}s) :
+[développement]
+
+CTA (${Math.max(4, duration - 5)}-${duration}s) :
+[appel à l'action]
+
+---
+📝 TEXTE À L'ÉCRAN :
+• 0-2s : [overlay]
+
+---
+🎥 INSTRUCTIONS VISUELLES :
+[plans, mouvements]
+
+---
+🎵 SUGGESTION AUDIO :
+[type de son]
+
+---
+💬 CAPTION + HASHTAGS :
+[caption + 5-8 hashtags]
+---`;
+
+  try {
+    const res = await fetchWithRetry(
+      `${state.baseUrl.replace(/\/+$/, '')}/chat/completions`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.apiKey.trim()}` }, body: JSON.stringify({ model: state.model, messages: [{ role: 'system', content: sysPrompt }, { role: 'user', content: userPrompt }], temperature: 0.8, stream: false }) },
+      { onRetry: (info) => { const s = Math.ceil(info.delayMs / 1000); el.ttScript.innerHTML = `<div class="tt-loading"><span class="spinner"></span> Reprise ${info.attempt}/${info.maxAttempts} dans ${s}s…</div>`; } }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    const fullText = json.choices?.[0]?.message?.content || '';
+    el.ttScript.textContent = fullText;
+    state.tiktokScript = fullText;
+
+    const captionMatch = fullText.match(/CAPTION \+ HASHTAGS\s*:\s*\n([\s\S]*?)(?:\n---|\n*$)/i);
+    if (captionMatch) {
+      state.tiktokCaption = captionMatch[1].trim();
+      el.ttCaptionText.innerHTML = escapeHtml(state.tiktokCaption)
+        .replace(/(#\w+)/g, '<span class="tt-hashtags">$1</span>')
+        .replace(/\n/g, '<br>');
+    }
+    save();
+  } catch (err) { el.ttScript.textContent = '❌ Erreur : ' + err.message; }
+  finally { el.ttGenScript.disabled = false; el.ttGenScript.textContent = '✍️ Générer le script'; }
+}
+
+async function ttGenerateVariations() {
+  const topic = el.ttTopic.value.trim();
+  if (!topic) { el.ttTopic.focus(); alert('Veuillez décrire votre sujet.'); return; }
+  if (!state.apiKey.trim()) { alert('Veuillez saisir votre clé API.'); openSidebar(); el.apiKey.focus(); return; }
+
+  el.ttGenVariations.disabled = true; el.ttGenVariations.textContent = '⏳ Génération…';
+  el.ttHookList.innerHTML = '<div class="tt-loading"><span class="spinner"></span> Génération des hooks…</div>';
+  el.ttHooksSection.style.display = 'block';
+
+  const userPrompt = `Génère 5 hooks TikTok alternatifs et percutants pour ce sujet : "${topic}"
+
+Chaque hook doit faire moins de 10 mots, être percutant, technique différente :
+1. Question choc
+2. Affirmation contre-intuitive
+3. Chiffre surprenant
+4. Storytelling personnel
+5. Erreur à éviter
+
+Réponds UNIQUEMENT au format JSON :
+[{"technique":"...","hook":"..."},...]`;
+
+  try {
+    const res = await fetchWithRetry(
+      `${state.baseUrl.replace(/\/+$/, '')}/chat/completions`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.apiKey.trim()}` }, body: JSON.stringify({ model: state.model, messages: [{ role: 'system', content: 'Tu es un copywriter TikTok. Tu réponds uniquement en JSON valide.' }, { role: 'user', content: userPrompt }], temperature: 0.9, stream: false }) }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    let raw = json.choices?.[0]?.message?.content || '';
+    raw = raw.replace(/```json\s*|```/g, '').trim();
+    let hooks = [];
+    try { hooks = JSON.parse(raw); }
+    catch { hooks = raw.split('\n').filter(l => l.includes('hook')).slice(0, 5).map((l, i) => ({ technique: `Variante ${i + 1}`, hook: l.replace(/[{}"]/g, '').trim() })); }
+    if (!Array.isArray(hooks) || !hooks.length) throw new Error('Format invalide');
+    state.tiktokHooks = hooks;
+    el.ttHookList.innerHTML = '';
+    hooks.forEach((h, i) => {
+      const item = document.createElement('div'); item.className = 'tt-hook-item';
+      item.innerHTML = `<div class="hook-num">${i + 1}</div><div class="hook-text"><div style="font-size:11px;color:var(--muted);margin-bottom:3px">${escapeHtml(h.technique || '')}</div><div>${escapeHtml(h.hook || '')}</div></div>`;
+      item.addEventListener('click', () => { navigator.clipboard.writeText(h.hook || ''); item.style.borderColor = 'var(--ok)'; setTimeout(() => item.style.borderColor = '', 800); });
+      el.ttHookList.appendChild(item);
+    });
+    save();
+  } catch (err) { el.ttHookList.innerHTML = `<div class="vc-err">Erreur : ${escapeHtml(err.message)}</div>`; }
+  finally { el.ttGenVariations.disabled = false; el.ttGenVariations.textContent = '🔄 Variantes de hook'; }
+}
+
+async function ttGenerateVideo() {
+  if (!state.apiKey.trim()) { alert('Veuillez saisir votre clé API.'); openSidebar(); el.apiKey.focus(); return; }
+  let prompt = el.ttTopic.value.trim();
+  if (state.tiktokScript) {
+    const visualMatch = state.tiktokScript.match(/INSTRUCTIONS VISUELLES\s*:\s*\n([\s\S]*?)(?:\n---|$)/i);
+    if (visualMatch && visualMatch[1].trim()) prompt = visualMatch[1].trim();
+    else if (state.tiktokScript.length > 400) prompt = state.tiktokScript.slice(0, 400);
+  }
+  if (!prompt) { alert('Veuillez d\'abord générer un script ou décrire votre sujet.'); return; }
+
+  const duration = Math.min(12, state.tiktokDuration);
+  const model = 'agnes-video-2.5-flash';
+  const body = { model, prompt, seconds: String(duration), mode: 'text', size: '720P', aspect_ratio: '9:16' };
+
+  const task = {
+    id: 'tt_' + Date.now(), videoId: null, model, prompt, imageUrls: [],
+    status: 'queued', progress: 0, stage: 'Création de la tâche…',
+    videoUrl: null, error: null, isTiktok: true, aspectRatio: '9:16', preset: 'tiktok', createdAt: Date.now()
+  };
+  const card = createVideoCard(task, el.ttVideoList);
+  state.tiktokVideoTasks.unshift(task); save();
+  el.ttGenVideo.disabled = true; el.ttGenVideo.textContent = '⏳ Création de la tâche…';
+
+  try {
+    const res = await fetchWithRetry(`${videoApiBase()}/videos`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.apiKey.trim()}` }, body: JSON.stringify(body) },
+      { onRetry: (info) => { const s = Math.ceil(info.delayMs / 1000); el.ttGenVideo.textContent = `🔁 Tentative ${info.attempt}/${info.maxAttempts} — ${s}s…`; task.stage = `Reprise ${info.attempt}/${info.maxAttempts}…`; updateVideoCard(card, task); } });
+
+    if (!res.ok) {
+      let detail = ''; try { const j = await res.json(); detail = j.error?.message || JSON.stringify(j); } catch { detail = await res.text().catch(() => ''); }
+      throw new Error(`HTTP ${res.status} — ${detail || res.statusText}`);
+    }
+    const data = await res.json();
+    const videoId = data.video_id || data.id || data.task_id;
+    if (!videoId) throw new Error('Aucun identifiant vidéo retourné.');
+    task.videoId = videoId; task.status = 'processing'; task.stage = 'Rendu TikTok 9:16…';
+    updateVideoCard(card, task); save();
+    pollVideoTask(task, card);
+  } catch (err) {
+    task.status = 'failed'; task.error = err.message;
+    updateVideoCard(card, task); save();
+  } finally { el.ttGenVideo.disabled = false; el.ttGenVideo.textContent = '🎬 Générer la vidéo TikTok (9:16 · 720P)'; }
+}
+
+/* ══════════════════════════════════════════════
+   SIDEBAR MOBILE
+   ══════════════════════════════════════════════ */
+function openSidebar() { el.sidebar.classList.add('open'); el.overlay.classList.add('show'); }
+function closeSidebar() { el.sidebar.classList.remove('open'); el.overlay.classList.remove('show'); }
+
+/* ══════════════════════════════════════════════
+   ÉVÉNEMENTS
+   ══════════════════════════════════════════════ */
+function bind() {
+  el.apiKey.addEventListener('input', e => { state.apiKey = e.target.value.trim(); save(true); updateStatus(); });
+  el.apiKey.addEventListener('change', () => save(true));
+  el.apiKey.addEventListener('blur', () => save());
+  el.eyeBtn.addEventListener('click', () => {
+    const isPwd = el.apiKey.type === 'password';
+    el.apiKey.type = isPwd ? 'text' : 'password';
+    el.eyeIcon.innerHTML = isPwd
+      ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+  });
+
+  el.baseUrl.addEventListener('input', e => { state.baseUrl = e.target.value.trim() || 'https://apihub.agnes-ai.com/v1'; save(); });
+  el.model.addEventListener('input', e => { state.model = e.target.value.trim() || 'agnes-2.5-flash'; save(); });
+  el.systemPrompt.addEventListener('input', e => { state.systemPrompt = e.target.value; save(); });
+  el.temperature.addEventListener('input', e => { state.temperature = Number(e.target.value); el.tempVal.textContent = state.temperature; save(); });
+  el.maxTokens.addEventListener('input', e => { state.maxTokens = Number(e.target.value) || 0; save(); });
+  el.streamToggle.addEventListener('click', () => { state.streaming = !state.streaming; el.streaming.checked = state.streaming; el.streamToggle.classList.toggle('on', state.streaming); save(); });
+  el.retryToggle.addEventListener('click', () => { state.autoRetry = !state.autoRetry; el.autoRetry.checked = state.autoRetry; el.retryToggle.classList.toggle('on', state.autoRetry); save(); });
+  el.maxRetries.addEventListener('input', e => { state.maxRetries = Math.max(1, Math.min(10, Number(e.target.value) || 8)); save(); });
+  el.retryDelay.addEventListener('input', e => { state.retryDelay = Number(e.target.value); el.delayVal.textContent = state.retryDelay; save(); });
+
+  el.newChat.addEventListener('click', () => { if (state.busy) return; state.history = []; save(); renderHistory(); closeSidebar(); el.prompt.focus(); });
+  el.clearAll.addEventListener('click', () => {
+    if (!confirm('Effacer la conversation, les réglages et les tâches vidéo ?')) return;
+    wipeStorage(); location.reload();
+  });
+
+  el.sendBtn.addEventListener('click', () => { if (state.busy) stopGeneration(); else send(); });
+  el.prompt.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+  el.prompt.addEventListener('input', () => { el.prompt.style.height = 'auto'; el.prompt.style.height = Math.min(el.prompt.scrollHeight, 200) + 'px'; });
+
+  el.messages.addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (chip) { el.prompt.value = chip.dataset.prompt || ''; el.prompt.dispatchEvent(new Event('input')); send(); return; }
+    const copyCode = e.target.closest('.copy-code');
+    if (copyCode) { navigator.clipboard.writeText(decodeURIComponent(copyCode.dataset.code)); const old = copyCode.textContent; copyCode.textContent = '✓ Copié'; setTimeout(() => copyCode.textContent = old, 1400); return; }
+    const copyMsg = e.target.closest('.act-copy');
+    if (copyMsg) { const wrap = copyMsg.closest('.msg'); const md = wrap.querySelector('.content .md'); navigator.clipboard.writeText(md ? md.innerText : ''); const old = copyMsg.textContent; copyMsg.textContent = '✓'; setTimeout(() => copyMsg.textContent = old, 1200); return; }
+  });
+
+  document.querySelectorAll('.tabs > .tab[data-view]').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tabs > .tab[data-view]').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const v = tab.dataset.view;
+      $('chat-view').style.display = v === 'chat' ? 'flex' : 'none';
+      $('image-view').classList.toggle('active', v === 'image');
+      $('video-view').classList.toggle('active', v === 'video');
+      $('tiktok-view').classList.toggle('active', v === 'tiktok');
+    });
+  });
+
+  document.querySelectorAll('.tab[data-imode]').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab[data-imode]').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      state.imageMode = tab.dataset.imode;
+      el.imgEditField.style.display = (state.imageMode === 'edit' || state.imageMode === 'adapt') ? 'block' : 'none';
+      el.imgAdaptHint.style.display = state.imageMode === 'adapt' ? 'block' : 'none';
+      el.genImg.textContent = state.imageMode === 'adapt'
+        ? '📐 Adapter la résolution'
+        : state.imageMode === 'edit' ? '✨ Transformer l\'image' : '✨ Générer l\'image';
+    });
+  });
+
+  document.querySelectorAll('.tab[data-vmode]').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab[data-vmode]').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      state.videoMode = tab.dataset.vmode;
+      el.videoImageField.style.display = state.videoMode === 'image' ? 'block' : 'none';
+      el.vAdaptHint.style.display = state.videoMode === 'adapt' ? 'block' : 'none';
+      el.genVideo.textContent = state.videoMode === 'adapt'
+        ? '📐 Adapter la résolution'
+        : '🎬 Lancer la génération vidéo';
+    });
+  });
+
+  el.imgDrop.addEventListener('click', () => openFilePicker(state.imageSources, el.imgMultiGrid, el.imgCountBadge));
+  ['dragenter','dragover'].forEach(ev => el.imgDrop.addEventListener(ev, e => { e.preventDefault(); el.imgDrop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(ev => el.imgDrop.addEventListener(ev, e => { e.preventDefault(); el.imgDrop.classList.remove('over'); }));
+  el.imgDrop.addEventListener('drop', e => { handleImageFiles(Array.from(e.dataTransfer.files || []), state.imageSources, el.imgMultiGrid, el.imgCountBadge); });
+  el.imgUrlAdd.addEventListener('click', () => { const url = el.imgSourceUrl.value.trim(); if (!url) return; if (addImages(state.imageSources, [url], el.imgMultiGrid, el.imgCountBadge) > 0) el.imgSourceUrl.value = ''; });
+  el.imgSourceUrl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); el.imgUrlAdd.click(); } });
+
+  el.genImg.addEventListener('click', generateImage);
+  el.imgPrompt.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); generateImage(); } });
+
+  el.videoDrop.addEventListener('click', () => openFilePicker(state.videoImages, el.videoMultiGrid, el.videoCountBadge));
+  ['dragenter','dragover'].forEach(ev => el.videoDrop.addEventListener(ev, e => { e.preventDefault(); el.videoDrop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(ev => el.videoDrop.addEventListener(ev, e => { e.preventDefault(); el.videoDrop.classList.remove('over'); }));
+  el.videoDrop.addEventListener('drop', e => { handleImageFiles(Array.from(e.dataTransfer.files || []), state.videoImages, el.videoMultiGrid, el.videoCountBadge); });
+  el.videoUrlAdd.addEventListener('click', () => { const url = el.videoImageUrl.value.trim(); if (!url) return; if (addImages(state.videoImages, [url], el.videoMultiGrid, el.videoCountBadge) > 0) el.videoImageUrl.value = ''; });
+  el.videoImageUrl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); el.videoUrlAdd.click(); } });
+
+  el.videoAdaptDrop.addEventListener('click', () => openFilePicker(state.videoAdaptImages, el.videoAdaptGrid, el.videoAdaptCountBadge, 1));
+  ['dragenter','dragover'].forEach(ev => el.videoAdaptDrop.addEventListener(ev, e => { e.preventDefault(); el.videoAdaptDrop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(ev => el.videoAdaptDrop.addEventListener(ev, e => { e.preventDefault(); el.videoAdaptDrop.classList.remove('over'); }));
+  el.videoAdaptDrop.addEventListener('drop', e => { handleImageFiles(Array.from(e.dataTransfer.files || []), state.videoAdaptImages, el.videoAdaptGrid, el.videoAdaptCountBadge, 1); });
+  el.videoAdaptUrlAdd.addEventListener('click', () => { const url = el.videoAdaptUrl.value.trim(); if (!url) return; if (addImages(state.videoAdaptImages, [url], el.videoAdaptGrid, el.videoAdaptCountBadge, 1) > 0) el.videoAdaptUrl.value = ''; });
+  el.videoAdaptUrl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); el.videoAdaptUrlAdd.click(); } });
+
+  el.genVideo.addEventListener('click', generateVideo);
+  el.videoModel.addEventListener('change', () => {
+    const isFlash = el.videoModel.value === 'agnes-video-2.5-flash';
+    el.videoSize.disabled = isFlash;
+    if (isFlash) el.videoSize.value = '720P';
+    else if (el.videoSize.value === '720P') el.videoSize.value = '1080P';
+  });
+
+  el.ttNicheGrid.addEventListener('click', e => {
+    const btn = e.target.closest('.tt-niche'); if (!btn) return;
+    document.querySelectorAll('.tt-niche').forEach(n => n.classList.remove('active'));
+    btn.classList.add('active'); state.tiktokNiche = btn.dataset.niche || '';
+  });
+  el.ttDurationRow.addEventListener('click', e => {
+    const btn = e.target.closest('.tt-duration'); if (!btn) return;
+    document.querySelectorAll('.tt-duration').forEach(d => d.classList.remove('active'));
+    btn.classList.add('active'); state.tiktokDuration = Number(btn.dataset.duration) || 15;
+  });
+  el.ttGenScript.addEventListener('click', ttGenerateScript);
+  el.ttGenVariations.addEventListener('click', ttGenerateVariations);
+  el.ttGenVideo.addEventListener('click', ttGenerateVideo);
+  el.ttCopyCaption.addEventListener('click', () => {
+    navigator.clipboard.writeText(state.tiktokCaption || el.ttCaptionText.innerText);
+    const old = el.ttCopyCaption.textContent; el.ttCopyCaption.textContent = '✓ Copié';
+    setTimeout(() => el.ttCopyCaption.textContent = old, 1400);
+  });
+
+  el.menuBtn.addEventListener('click', openSidebar);
+  el.overlay.addEventListener('click', closeSidebar);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && state.busy) stopGeneration();
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); if (state.busy) return; state.history = []; save(); renderHistory(); el.prompt.focus(); }
+  });
+
+  window.addEventListener('beforeunload', () => save());
+  document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
+  window.addEventListener('pagehide', () => save());
+}
+
+/* ══════════════════════════════════════════════
+   DÉMARRAGE
+   ══════════════════════════════════════════════ */
+(function init() {
+  load();
+  syncUI();
+  bind();
+
+  renderPresetGrid(el.imgPresetGrid, state.imagePreset, 'image', applyImagePreset);
+  renderPresetInfo(el.imgPresetInfo, state.imagePreset, 'image');
+  if (state.imagePreset !== 'custom') applyImagePreset(state.imagePreset);
+
+  renderPresetGrid(el.videoPresetGrid, state.videoPreset, 'video', applyVideoPreset);
+  renderPresetInfo(el.videoPresetInfo, state.videoPreset, 'video');
+  if (state.videoPreset !== 'custom') applyVideoPreset(state.videoPreset);
+
+  renderMultiGrid(state.imageSources, el.imgMultiGrid, el.imgCountBadge);
+  renderMultiGrid(state.videoImages, el.videoMultiGrid, el.videoCountBadge);
+  renderMultiGrid(state.videoAdaptImages, el.videoAdaptGrid, el.videoAdaptCountBadge, 1);
+
+  renderHistory();
+  renderVideoTasks();
+
+  if (!state.apiKey || !state.apiKey.trim()) setTimeout(openSidebar, 350);
+  else setTimeout(flashSaved, 400);
+
+  el.prompt.focus();
+})();
+</script>
+</body>
+</html>
