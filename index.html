@@ -1069,18 +1069,54 @@ async function pollVideo(videoId, onProgress) {
     const estimatedMs = estimateGenerationTime(state.durationFrames);
     const estimatedSec = estimatedMs / 1000;
     let remaining = Math.max(20, Math.floor(estimatedSec * 0.8));
-    while (remaining > 0) { if (state.stopRequested) throw new Error('Arrêt demandé'); onProgress('Création… — ' + remaining + 's'); await sleep(1000); remaining--; }
+    while (remaining > 0) {
+        if (state.stopRequested) throw new Error('Arrêt demandé');
+        onProgress('Création… — ' + remaining + 's');
+        await sleep(1000);
+        remaining--;
+    }
     for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
         if (state.stopRequested) throw new Error('Arrêt demandé');
-        if (attempt > 0) { let r = POLL_INTERVAL_SEC; while (r > 0) { if (state.stopRequested) throw new Error('Arrêt demandé'); onProgress('L\'image prend vie… — ' + r + 's'); await sleep(1000); r--; } }
+        if (attempt > 0) {
+            let r = POLL_INTERVAL_SEC;
+            while (r > 0) {
+                if (state.stopRequested) throw new Error('Arrêt demandé');
+                onProgress('L\'image prend vie… — ' + r + 's');
+                await sleep(1000);
+                r--;
+            }
+        }
+
         const url = POLL_BASE + '?video_id=' + encodeURIComponent(videoId) + '&model_name=' + encodeURIComponent(MODEL_VIDEO);
-        const res = await fetch(url, { method: 'GET', headers: { 'Authorization': 'Bearer ' + getApiKey() } });
-        const d = await res.json();
+        log('Polling #' + attempt + ' → ' + url);
+
+        const res = await fetch(url, {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + getApiKey() }
+        });
+
+        const responseText = await res.text();
+        log('Polling HTTP ' + res.status);
+        log('Polling corps : ' + responseText.slice(0, 500));
+
+        let d;
+        try { d = JSON.parse(responseText); } catch (e) {
+            throw new Error('Polling : réponse non-JSON');
+        }
+
         const status = d.status || 'unknown';
         const progress = d.progress || 0;
         onProgress('Création… — ' + progress + '%');
-        if (status === 'completed' || status === 'succeeded' || status === 'done') { const videoUrl = (d.metadata && d.metadata.url) || d.url || (d.output && d.output.url); if (!videoUrl) throw new Error('Terminé mais pas d\'URL'); return videoUrl; }
-        if (status === 'failed' || status === 'error' || status === 'cancelled') throw new Error('Échec (' + status + ')');
+
+        if (status === 'completed' || status === 'succeeded' || status === 'done') {
+            const videoUrl = (d.metadata && d.metadata.url) || d.url || (d.output && d.output.url);
+            if (!videoUrl) throw new Error('Terminé mais pas d\'URL');
+            log('✓ Vidéo prête : ' + videoUrl);
+            return videoUrl;
+        }
+        if (status === 'failed' || status === 'error' || status === 'cancelled') {
+            throw new Error('Échec (' + status + ') : ' + responseText.slice(0, 200));
+        }
     }
     throw new Error('Délai maximal dépassé');
 }
