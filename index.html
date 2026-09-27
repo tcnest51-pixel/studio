@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Studio IA — Agnes · 52 thèmes</title>
+<title>Studio IA — Agnes + imgbb · 52 thèmes</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -60,17 +60,18 @@
     .section.open .section-body { max-height: 8000px; }
     .section-content { padding: 0 1.1rem 1.1rem; }
     .api-panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.2rem; margin-bottom: 1rem; }
-    .api-panel.ok { border-color: var(--success); }
     .api-key-input { width: 100%; padding: 0.85rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2); color: var(--ink); font-family: ui-monospace, monospace; font-size: 0.85rem; margin-bottom: 0.6rem; }
     .api-key-input:focus { outline: none; border-color: var(--accent); }
     .api-save-btn { width: 100%; padding: 0.8rem; border-radius: 8px; border: none; background: var(--accent); color: #fff; font-size: 0.9rem; font-weight: 700; font-family: inherit; cursor: pointer; margin-bottom: 0.6rem; }
+    .api-save-btn.green { background: var(--success); }
     .api-status-line { font-size: 0.75rem; padding: 0.55rem 0.85rem; border-radius: 6px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; background: var(--panel-2); color: var(--ink-dim); }
     .api-status-line.ok { background: #1a3a1a; color: #6ad46a; font-weight: 600; }
     .api-status-line .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-faint); flex-shrink: 0; }
     .api-status-line.ok .status-dot { background: var(--success); }
-    .api-hint { font-size: 0.72rem; color: var(--ink-dim); margin-top: 0.4rem; }
+    .api-hint { font-size: 0.72rem; color: var(--ink-dim); margin-top: 0.4rem; margin-bottom: 0.8rem; }
     .api-hint a { color: var(--accent); text-decoration: underline; }
-    .stat-line { font-size: 0.72rem; color: var(--ink-dim); margin-top: 0.5rem; padding: 0.4rem 0.6rem; background: var(--panel-2); border-radius: 6px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.3rem; }
+    .api-sep { height: 1px; background: var(--border); margin: 0.8rem 0; }
+    .stat-line { font-size: 0.72rem; color: var(--ink-dim); padding: 0.4rem 0.6rem; background: var(--panel-2); border-radius: 6px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.3rem; }
     .wake-status { font-size: 0.72rem; padding: 0.5rem 0.7rem; border-radius: 6px; margin-top: 0.4rem; display: flex; justify-content: space-between; align-items: center; background: #1a1a2a; color: #8ab0ff; flex-wrap: wrap; gap: 0.4rem; }
     .wake-status.active { background: #1a3a1a; color: #6ad46a; }
     .wake-status.warn { background: #3a2a1a; color: #ffb84a; }
@@ -173,7 +174,7 @@
 
 <header>
     <h1>Studio IA Universel</h1>
-    <p class="subtitle">52 thèmes · Agnes API</p>
+    <p class="subtitle">52 thèmes · Agnes + imgbb</p>
 </header>
 
 <div class="theme-filter">
@@ -189,9 +190,10 @@
 </div>
 
 <div class="api-panel" id="api-panel">
+    <label class="control-label">🔑 Clé API Agnes</label>
     <input type="password" class="api-key-input" id="api-key-input"
            placeholder="Collez votre clé API Agnes ici (sk-...)" autocomplete="off" spellcheck="false">
-    <button type="button" class="api-save-btn" id="api-save-btn">Enregistrer la clé</button>
+    <button type="button" class="api-save-btn" id="api-save-btn">Enregistrer la clé Agnes</button>
     <div class="api-status-line" id="api-status-line">
         <span class="status-dot"></span>
         <span id="api-status-text">Aucune clé API enregistrée</span>
@@ -199,6 +201,23 @@
     <div class="api-hint">
         Clé sur <a href="https://platform.agnes-ai.com" target="_blank">platform.agnes-ai.com</a> → Settings → API Keys
     </div>
+
+    <div class="api-sep"></div>
+
+    <label class="control-label">🖼️ Clé API imgbb (pour héberger les images)</label>
+    <input type="password" class="api-key-input" id="imgbb-key-input"
+           placeholder="Collez votre clé imgbb (32 caractères)" autocomplete="off" spellcheck="false">
+    <button type="button" class="api-save-btn green" id="imgbb-save-btn">Enregistrer la clé imgbb</button>
+    <div class="api-status-line" id="imgbb-status-line">
+        <span class="status-dot"></span>
+        <span id="imgbb-status-text">Aucune clé imgbb</span>
+    </div>
+    <div class="api-hint">
+        Clé gratuite sur <a href="https://api.imgbb.com/" target="_blank">api.imgbb.com</a> → Get API key
+    </div>
+
+    <div class="api-sep"></div>
+
     <div class="stat-line">
         <span>📊 Vitesse : <span id="stat-speed">en attente</span></span>
         <span id="stat-samples">0 génération</span>
@@ -332,6 +351,9 @@
 <video id="noSleepVideo" playsinline muted loop></video>
 
 <script>
+// ══════════════════════════════════════════════════════════════════
+// CONFIGURATION
+// ══════════════════════════════════════════════════════════════════
 const API_BASE = 'https://apihub.agnes-ai.com/v1';
 const POLL_BASE = 'https://apihub.agnes-ai.com/agnesapi';
 const MODEL_VIDEO = 'agnes-video-v2.0';
@@ -342,12 +364,13 @@ const CREATE_INTERVAL_MAX = 90000;
 const CREATE_INTERVAL_SAFE = 75000;
 const POLL_INTERVAL_SEC = 8;
 const MAX_POLL_ATTEMPTS = 100;
-const TIMING_CACHE_KEY = 'agnes_timing_final';
-const API_KEY_STORAGE = 'agnes_api_key_final';
-const THEME_STORAGE = 'agnes_theme_final';
-const FAV_STORAGE = 'agnes_favorites_final';
-const HISTORY_STORAGE = 'agnes_history_final';
-const WAKE_LOCK_PREF = 'agnes_wakelock_final';
+const TIMING_CACHE_KEY = 'agnes_timing_v10';
+const API_KEY_STORAGE = 'agnes_api_key_v10';
+const IMGBB_KEY_STORAGE = 'agnes_imgbb_key';
+const THEME_STORAGE = 'agnes_theme_v10';
+const FAV_STORAGE = 'agnes_favorites_v10';
+const HISTORY_STORAGE = 'agnes_history_v10';
+const WAKE_LOCK_PREF = 'agnes_wakelock_v10';
 const MAX_VISIBLE_QUEUE = 30;
 const MAX_IMAGE_SIZE = 12 * 1024 * 1024;
 const THUMBNAIL_MAX_WIDTH = 200;
@@ -809,25 +832,43 @@ function recordGenerationTime(numFrames, durationMs) { const cache = loadTimingC
 function estimateGenerationTime(numFrames) { const cache = loadTimingCache(); const samples = cache[String(numFrames)]; if (samples && samples.length > 0) { const sorted = [...samples].sort((a, b) => a - b); const mid = Math.floor(sorted.length / 2); return sorted.length % 2 === 0 ? (sorted[mid-1] + sorted[mid]) / 2 : sorted[mid]; } return 30000 + numFrames * 500; }
 function updateTimingDisplay() { const cache = loadTimingCache(); const all = Object.values(cache).flat(); const speedEl = document.getElementById('stat-speed'); const samplesEl = document.getElementById('stat-samples'); if (!speedEl || !samplesEl) return; if (all.length === 0) { speedEl.textContent = 'en attente'; samplesEl.textContent = '0 génération'; return; } const avg = all.reduce((a, b) => a + b, 0) / all.length; speedEl.textContent = (avg / 1000).toFixed(1) + ' s'; samplesEl.textContent = all.length + ' génération' + (all.length > 1 ? 's' : ''); }
 
-// CLÉ API
+// CLÉS API
 function getApiKey() { try { return (localStorage.getItem(API_KEY_STORAGE) || '').trim(); } catch (e) { return ''; } }
+function getImgbbKey() { try { return (localStorage.getItem(IMGBB_KEY_STORAGE) || '').trim(); } catch (e) { return ''; } }
+
 function saveApiKey() {
     const input = document.getElementById('api-key-input');
     if (!input) return;
     const key = input.value.trim();
-    if (!key) { try { localStorage.removeItem(API_KEY_STORAGE); } catch (e) {} updateApiPanel(); showToast('Clé supprimée', 'warn'); return; }
+    if (!key) { try { localStorage.removeItem(API_KEY_STORAGE); } catch (e) {} updateApiPanel(); showToast('Clé Agnes supprimée', 'warn'); return; }
     if (!key.startsWith('sk-')) { if (!confirm('La clé ne commence pas par "sk-". Sauvegarder ?')) return; }
-    try { localStorage.setItem(API_KEY_STORAGE, key); updateApiPanel(); showToast('Clé API enregistrée ✓', 'success'); input.blur(); } catch (e) { showToast('Erreur', 'error'); }
+    try { localStorage.setItem(API_KEY_STORAGE, key); updateApiPanel(); showToast('Clé Agnes enregistrée ✓', 'success'); input.blur(); } catch (e) { showToast('Erreur', 'error'); }
+}
+function saveImgbbKey() {
+    const input = document.getElementById('imgbb-key-input');
+    if (!input) return;
+    const key = input.value.trim();
+    if (!key) { try { localStorage.removeItem(IMGBB_KEY_STORAGE); } catch (e) {} updateApiPanel(); showToast('Clé imgbb supprimée', 'warn'); return; }
+    try { localStorage.setItem(IMGBB_KEY_STORAGE, key); updateApiPanel(); showToast('Clé imgbb enregistrée ✓', 'success'); input.blur(); } catch (e) { showToast('Erreur', 'error'); }
 }
 function updateApiPanel() {
     const panel = document.getElementById('api-panel');
     const input = document.getElementById('api-key-input');
     const statusLine = document.getElementById('api-status-line');
     const statusText = document.getElementById('api-status-text');
+    const imgInput = document.getElementById('imgbb-key-input');
+    const imgLine = document.getElementById('imgbb-status-line');
+    const imgText = document.getElementById('imgbb-status-text');
     const key = getApiKey();
-    if (!panel || !input || !statusLine || !statusText) return;
-    if (key) { panel.classList.add('ok'); statusLine.classList.add('ok'); statusText.textContent = 'Clé API active · ' + key.slice(0, 8) + '…' + key.slice(-4); input.value = key; input.placeholder = ''; }
-    else { panel.classList.remove('ok'); statusLine.classList.remove('ok'); statusText.textContent = 'Aucune clé API enregistrée'; input.value = ''; input.placeholder = 'Collez votre clé API ici (sk-...)'; }
+    const imgbbKey = getImgbbKey();
+    if (panel && input && statusLine && statusText) {
+        if (key) { panel.classList.add('ok'); statusLine.classList.add('ok'); statusText.textContent = 'Clé Agnes active · ' + key.slice(0, 8) + '…' + key.slice(-4); input.value = key; input.placeholder = ''; }
+        else { panel.classList.remove('ok'); statusLine.classList.remove('ok'); statusText.textContent = 'Aucune clé API enregistrée'; input.value = ''; input.placeholder = 'Collez votre clé API Agnes ici (sk-...)'; }
+    }
+    if (imgInput && imgLine && imgText) {
+        if (imgbbKey) { imgLine.classList.add('ok'); imgText.textContent = 'Clé imgbb active · ' + imgbbKey.slice(0, 6) + '…'; imgInput.value = imgbbKey; imgInput.placeholder = ''; }
+        else { imgLine.classList.remove('ok'); imgText.textContent = 'Aucune clé imgbb'; imgInput.value = ''; imgInput.placeholder = 'Collez votre clé imgbb (32 caractères)'; }
+    }
     updateGenerateBtn();
 }
 function updateGenerateBtn() {
@@ -835,11 +876,13 @@ function updateGenerateBtn() {
     if (!btn) return;
     const hasImages = state.images.length > 0;
     const hasKey = !!getApiKey();
+    const hasImgbb = !!getImgbbKey();
     const theme = THEMES[state.theme];
-    btn.disabled = !hasImages || !hasKey || state.isRunning || state.isLoadingImages;
+    btn.disabled = !hasImages || !hasKey || !hasImgbb || state.isRunning || state.isLoadingImages;
     if (state.isLoadingImages) btn.textContent = 'Chargement… (' + state.images.length + ')';
     else if (state.isRunning) { const total = state.queue.length; const done = state.completed + state.failed; btn.textContent = 'Génération… (' + done + '/' + total + ')'; }
-    else if (!hasKey) btn.textContent = 'Ajoutez votre clé API';
+    else if (!hasKey) btn.textContent = 'Ajoutez votre clé Agnes';
+    else if (!hasImgbb) btn.textContent = 'Ajoutez votre clé imgbb';
     else if (!hasImages) btn.textContent = 'Ajoutez des photos';
     else btn.textContent = 'Générer ' + state.images.length + ' vidéo' + (state.images.length > 1 ? 's' : '') + ' ' + theme.emoji;
 }
@@ -981,6 +1024,23 @@ function buildPrompt() {
     return parts.join('. ');
 }
 
+// UPLOAD IMGBB
+async function uploadToImgbb(dataUri) {
+    const key = getImgbbKey();
+    if (!key) throw new Error('Clé imgbb manquante — colle-la en haut de l\'app');
+    log('Upload de l\'image vers imgbb…');
+    const res = await fetch(dataUri);
+    const blob = await res.blob();
+    const formData = new FormData();
+    formData.append('image', blob, 'input.jpg');
+    const uploadRes = await fetch('https://api.imgbb.com/1/upload?key=' + encodeURIComponent(key), { method: 'POST', body: formData });
+    if (!uploadRes.ok) { const err = await uploadRes.text(); throw new Error('Upload imgbb : HTTP ' + uploadRes.status + ' — ' + err.slice(0, 200)); }
+    const uploadData = await uploadRes.json();
+    if (!uploadData.success || !uploadData.data) throw new Error('imgbb : réponse invalide');
+    log('URL imgbb : ' + uploadData.data.url);
+    return uploadData.data.url;
+}
+
 // API AGNES
 async function apiFetch(url, options = {}, label = 'API') {
     for (let attempt = 0; attempt < 7; attempt++) {
@@ -1016,7 +1076,8 @@ async function apiFetch(url, options = {}, label = 'API') {
     return fetch(url, options);
 }
 async function createVideoTask(imageDataUri, prompt) {
-    const body = { model: MODEL_VIDEO, prompt, image: imageDataUri, num_frames: state.durationFrames, frame_rate: FRAME_RATE };
+    const imageUrl = await uploadToImgbb(imageDataUri);
+    const body = { model: MODEL_VIDEO, prompt, image: imageUrl, num_frames: state.durationFrames, frame_rate: FRAME_RATE };
     const res = await apiFetch(API_BASE + '/videos', { method: 'POST', headers: { 'Authorization': 'Bearer ' + getApiKey(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) }, 'Création');
     if (!res.ok) { const err = await res.text(); throw new Error('HTTP ' + res.status + ' — ' + err.slice(0, 200)); }
     const data = await res.json();
@@ -1059,7 +1120,8 @@ function renderQueue() {
     const theme = THEMES[state.theme];
     html += state.queue.slice(0, MAX_VISIBLE_QUEUE).map(item => {
         let icon = '○', statusText = 'En attente', cls = 'pending';
-        if (item.status === 'creating') { icon = '◐'; statusText = 'Préparation…'; cls = 'processing'; }
+        if (item.status === 'uploading') { icon = '⬆️'; statusText = 'Upload…'; cls = 'processing'; }
+        else if (item.status === 'creating') { icon = '◐'; statusText = 'Préparation…'; cls = 'processing'; }
         else if (item.status === 'processing') { icon = theme.emoji; statusText = item.progress || 'En cours…'; cls = 'processing'; }
         else if (item.status === 'done') { icon = '●'; statusText = 'Terminé'; cls = 'done'; }
         else if (item.status === 'failed') { icon = '✕'; statusText = 'Échec'; cls = 'failed'; }
@@ -1081,7 +1143,7 @@ function addToGallery(videoUrl, label) {
 
 // PIPELINE
 async function createTaskOnly(item) {
-    item.status = 'creating'; item.progress = 'Préparation…'; renderQueue();
+    item.status = 'uploading'; item.progress = 'Upload…'; renderQueue();
     const prompt = buildPrompt(); item.prompt = prompt;
     const videoId = await createVideoTask(item.image.dataUri, prompt);
     item.videoId = videoId; item.startTime = Date.now();
@@ -1105,7 +1167,8 @@ async function pollTaskAndDisplay(item) {
 }
 async function startGeneration() {
     if (state.isRunning || !state.images.length) return;
-    if (!getApiKey()) { showToast('Ajoutez votre clé API', 'error'); document.getElementById('api-key-input').focus(); return; }
+    if (!getApiKey()) { showToast('Ajoutez votre clé Agnes', 'error'); document.getElementById('api-key-input').focus(); return; }
+    if (!getImgbbKey()) { showToast('Ajoutez votre clé imgbb', 'error'); document.getElementById('imgbb-key-input').focus(); return; }
     state.mainPrompt = document.getElementById('main-prompt').value.trim();
     if (!state.mainPrompt && !state.selectedEffect) { if (!confirm('Ni prompt ni style. Continuer ?')) return; }
     state.isRunning = true; state.stopRequested = false; state.completed = 0; state.failed = 0; state.creationAttemptsSinceLastError = 0;
@@ -1222,8 +1285,10 @@ function bindEditEvents() {
 // INIT
 (function init() {
     document.getElementById('api-save-btn').addEventListener('click', saveApiKey);
+    document.getElementById('imgbb-save-btn').addEventListener('click', saveImgbbKey);
     document.getElementById('stop-btn').addEventListener('click', stopGeneration);
     document.getElementById('api-key-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); saveApiKey(); } });
+    document.getElementById('imgbb-key-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); saveImgbbKey(); } });
     document.querySelectorAll('[data-toggle]').forEach(header => { header.addEventListener('click', () => { document.getElementById(header.dataset.toggle).classList.toggle('open'); }); });
     const uploadZone = document.getElementById('upload-zone'); const fileInput = document.getElementById('file-input');
     uploadZone.addEventListener('click', () => fileInput.click());
@@ -1243,7 +1308,7 @@ function bindEditEvents() {
     try { const savedTheme = localStorage.getItem(THEME_STORAGE); if (savedTheme && THEMES[savedTheme]) state.theme = savedTheme; } catch (e) {}
     updateApiPanel(); updateTimingDisplay(); updateWakeStatus(); renderCategoryChips(); renderFavorites(); renderHistory();
     setTheme(state.theme); renderImages(); renderQueue(); updateGenerateBtn();
-    log('Studio IA Agnes prêt — ' + Object.keys(THEMES).length + ' thèmes');
+    log('Studio IA Agnes + imgbb prêt — ' + Object.keys(THEMES).length + ' thèmes');
 })();
 </script>
 
