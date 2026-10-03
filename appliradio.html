@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ondes · Radio & Musique</title>
+<style>
+:root{
+  --bg:#0a0a10; --card:#15151f; --card2:#1c1c28; --line:#28283c;
+  --txt:#ececf5; --dim:#8b8ba7; --acc:#8b5cf6; --acc2:#ec4899;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:
+    radial-gradient(1100px 600px at 15% -15%, #241145 0%, transparent 60%),
+    radial-gradient(900px 500px at 95% 0%, #3b0f33 0%, transparent 55%),
+    var(--bg);
+  background-attachment:fixed;
+  color:var(--txt);
+  padding-bottom:118px;
+  -webkit-font-smoothing:antialiased;
+}
+header{
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(18px);
+  background:rgba(10,10,16,.78);
+  border-bottom:1px solid var(--line);
+  padding:14px 18px 0;
+}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.logo{
+  width:34px;height:34px;border-radius:11px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));
+  font-size:17px;box-shadow:0 6px 22px rgba(139,92,246,.45);
+}
+.brand h1{font-size:19px;letter-spacing:-.4px;font-weight:700}
+.brand h1 span{background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.search{flex:1 1 260px;position:relative}
+.search input{
+  width:100%;padding:11px 14px 11px 38px;border-radius:12px;
+  border:1px solid var(--line);background:var(--card);color:var(--txt);
+  font-size:14px;outline:none;transition:.2s;
+}
+.search input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(139,92,246,.18)}
+.search input::placeholder{color:var(--dim)}
+.search::before{content:"⌕";position:absolute;left:14px;top:50%;transform:translateY(-52%);color:var(--dim);font-size:17px}
+.tabs{display:flex;gap:6px;margin-top:13px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  border:0;background:transparent;color:var(--dim);
+  padding:9px 15px;border-radius:10px 10px 0 0;font-size:14px;font-weight:600;
+  cursor:pointer;white-space:nowrap;transition:.18s;border-bottom:2px solid transparent;
+  font-family:inherit;
+}
+.tab:hover{color:var(--txt);background:rgba(255,255,255,.04)}
+.tab.active{color:var(--txt);border-bottom-color:var(--acc);background:rgba(139,92,246,.10)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:14px 18px 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  border:1px solid var(--line);background:var(--card);color:var(--dim);
+  padding:7px 14px;border-radius:999px;font-size:13px;font-weight:500;
+  cursor:pointer;white-space:nowrap;transition:.18s;font-family:inherit;
+}
+.chip:hover{color:var(--txt);border-color:#3b3b55}
+.chip.active{
+  background:linear-gradient(135deg,var(--acc),var(--acc2));
+  border-color:transparent;color:#fff;box-shadow:0 4px 16px rgba(139,92,246,.35);
+}
+main{padding:8px 18px 20px}
+.grid{display:grid;gap:13px;margin-top:12px;grid-template-columns:repeat(auto-fill,minmax(158px,1fr))}
+.card{
+  position:relative;background:var(--card);border:1px solid var(--line);
+  border-radius:15px;padding:11px;cursor:pointer;transition:.2s;overflow:hidden;
+}
+.card:hover{background:var(--card2);transform:translateY(-3px);border-color:#3a3a55;box-shadow:0 10px 28px rgba(0,0,0,.45)}
+.card.playing{border-color:var(--acc);background:var(--card2);box-shadow:0 0 0 1px var(--acc),0 10px 30px rgba(139,92,246,.28)}
+.card.playing .art::after{content:"";position:absolute;inset:0;background:rgba(10,10,16,.55);backdrop-filter:blur(2px);z-index:3}
+.card.playing .art .eq{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;gap:4px;padding-bottom:38%;z-index:4}
+.eq i{width:4px;background:linear-gradient(180deg,var(--acc2),var(--acc));border-radius:2px;animation:eq .9s ease-in-out infinite}
+.eq i:nth-child(1){height:16px;animation-delay:-.5s}
+.eq i:nth-child(2){height:26px;animation-delay:-.2s}
+.eq i:nth-child(3){height:12px;animation-delay:-.7s}
+.eq i:nth-child(4){height:22px;animation-delay:-.35s}
+@keyframes eq{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
+.art{
+  position:relative;width:100%;aspect-ratio:1;border-radius:11px;overflow:hidden;
+  background:linear-gradient(135deg,#2a1c4d,#4a1a45);
+  display:grid;place-items:center;margin-bottom:10px;
+}
+.art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2}
+.art .ph{font-size:26px;font-weight:800;color:rgba(255,255,255,.30);letter-spacing:-1px;z-index:1}
+.meta{min-width:0}
+.name{font-size:13.5px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sub{font-size:11.5px;color:var(--dim);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.6px;padding:2px 6px;border-radius:5px;background:var(--acc2);color:#fff;vertical-align:middle;margin-right:5px}
+.fav{
+  position:absolute;top:16px;right:16px;z-index:5;
+  width:29px;height:29px;border-radius:50%;border:0;cursor:pointer;
+  background:rgba(10,10,16,.62);backdrop-filter:blur(6px);
+  color:#fff;font-size:14px;line-height:1;display:grid;place-items:center;
+  opacity:0;transition:.18s;
+}
+.card:hover .fav,.fav.on{opacity:1}
+.fav.on{color:var(--acc2);background:rgba(236,72,153,.16)}
+.fav:hover{transform:scale(1.12)}
+.state{grid-column:1/-1;text-align:center;padding:70px 20px;color:var(--dim);font-size:14px}
+.state .big{font-size:40px;margin-bottom:14px;opacity:.55}
+.spinner{width:30px;height:30px;border-radius:50%;margin:0 auto 16px;border:3px solid var(--line);border-top-color:var(--acc);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.player{
+  position:fixed;left:0;right:0;bottom:0;z-index:100;
+  background:rgba(14,14,22,.92);backdrop-filter:blur(22px);
+  border-top:1px solid var(--line);
+  padding:12px 18px calc(12px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+}
+.np{display:flex;align-items:center;gap:12px;flex:1 1 200px;min-width:0}
+.np-art{width:48px;height:48px;border-radius:11px;flex:0 0 auto;overflow:hidden;background:linear-gradient(135deg,#2a1c4d,#4a1a45);display:grid;place-items:center;font-size:19px}
+.np-art img{width:100%;height:100%;object-fit:cover}
+.np-txt{min-width:0;flex:1}
+.np-title{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-sub{font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.ctrl{display:flex;align-items:center;gap:14px;flex:0 0 auto}
+.play{
+  width:46px;height:46px;border-radius:50%;border:0;cursor:pointer;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));
+  color:#fff;font-size:17px;display:grid;place-items:center;
+  transition:.18s;box-shadow:0 6px 20px rgba(139,92,246,.45);
+}
+.play:hover{transform:scale(1.07)}
+.play:active{transform:scale(.96)}
+.play:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+#vol{
+  -webkit-appearance:none;appearance:none;width:96px;height:4px;border-radius:4px;
+  background:linear-gradient(90deg,var(--acc) var(--p,80%),var(--line) var(--p,80%));
+  outline:none;cursor:pointer;
+}
+#vol::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.5);cursor:pointer}
+#vol::-moz-range-thumb{width:14px;height:14px;border:0;border-radius:50%;background:#fff;cursor:pointer}
+@media(max-width:560px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+  main{padding:8px 12px 20px}
+  .chips{padding-left:12px;padding-right:12px}
+  header{padding-left:12px;padding-right:12px}
+  .player{padding-left:12px;padding-right:12px;gap:12px}
+  #vol{width:70px}
+  .brand h1{display:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="top">
+    <div class="brand">
+      <div class="logo">◉</div>
+      <h1>On<span>des</span></h1>
+    </div>
+    <div class="search">
+      <input id="search" type="search" placeholder="Rechercher une radio, un artiste, un titre…" autocomplete="off">
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab active" data-tab="radio">📻 Radios</button>
+    <button class="tab" data-tab="music">🎵 Musique</button>
+    <button class="tab" data-tab="french">🇫🇷 Chanson française</button>
+    <button class="tab" data-tab="fav">♥ Favoris</button>
+  </nav>
+</header>
+
+<main>
+  <div id="chips" class="chips"></div>
+  <div id="grid" class="grid"></div>
+</main>
+
+<div class="player">
+  <div class="np">
+    <div class="np-art" id="npArt">◉</div>
+    <div class="np-txt">
+      <div class="np-title" id="npTitle">Aucune lecture</div>
+      <div class="np-sub" id="npSub">Choisis une radio ou un morceau</div>
+    </div>
+  </div>
+  <div class="ctrl">
+    <button class="play" id="playBtn" disabled>▶</button>
+    <input id="vol" type="range" min="0" max="1" step="0.01" value="0.8">
+  </div>
+</div>
+
+<audio id="audio" preload="none"></audio>
+
+<script>
+/* =========================================================
+   Ondes — Radio (Radio-Browser) + Musique FR/EN (Audius)
+   ========================================================= */
+
+const $ = s => document.querySelector(s);
+const audio   = $('#audio');
+const grid    = $('#grid');
+const chipsEl = $('#chips');
+const searchEl= $('#search');
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const state = {
+  tab: 'radio',
+  chip: null,
+  list: [],
+  current: null,
+  audiusHost: null,
+  loading: false,
+  reqId: 0
+};
+
+/* ------------------ FAVORIS ------------------ */
+const FAV_KEY = 'ondes.favs.v1';
+let favs = [];
+try { favs = JSON.parse(localStorage.getItem(FAV_KEY)) || []; } catch(e){ favs = []; }
+const saveFavs = () => {
+  try { localStorage.setItem(FAV_KEY, JSON.stringify(favs)); } catch(e){}
+};
+const isFav = key => favs.some(f => f.key === key);
+
+function toggleFav(item){
+  if (isFav(item.key)) favs = favs.filter(f => f.key !== item.key);
+  else favs.unshift(item);
+  saveFavs();
+  if (state.tab === 'fav') {
+    render();
+  } else {
+    document.querySelectorAll('.card').forEach(c => {
+      if (c.dataset.key === item.key) {
+        const b = c.querySelector('.fav');
+        if (b) b.classList.toggle('on', isFav(item.key));
+      }
+    });
+  }
+}
+
+/* ------------------ RADIO-BROWSER ------------------ */
+const RB_HOSTS = [
+  'https://de1.api.radio-browser.info',
+  'https://de2.api.radio-browser.info',
+  'https://nl1.api.radio-browser.info',
+  'https://at1.api.radio-browser.info',
+  'https://all.api.radio-browser.info'
+];
+
+async function rb(path){
+  let err;
+  for (const h of RB_HOSTS){
+    try {
+      const ctl = new AbortController();
+      const t = setTimeout(() => ctl.abort(), 9000);
+      const r = await fetch(h + path, { signal: ctl.signal });
+      clearTimeout(t);
+      if (r.ok) return await r.json();
+      err = new Error('HTTP ' + r.status);
+    } catch(e){ err = e; }
+  }
+  throw err || new Error('Radio-Browser indisponible');
+}
+
+/* Filtre minimal : uniquement les favicons qui ne sont PAS de vraies URL.
+   On ne blackliste PAS cloudinary, wp.com, etc. — les images se chargent
+   très bien avec referrerpolicy="no-referrer". */
+function normRadio(s){
+  let fav = (s.favicon || '').trim();
+  if (fav === 'null' || fav === 'undefined' || !/^https?:\/\//i.test(fav)) fav = '';
+
+  return {
+    key: 'r:' + s.stationuuid,
+    kind: 'radio',
+    title: (s.name || 'Sans nom').trim(),
+    sub: [s.country || s.countrycode, s.bitrate ? s.bitrate + ' kbps' : '']
+          .filter(Boolean).join(' · ') || 'Radio',
+    img: fav,
+    url: s.url_resolved || s.url || ''
+  };
+}
+
+/* ------------------ AUDIUS ------------------ */
+async function audiusHost(){
+  if (state.audiusHost) return state.audiusHost;
+  const r = await fetch('https://api.audius.co');
+  if (!r.ok) throw new Error('Audius indisponible');
+  const j = await r.json();
+  const hosts = j.data || [];
+  if (!hosts.length) throw new Error('Audius indisponible');
+  state.audiusHost = hosts[Math.floor(Math.random() * hosts.length)];
+  return state.audiusHost;
+}
+
+function normTrack(t){
+  return {
+    key: 't:' + t.id,
+    kind: 'track',
+    title: t.title || 'Sans titre',
+    sub: (t.user && (t.user.name || t.user.handle)) || 'Artiste inconnu',
+    img: t.artwork ? (t.artwork['480x480'] || t.artwork['150x150'] || '') : '',
+    url: state.audiusHost
+          ? state.audiusHost + '/v1/tracks/' + t.id + '/stream?app_name=OndesApp'
+          : ''
+  };
+}
+
+/* ------------------ CHIPS ------------------ */
+const RADIO_CHIPS = [
+  { label:'Top',          q:null },
+  { label:'🇫🇷 France',   q:'france' },
+  { label:'Chanson FR',   q:'chanson française' },
+  { label:'Pop',          q:'pop' },
+  { label:'Rock',         q:'rock' },
+  { label:'Jazz',         q:'jazz' },
+  { label:'Électro',      q:'electronic' },
+  { label:'Hip-Hop',      q:'hip hop' },
+  { label:'Classique',    q:'classical' },
+  { label:'Reggae',       q:'reggae' },
+  { label:'Latino',       q:'latin' },
+  { label:'Info',         q:'news' },
+  { label:'Chill',        q:'chillout' }
+];
+
+const MUSIC_CHIPS = [
+  { label:'Tendances',   q:null },
+  { label:'Électro',     q:'Electronic' },
+  { label:'Hip-Hop',     q:'Hip-Hop/Rap' },
+  { label:'Rock',        q:'Rock' },
+  { label:'Pop',         q:'Pop' },
+  { label:'Jazz',        q:'Jazz' },
+  { label:'Classique',   q:'Classical' },
+  { label:'Lo-Fi',       q:'Lo-Fi' },
+  { label:'House',       q:'House' },
+  { label:'Techno',      q:'Techno' },
+  { label:'Ambient',     q:'Ambient' },
+  { label:'Reggae',      q:'Reggae' }
+];
+
+const FRENCH_CHIPS = [
+  { label:'Tendances FR',       q:null },
+  { label:'Chanson française',  q:'chanson française' },
+  { label:'Variété',            q:'variété française' },
+  { label:'Pop française',      q:'pop française' },
+  { label:'Rap français',       q:'rap français' },
+  { label:'Rock français',      q:'rock français' },
+  { label:'Électro FR',         q:'electro française' },
+  { label:'Jazz FR',            q:'jazz français' },
+  { label:'Nouvelle scène',     q:'nouvelle scène française' },
+  { label:'Classique FR',       q:'classical french' }
+];
+
+/* ------------------ RENDU ------------------ */
+function initials(str){
+  return (str || '?').replace(/[^\p{L}\p{N} ]/gu,'').split(/\s+/).filter(Boolean)
+    .slice(0,2).map(w => w[0]).join('').toUpperCase() || '?';
+}
+
+function renderChips(){
+  let chips = [];
+  if (state.tab === 'music')       chips = MUSIC_CHIPS;
+  else if (state.tab === 'radio')  chips = RADIO_CHIPS;
+  else if (state.tab === 'french') chips = FRENCH_CHIPS;
+
+  if (!chips.length){
+    chipsEl.style.display = 'none';
+    chipsEl.innerHTML = '';
+    return;
+  }
+  chipsEl.style.display = 'flex';
+  chipsEl.innerHTML = chips.map(function(c){
+    const active = state.chip === c.q ? ' active' : '';
+    const dq = c.q === null ? '' : esc(c.q);
+    return '<button class="chip' + active + '" data-q="' + dq + '">' + esc(c.label) + '</button>';
+  }).join('');
+}
+
+function render(){
+  renderChips();
+
+  if (state.loading){
+    grid.innerHTML = '<div class="state"><div class="spinner"></div>Chargement…</div>';
+    return;
+  }
+
+  if (!state.list.length){
+    let m1, m2, m3;
+    if (state.tab === 'fav'){
+      m1 = '♥'; m2 = "Aucun favori pour l'instant";
+      m3 = "Clique sur le cœur d'une radio ou d'un morceau pour l'ajouter ici.";
+    } else {
+      m1 = '🔍'; m2 = 'Aucun résultat';
+      m3 = 'Essaie un autre mot-clé ou une autre catégorie.';
+    }
+    grid.innerHTML =
+      '<div class="state"><div class="big">' + m1 + '</div>' +
+      '<b style="color:var(--txt);display:block;margin-bottom:6px">' + m2 + '</b>' +
+      m3 + '</div>';
+    return;
+  }
+
+  grid.innerHTML = state.list.map(function(it){
+    const playing = state.current && state.current.key === it.key;
+    const liveBadge = it.kind === 'radio' ? '<span class="badge">LIVE</span>' : '';
+    /* referrerpolicy="no-referrer" contourne Tracking Prevention
+       sans casser le chargement des images (pas de crossorigin !). */
+    const imgTag = it.img
+      ? '<img src="' + esc(it.img) + '" loading="lazy" alt="" referrerpolicy="no-referrer" onerror="this.remove()">'
+      : '';
+    const eqTag = playing ? '<div class="eq"><i></i><i></i><i></i><i></i></div>' : '';
+    const favClass = isFav(it.key) ? ' on' : '';
+
+    return '' +
+      '<div class="card' + (playing ? ' playing' : '') + '" data-key="' + esc(it.key) + '">' +
+        '<button class="fav' + favClass + '" data-fav="' + esc(it.key) + '" aria-label="Favori">♥</button>' +
+        '<div class="art">' +
+          '<span class="ph">' + esc(initials(it.title)) + '</span>' +
+          imgTag +
+          eqTag +
+        '</div>' +
+        '<div class="meta">' +
+          '<div class="name">' + liveBadge + esc(it.title) + '</div>' +
+          '<div class="sub">' + esc(it.sub) + '</div>' +
+        '</div>' +
+      '</div>';
+  }).join('');
+}
+
+/* ------------------ CHARGEMENT DES DONNÉES ------------------ */
+async function loadRadio(chip, query){
+  state.loading = true; render();
+  let data;
+  try {
+    if (query){
+      data = await rb('/json/stations/search?name=' + encodeURIComponent(query) +
+                      '&limit=80&hidebroken=true&order=clickcount&reverse=true');
+    } else if (chip){
+      data = await rb('/json/stations/bytag/' + encodeURIComponent(chip) +
+                      '?limit=80&hidebroken=true&order=clickcount&reverse=true');
+    } else {
+      data = await rb('/json/stations/topclick/80?hidebroken=true');
+    }
+  } catch(e){
+    state.loading = false;
+    state.list = [];
+    grid.innerHTML = '<div class="state"><div class="big">⚠️</div>' +
+      '<b style="color:var(--txt);display:block;margin-bottom:6px">Connexion impossible</b>' +
+      'Vérifie ta connexion internet et réessaie.</div>';
+    return;
+  }
+
+  const seen = new Set();
+  state.list = data
+    .filter(s => s.url_resolved && !/\.m3u8(\?|$)/i.test(s.url_resolved))
+    .map(normRadio)
+    .filter(function(s){
+      const k = s.title.toLowerCase() + '|' + s.sub;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    })
+    .slice(0, 60);
+
+  state.loading = false;
+  render();
+}
+
+async function loadMusic(chip, query){
+  state.loading = true; render();
+  let tracks = [];
+  try {
+    const host = await audiusHost();
+    let url;
+    if (query){
+      url = host + '/v1/tracks/search?query=' + encodeURIComponent(query) + '&app_name=OndesApp&limit=50';
+    } else if (chip){
+      url = host + '/v1/tracks/trending?genre=' + encodeURIComponent(chip) + '&app_name=OndesApp&limit=50';
+    } else {
+      url = host + '/v1/tracks/trending?app_name=OndesApp&limit=50';
+    }
+    let r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    let j = await r.json();
+    tracks = j.data || [];
+
+    if (!tracks.length && chip && !query){
+      r = await fetch(host + '/v1/tracks/trending?app_name=OndesApp&limit=50');
+      j = await r.json();
+      tracks = j.data || [];
+    }
+  } catch(e){
+    state.loading = false;
+    state.list = [];
+    grid.innerHTML = '<div class="state"><div class="big">⚠️</div>' +
+      '<b style="color:var(--txt);display:block;margin-bottom:6px">Audius indisponible</b>' +
+      'Réessaie dans un instant.</div>';
+    return;
+  }
+
+  state.list = tracks.map(normTrack).filter(t => t.url);
+  state.loading = false;
+  render();
+}
+
+async function loadFrench(chip, query){
+  state.loading = true; render();
+  let tracks = [];
+  try {
+    const host = await audiusHost();
+
+    if (query){
+      const r = await fetch(host + '/v1/tracks/search?query=' + encodeURIComponent(query) +
+                            '&app_name=OndesApp&limit=50');
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      tracks = j.data || [];
+    } else if (chip){
+      const r = await fetch(host + '/v1/tracks/search?query=' + encodeURIComponent(chip) +
+                            '&app_name=OndesApp&limit=50');
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      tracks = j.data || [];
+    } else {
+      const frenchQueries = ['french', 'français', 'chanson française', 'variété française'];
+      const results = await Promise.all(frenchQueries.map(function(q){
+        return fetch(host + '/v1/tracks/search?query=' + encodeURIComponent(q) +
+                     '&app_name=OndesApp&limit=15')
+          .then(function(r){ return r.ok ? r.json() : { data: [] }; })
+          .then(function(j){ return j.data || []; })
+          .catch(function(){ return []; });
+      }));
+      const seen = new Set();
+      tracks = results.flat().filter(function(t){
+        if (seen.has(t.id)) return false;
+        seen.add(t.id);
+        return true;
+      });
+    }
+  } catch(e){
+    state.loading = false;
+    state.list = [];
+    grid.innerHTML = '<div class="state"><div class="big">⚠️</div>' +
+      '<b style="color:var(--txt);display:block;margin-bottom:6px">Audius indisponible</b>' +
+      'Réessaie dans un instant.</div>';
+    return;
+  }
+
+  state.list = tracks.map(normTrack).filter(t => t.url).slice(0, 60);
+  state.loading = false;
+  render();
+}
+
+async function refresh(){
+  const id = ++state.reqId;
+  const q = searchEl.value.trim();
+  const chip = state.chip;
+
+  if (state.tab === 'fav'){
+    state.list = favs.slice();
+    state.loading = false;
+    render();
+    return;
+  }
+
+  if (state.tab === 'radio')       await loadRadio(chip, q);
+  else if (state.tab === 'music')  await loadMusic(chip, q);
+  else if (state.tab === 'french') await loadFrench(chip, q);
+
+  if (id !== state.reqId) return;
+}
+
+/* ------------------ LECTURE ------------------ */
+function play(item){
+  if (!item || !item.url){
+    $('#npSub').textContent = '⚠️ Source indisponible';
+    return;
+  }
+  state.current = item;
+  audio.src = item.url;
+  audio.volume = parseFloat($('#vol').value);
+  audio.play().catch(function(){
+    $('#npSub').textContent = '⚠️ Flux indisponible, essaie une autre source';
+  });
+
+  $('#npTitle').textContent = item.title;
+  $('#npSub').textContent = item.sub;
+  $('#npArt').innerHTML = item.img
+    ? '<img src="' + esc(item.img) + '" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.textContent=\'◉\'">'
+    : '◉';
+  $('#playBtn').disabled = false;
+  updatePlayIcon();
+  render();
+}
+
+function updatePlayIcon(){
+  $('#playBtn').textContent = (!audio.paused && audio.src) ? '❚❚' : '▶';
+}
+
+/* ------------------ ÉVÉNEMENTS ------------------ */
+grid.addEventListener('click', function(e){
+  const favBtn = e.target.closest('.fav');
+  if (favBtn){
+    e.stopPropagation();
+    const key = favBtn.dataset.fav;
+    const item = state.list.find(i => i.key === key) || favs.find(f => f.key === key);
+    if (item) toggleFav(item);
+    return;
+  }
+  const card = e.target.closest('.card');
+  if (!card) return;
+  const item = state.list.find(i => i.key === card.dataset.key);
+  if (!item) return;
+  if (state.current && state.current.key === item.key){
+    if (audio.paused) audio.play(); else audio.pause();
+    return;
+  }
+  play(item);
+});
+
+chipsEl.addEventListener('click', function(e){
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  state.chip = chip.dataset.q || null;
+  refresh();
+});
+
+document.querySelectorAll('.tab').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.tab = btn.dataset.tab;
+    state.chip = null;
+    searchEl.value = '';
+    refresh();
+  });
+});
+
+let searchTimer;
+searchEl.addEventListener('input', function(){
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(function(){
+    state.chip = null;
+    refresh();
+  }, 450);
+});
+
+$('#playBtn').addEventListener('click', function(){
+  if (!audio.src) return;
+  if (audio.paused) audio.play(); else audio.pause();
+});
+
+$('#vol').addEventListener('input', function(e){
+  audio.volume = parseFloat(e.target.value);
+  e.target.style.setProperty('--p', (e.target.value * 100) + '%');
+});
+
+audio.addEventListener('play',  updatePlayIcon);
+audio.addEventListener('pause', updatePlayIcon);
+audio.addEventListener('error', function(){
+  if (!audio.src) return;
+  $('#npSub').textContent = '⚠️ Flux indisponible ou bloqué';
+  updatePlayIcon();
+});
+
+/* Volume initial */
+const volEl = $('#vol');
+audio.volume = parseFloat(volEl.value);
+volEl.style.setProperty('--p', (volEl.value * 100) + '%');
+
+/* ------------------ DÉMARRAGE ------------------ */
+refresh();
+</script>
+</body>
+</html>
