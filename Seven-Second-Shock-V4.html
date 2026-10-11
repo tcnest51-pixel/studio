@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seven-Second Shock V4 · Agnes</title>
+<title>Seven-Second Shock V6 · Agnes</title>
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -66,6 +66,8 @@
     .chip.off { border-color: var(--error); color: #f0b8b8; opacity: 0.6; }
     .chip.cd { border-color: var(--accent-2); color: var(--accent-2); }
     .chip.ok { border-color: var(--success); color: #d8f0b8; }
+    .chip.busy { border-color: var(--error); color: #ff9a9a; animation: pulse 1.6s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
     input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 5px;
         border-radius: 3px; background: var(--border); outline: none; padding: 0; margin-top: 0.5rem; }
     input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px;
@@ -95,7 +97,8 @@
     #status.error { border-left-color: var(--error); color: #f0b8b8; }
     #status.success { border-left-color: var(--success); color: #d8f0b8; }
     #status.info { border-left-color: var(--accent); color: #e8c8d0; }
-    #status a { color: var(--accent-2); text-decoration: underline; }
+    #status.busy { border-left-color: var(--accent-2); color: #ffe9a8;
+        background: linear-gradient(90deg, rgba(201,162,39,0.12), rgba(155,28,49,0.06)); }
     #status button.inline-btn { display: inline-block; padding: 0.3rem 0.7rem; margin: 0.3rem 0.3rem 0 0;
         background: var(--panel); color: var(--accent-2); border: 1px solid var(--accent-2);
         border-radius: 6px; font-family: inherit; font-size: 0.75rem; font-weight: 700;
@@ -113,6 +116,8 @@
     .queue-item.processing { border-color: var(--accent); box-shadow: 0 0 10px rgba(155,28,49,0.25); }
     .queue-item.extracting { border-color: var(--success); box-shadow: 0 0 10px rgba(124,179,66,0.3); }
     .queue-item.waiting { border-color: var(--accent-2); box-shadow: 0 0 10px rgba(201,162,39,0.25); }
+    .queue-item.busy { border-color: var(--error); box-shadow: 0 0 12px rgba(183,28,28,0.35);
+        background: linear-gradient(90deg, rgba(183,28,28,0.08), transparent); }
     .queue-item.done { border-color: var(--success); }
     .queue-item.failed { border-color: var(--error); }
     .q-counter { min-width: 2.2rem; padding: 0.15rem 0.5rem; border-radius: 8px;
@@ -125,6 +130,9 @@
     .q-chain { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 6px;
         background: rgba(124,179,66,0.2); color: var(--success); font-size: 0.6rem;
         font-weight: 700; margin-left: 0.4rem; }
+    .q-attempts { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 6px;
+        background: rgba(201,162,39,0.25); color: var(--accent-2); font-size: 0.6rem;
+        font-weight: 800; margin-left: 0.4rem; font-family: monospace; }
     .gallery { display: none; margin-top: 2rem; width: 100%; max-width: 1000px; }
     .gallery.visible { display: block; }
     .gallery-title { font-size: 1rem; color: var(--accent-2); text-transform: uppercase;
@@ -211,7 +219,7 @@
 </head>
 <body>
 
-<h1>Seven-Second Shock V4</h1>
+<h1>Seven-Second Shock V6</h1>
 <p class="subtitle">« Fait pour décrire vite. Conçu pour choquer. » · Agnes AI</p>
 
 <!-- ═══════════ API KEYS ═══════════ -->
@@ -263,7 +271,7 @@
     </div>
 </div>
 
-<!-- ═══════════ SÉQUENCE ═══════════ -->
+<!-- ═══════════ SÉQUENCE + MODE PATIENT ═══════════ -->
 <div class="panel">
     <div class="toggle-row" id="toggle-sequence">
         <div class="tg-info">
@@ -277,6 +285,14 @@
         <div class="tg-info">
             <div class="tg-name">🔗 Continuité de transformation <span style="color:var(--accent-2); font-size:0.65rem;">(recommandé)</span></div>
             <div class="tg-desc">Le keyframe de fin du stade précédent devient l'image de départ du stade suivant</div>
+        </div>
+        <div class="toggle-switch"></div>
+    </div>
+
+    <div class="toggle-row" id="toggle-patient" style="margin-top:0.6rem;">
+        <div class="tg-info">
+            <div class="tg-name">🐢 Mode patient <span style="color:var(--accent-2); font-size:0.65rem;">(anti-503)</span></div>
+            <div class="tg-desc">En cas de file Agnes saturée : attend 2 min entre chaque tentative au lieu de 45 s. Laisse l'onglet ouvert — ça finira par passer.</div>
         </div>
         <div class="toggle-switch"></div>
     </div>
@@ -352,11 +368,27 @@ const MODELS = {
     img: 'agnes-image-2.5-flash',
     vid: 'agnes-video-2.5-flash'
 };
+
 const RPM = {
     free: { img: 10, vid: 1,  txt: 10  },
     ent:  { img: 40, vid: 2,  txt: 20  },
     plan: { img: 100, vid: 5, txt: 600 }
 };
+
+const SAFETY = {
+    img: 1.5,
+    vid: 3.0,
+    txt: 1.4
+};
+
+/* Cooldown 429 */
+const COOL_BASE = 60000;
+const COOL_EXTRA_VID = 60000;
+const COOL_EXTRA_OTHER = 20000;
+
+/* Cooldown 503 (file saturée) */
+const BUSY_WAIT_NORMAL = 45000;   /* 45 s */
+const BUSY_WAIT_PATIENT = 120000; /* 2 min en mode patient */
 
 const FORMATS = [
     { id: '9:16', icon: '📱', label: 'Vertical' },
@@ -372,6 +404,10 @@ const state = {
     plan: 'plan',
     factor: 1,
     okCount: 0,
+
+    globalCool: 0,
+    serviceBusy: false,    /* ⬅️ NOUVEAU : Agnes renvoie 503 */
+    patientMode: false,    /* ⬅️ NOUVEAU : mode patient */
 
     images: [],
     running: false,
@@ -409,6 +445,12 @@ function timestamp() {
     return n.getFullYear() + p(n.getMonth() + 1) + p(n.getDate()) + '_' +
            p(n.getHours()) + p(n.getMinutes()) + p(n.getSeconds());
 }
+function fmtTime(ms) {
+    const s = Math.round(ms / 1000);
+    if (s < 60) return s + 's';
+    const m = Math.floor(s / 60), r = s % 60;
+    return m + 'min' + (r > 0 ? r + 's' : '');
+}
 
 /* ═══════════════════════════════════════════════════════════════
    CONSOLE
@@ -439,7 +481,7 @@ function toggleConsole(force) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   GESTION DES CLÉS + RATE LIMIT
+   GESTION DES CLÉS
    ═══════════════════════════════════════════════════════════════ */
 function parseKeys() {
     return [...new Set(
@@ -464,23 +506,43 @@ function renderKeysStatus() {
     const now = Date.now();
     const el = document.getElementById('keys-status');
     if (!state.keys.length) { el.innerHTML = '<span class="chip off">Aucune clé</span>'; return; }
-    el.innerHTML = state.keys.map((k, i) => {
+    let html = '';
+    if (state.serviceBusy) {
+        html += `<span class="chip busy">⚡ Agnes saturé (503)</span>`;
+    }
+    if (state.globalCool > now) {
+        html += `<span class="chip cd">🌍 Cooldown ${Math.ceil((state.globalCool - now) / 1000)}s</span>`;
+    }
+    html += state.keys.map((k, i) => {
         let cls = 'chip ok', txt = 'OK';
         if (k.off) { cls = 'chip off'; txt = 'OFF'; }
         else if (k.cool > now) { cls = 'chip cd'; txt = 'PAUSE ' + Math.ceil((k.cool - now) / 1000) + 's'; }
         return `<span class="${cls}">#${i + 1} …${esc(k.k.slice(-4))} ${txt}</span>`;
     }).join('');
+    el.innerHTML = html;
 }
 setInterval(renderKeysStatus, 1000);
 
+/* ═══════════════════════════════════════════════════════════════
+   SLOT (rate limit par clé + cooldown global)
+   ═══════════════════════════════════════════════════════════════ */
 async function slot(kind) {
     for (;;) {
         if (state.stopRequested) throw new Error('ARRÊT_DEMANDÉ');
+
+        const nowCheck = Date.now();
+        if (state.globalCool > nowCheck) {
+            const wait = state.globalCool - nowCheck;
+            log('in', `🌍 cooldown global : ${fmtTime(wait)} avant ${kind}…`);
+            await sleep(Math.min(wait, 5000));
+            continue;
+        }
+
         const live = state.keys.filter(o => !o.off);
         if (!live.length) throw Object.assign(new Error('Aucune clé active'), { fatal: true });
 
         const rpm = Math.max(1, RPM[state.plan][kind]);
-        const safety = kind === 'vid' ? 2.2 : 1.4;
+        const safety = SAFETY[kind] || 1.5;
         const iv = (60000 / rpm) * safety * state.factor;
 
         const now = Date.now();
@@ -494,7 +556,7 @@ async function slot(kind) {
 
         if (bt > now) {
             const wait = bt - now;
-            if (wait > 500) log('in', `⏳ attente ${Math.round(wait / 1000)}s avant ${kind}…`);
+            if (wait > 500) log('in', `⏳ attente ${fmtTime(wait)} avant ${kind} (clé #${state.keys.indexOf(best) + 1})…`);
             await sleep(wait);
         }
         if (state.stopRequested) throw new Error('ARRÊT_DEMANDÉ');
@@ -503,13 +565,18 @@ async function slot(kind) {
     }
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   CALL — 429 (cooldown global) + 503 (retry long, ne consomme pas)
+   ═══════════════════════════════════════════════════════════════ */
 async function call(kind, url, body, tries) {
     let err;
-    for (let a = 0; a < tries; a++) {
+    let attempt = 0;
+
+    while (attempt < tries) {
         if (state.stopRequested) throw new Error('ARRÊT_DEMANDÉ');
         const o = await slot(kind);
         try {
-            log('in', `→ ${kind} (clé #${state.keys.indexOf(o) + 1})`);
+            log('in', `→ ${kind} (clé #${state.keys.indexOf(o) + 1}, tentative ${attempt + 1}/${tries})`);
             const r = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + o.k },
@@ -517,40 +584,95 @@ async function call(kind, url, body, tries) {
             });
             if (r.ok) {
                 o.bad = 0;
-                if (state.factor > 1 && ++state.okCount % 8 === 0) state.factor = Math.max(1, state.factor * 0.85);
+                state.serviceBusy = false;
+                if (state.factor > 1 && ++state.okCount % 8 === 0) state.factor = Math.max(1, state.factor * 0.9);
                 return { r, o };
             }
             const tx = (await r.text()).slice(0, 260);
-            log('er', `${kind} #${state.keys.indexOf(o) + 1} HTTP ${r.status} ${tx}`);
+            log('er', `${kind} #${state.keys.indexOf(o) + 1} HTTP ${r.status} ${tx.slice(0, 150)}`);
 
+            /* ═══ 429 : rate limit → cooldown GLOBAL ═══ */
             if (r.status === 429) {
                 const raRaw = r.headers.get('Retry-After');
                 const ra = parseInt(raRaw, 10);
-                const baseCool = (isFinite(ra) && ra > 0 ? ra : 30) * 1000;
-                const extra = kind === 'vid' ? 45000 : 15000;
-                o.cool = Date.now() + baseCool + extra;
-                state.factor = Math.min(6, state.factor * 1.8);
-                log('wr', `429 · clé #${state.keys.indexOf(o) + 1} en pause ${Math.round((baseCool + extra) / 1000)}s ` +
-                          `(facteur ×${state.factor.toFixed(2)})`);
+                const baseCool = (isFinite(ra) && ra > 0 ? ra : COOL_BASE / 1000) * 1000;
+                const extra = kind === 'vid' ? COOL_EXTRA_VID : COOL_EXTRA_OTHER;
+                const coolMs = baseCool + extra;
+
+                o.cool = Date.now() + coolMs;
+                state.globalCool = Math.max(state.globalCool, Date.now() + coolMs);
+                state.factor = Math.min(8, state.factor * 2.0);
+
+                log('wr', `429 · cooldown GLOBAL ${fmtTime(coolMs)} (facteur ×${state.factor.toFixed(2)})`);
                 err = new Error('429');
+                attempt++;
                 continue;
             }
 
+            /* ═══ 503 : file Agnes saturée → retry long, ne consomme PAS le budget ═══ */
+            if (r.status === 503) {
+                state.serviceBusy = true;
+                const retryAfter = parseInt(r.headers.get('Retry-After'), 10);
+
+                let waitMs;
+                if (isFinite(retryAfter) && retryAfter > 0) {
+                    waitMs = retryAfter * 1000;
+                    log('wr', `503 · file Agnes pleine · Retry-After=${retryAfter}s`);
+                } else if (state.patientMode) {
+                    waitMs = BUSY_WAIT_PATIENT + Math.random() * 30000;
+                    log('wr', `503 · file Agnes pleine · mode patient → attente ${fmtTime(waitMs)}`);
+                } else {
+                    waitMs = BUSY_WAIT_NORMAL + Math.random() * 15000;
+                    log('wr', `503 · file Agnes pleine · attente ${fmtTime(waitMs)}`);
+                }
+
+                setStatus(
+                    '<span class="spinner"></span>⏳ <b>File d\'attente Agnes saturée</b> (503).<br>' +
+                    'Nouvelle tentative dans <b>' + fmtTime(waitMs) + '</b>.<br>' +
+                    '<span style="opacity:0.7; font-size:0.8em;">' +
+                    (state.patientMode ? '🐢 Mode patient actif.' : '💡 Active le 🐢 mode patient si ça dure.') +
+                    ' Laisse l\'onglet ouvert — c\'est côté serveur Agnes.</span>',
+                    'busy'
+                );
+
+                /* Cooldown GLOBAL côté client */
+                state.globalCool = Math.max(state.globalCool, Date.now() + waitMs);
+
+                /* On attend en petits morceaux pour pouvoir STOP */
+                const end = Date.now() + waitMs;
+                while (Date.now() < end && !state.stopRequested) {
+                    await sleep(Math.min(2000, end - Date.now()));
+                }
+
+                /* ⬇️ IMPORTANT : on ne consomme PAS le budget de tentatives pour un 503 */
+                err = new Error('503');
+                continue;
+            }
+
+            /* ═══ 401/402/403 : clé invalide ═══ */
             if ([401, 402, 403].includes(r.status)) {
                 if (++o.bad >= 2) { o.off = true; log('wr', 'clé …' + o.k.slice(-4) + ' désactivée'); }
                 err = new Error('HTTP ' + r.status + ' ' + tx);
+                attempt++;
                 continue;
             }
+
+            /* ═══ 500/408/409 : erreurs transitoires ═══ */
             if (r.status >= 500 || r.status === 408 || r.status === 409) {
                 err = new Error('HTTP ' + r.status);
-                await sleep(2000 * Math.pow(2, a));
+                attempt++;
+                await sleep(2000 * Math.pow(2, attempt));
                 continue;
             }
+
+            /* Autres codes → fatal */
             throw Object.assign(new Error('HTTP ' + r.status + ' ' + tx), { fatal: true });
+
         } catch (e) {
             if (e.fatal || e.message === 'ARRÊT_DEMANDÉ') throw e;
             err = e;
-            await sleep(1500 * (a + 1));
+            attempt++;
+            await sleep(1500 * attempt);
         }
     }
     throw err || new Error('Échec après ' + tries + ' tentatives');
@@ -593,7 +715,8 @@ async function agnesVideo(prompt, firstFrame, lastFrame, ratio, seconds) {
         body.last_frame = lastFrame;
     }
 
-    const { r, o } = await call('vid', AGNES_API + '/videos', body, 4);
+    /* ⬇️ PATCH 2 : 8 tentatives vidéo au lieu de 4 */
+    const { r, o } = await call('vid', AGNES_API + '/videos', body, 8);
     const d = await r.json();
     const id = d.video_id || d.id;
     if (!id) throw new Error('Pas de video_id dans la réponse');
@@ -602,17 +725,52 @@ async function agnesVideo(prompt, firstFrame, lastFrame, ratio, seconds) {
 }
 
 async function pollVideo(id, keyObj) {
-    const end = Date.now() + 15 * 60000;
-    let miss = 0, iv = 2500;
+    const end = Date.now() + 25 * 60000;
+    let miss = 0;
+
+    /* ⬇️ PATCH 3 : poll 10s → 25s progressif */
+    let iv = 10000;
+    const startPoll = Date.now();
+
     while (Date.now() < end) {
         if (state.stopRequested) throw new Error('ARRÊT_DEMANDÉ');
-        await sleep(iv + Math.random() * 600);
+
+        const nowCheck = Date.now();
+        if (state.globalCool > nowCheck) {
+            const w = state.globalCool - nowCheck;
+            log('in', `🌍 poll · cooldown global ${fmtTime(w)}`);
+            await sleep(Math.min(w + 500, 30000));
+            continue;
+        }
+
+        await sleep(iv + Math.random() * 1500);
+
+        const polledFor = (Date.now() - startPoll) / 1000;
+        if (polledFor > 30) iv = Math.min(25000, 10000 + (polledFor - 30) * 200);
+
         try {
             const r = await fetch(AGNES_POLL + '?video_id=' + encodeURIComponent(id) + '&model_name=' + MODELS.vid,
                 { headers: { Authorization: 'Bearer ' + keyObj.k } });
-            if (r.status === 429) { iv = Math.min(10000, iv * 1.5); continue; }
+
+            if (r.status === 429) {
+                const retryAfter = parseInt(r.headers.get('Retry-After'), 10) || 45;
+                state.globalCool = Math.max(state.globalCool, Date.now() + retryAfter * 1000);
+                iv = Math.min(20000, iv * 2);
+                log('wr', `poll 429 · pause globale ${retryAfter}s`);
+                continue;
+            }
+
+            /* ⬇️ 503 sur le poll → on continue simplement (c'est transitoire) */
+            if (r.status === 503) {
+                state.serviceBusy = true;
+                iv = Math.min(30000, iv * 1.5);
+                log('wr', `poll 503 · Agnes saturé, prochain poll dans ${fmtTime(iv)}`);
+                continue;
+            }
+
             if (r.status === 404 && ++miss < 8) continue;
             if (!r.ok) throw Object.assign(new Error('poll HTTP ' + r.status), { fin: 1 });
+
             const d = await r.json();
             if (d.progress != null) updateLiveProgress(d.progress);
             if (d.status === 'completed') {
@@ -622,13 +780,14 @@ async function pollVideo(id, keyObj) {
             if (d.status === 'failed') throw Object.assign(new Error(d.error && d.error.message || 'génération échouée'), { fin: 1 });
         } catch (e) {
             if (e.fin || e.message === 'ARRÊT_DEMANDÉ') throw e;
+            iv = Math.min(20000, iv * 1.3);
         }
     }
-    throw new Error('Délai dépassé (15 min)');
+    throw new Error('Délai dépassé (25 min)');
 }
 
 function updateLiveProgress(p) {
-    const items = state.queue.filter(q => q.status === 'processing' || q.status === 'waiting');
+    const items = state.queue.filter(q => q.status === 'processing' || q.status === 'waiting' || q.status === 'busy');
     if (items.length) {
         items[items.length - 1].progress = 'Rendu ' + p + '%';
         renderQueue();
@@ -772,12 +931,13 @@ function renderQueue() {
     const done = state.completed + state.failed;
     document.getElementById('queue-progress').textContent = done + '/' + total;
     const remaining = total - done;
-    const etaMin = Math.round(remaining * 2.5);
+    const etaMin = Math.round(remaining * 1.5);
     document.getElementById('queue-eta').textContent = remaining > 0
         ? '≈ ' + etaMin + ' min restant' : '✓ Terminé';
     document.getElementById('queue-list').innerHTML = state.queue.map((item, i) => {
         let cls = 'pending', st = 'En file', icon = '○';
-        if (item.status === 'waiting') { cls = 'waiting'; st = item.progress || '⏳ Attente rate-limit…'; icon = '⏳'; }
+        if (item.status === 'busy') { cls = 'busy'; st = item.progress || '⚡ File Agnes saturée…'; icon = '⚡'; }
+        else if (item.status === 'waiting') { cls = 'waiting'; st = item.progress || '⏳ Attente…'; icon = '⏳'; }
         else if (item.status === 'creating') { cls = 'creating'; st = 'Création…'; icon = '◐'; }
         else if (item.status === 'processing') { cls = 'processing'; st = item.progress || 'En cours'; icon = '◐'; }
         else if (item.status === 'done') { cls = 'done'; st = 'Terminé'; icon = '●'; }
@@ -790,10 +950,12 @@ function renderQueue() {
             (state.sequence ? ' · Stade ' + (item.stageIndex + 1) + ' (' + stageLabel + ' ' + pct + '%)' : '') +
             ' · ' + item.format;
         const chainBadge = item.chained ? '<span class="q-chain">🔗</span>' : '';
+        const attemptsBadge = (item.attempts && item.attempts > 1)
+            ? '<span class="q-attempts">↻ ' + item.attempts + '</span>' : '';
         return '<div class="queue-item ' + cls + '">' +
             '<div class="q-counter">' + (i + 1) + '/' + total + '</div>' +
             '<div class="q-info">' +
-                '<div class="q-title">' + icon + ' ' + esc(title) + chainBadge + '</div>' +
+                '<div class="q-title">' + icon + ' ' + esc(title) + chainBadge + attemptsBadge + '</div>' +
                 '<div class="q-status">' + esc(st) + '</div>' +
             '</div>' +
         '</div>';
@@ -895,7 +1057,8 @@ async function generate() {
                 state.queue.push({
                     imageIndex: imgIdx, stageIndex: stgIdx, format: fmt,
                     image: imagesToUse[imgIdx], status: 'pending',
-                    progress: null, error: null, videoUrl: null, chained: stgIdx > 0
+                    progress: null, error: null, videoUrl: null, chained: stgIdx > 0,
+                    attempts: 0
                 });
             }
         }
@@ -903,11 +1066,13 @@ async function generate() {
     state.running = true; state.stopRequested = false;
     state.completed = 0; state.failed = 0; state.results = [];
     state.okCount = 0; state.factor = 1;
+    state.globalCool = 0;
+    state.serviceBusy = false;
 
     state.keys.forEach((k, i) => {
         k.off = false; k.bad = 0; k.cool = 0;
-        k.vid = Date.now() + i * 20000;
-        k.img = Date.now() + i * 4000;
+        k.vid = Date.now() + i * 30000;
+        k.img = Date.now() + i * 5000;
         k.txt = Date.now();
     });
 
@@ -917,7 +1082,8 @@ async function generate() {
     updateButton(); renderQueue();
     setStatus('<span class="spinner"></span>Démarrage…');
     log('in', '═══ Nouveau run · ' + imagesToUse.length + ' portrait(s) · ' +
-        stageCount + ' stade(s) · ' + formatsArr.length + ' format(s) · ' + state.keys.length + ' clé(s)');
+        stageCount + ' stade(s) · ' + formatsArr.length + ' format(s) · ' + state.keys.length + ' clé(s)' +
+        (state.patientMode ? ' · 🐢 mode patient' : ''));
 
     const startTime = Date.now();
 
@@ -944,6 +1110,7 @@ async function generate() {
 
                     const isChained = stgIdx > 0 && !!prevEndImage && state.strictContinuity;
                     item.chained = isChained;
+                    item.attempts = 0;
 
                     try {
                         if (isTextOnly) {
@@ -956,8 +1123,10 @@ async function generate() {
                             const stagePrompt = buildTextOnlyStagePrompt(basePrompt, stgIdx, stageCount);
                             log('in', '📝 Prompt texte→vidéo : ' + stagePrompt.slice(0, 200));
 
-                            item.status = 'waiting'; item.progress = '⏳ Attente rate-limit…';
+                            item.status = 'waiting'; item.progress = '⏳ Attente…';
                             renderQueue();
+
+                            item.attempts++;
                             const videoUrl = await agnesVideo(stagePrompt, null, null, fmt, seconds);
                             item.status = 'done'; item.videoUrl = videoUrl; item.progress = 'Terminé';
                             state.completed++;
@@ -971,8 +1140,7 @@ async function generate() {
                         } else {
                             const startImage = isChained ? prevEndImage : img.dataUri;
 
-                            item.status = 'creating';
-                            item.progress = 'Keyframe fin…';
+                            item.status = 'creating'; item.progress = 'Keyframe fin…';
                             renderQueue();
                             setStatus('<span class="spinner"></span>Portrait ' + (imgIdx + 1) + ' · Stade ' + (stgIdx + 1) + '/' + stageCount +
                                 ' (' + hint.label + ' ' + pct + '%) · ' + fmt + ' · génération keyframe…');
@@ -982,13 +1150,15 @@ async function generate() {
                             const endImage = await agnesImage(imgPrompt, startImage, fmt);
                             log('ok', '✓ Keyframe fin prêt');
 
-                            item.status = 'waiting'; item.progress = '⏳ Attente rate-limit…';
+                            item.status = 'waiting'; item.progress = '⏳ Attente…';
                             renderQueue();
                             setStatus('<span class="spinner"></span>Portrait ' + (imgIdx + 1) + ' · Stade ' + (stgIdx + 1) + '/' + stageCount +
                                 ' · ' + fmt + ' · rendu vidéo' + (isChained ? ' 🔗' : '') + '…');
 
                             const vidPrompt = buildStageVideoPrompt(basePrompt, stgIdx, stageCount, isChained);
                             log('in', '🎬 Prompt vidéo : ' + vidPrompt.slice(0, 200));
+
+                            item.attempts++;
                             const videoUrl = await agnesVideo(vidPrompt, startImage, endImage, fmt, seconds);
 
                             item.status = 'done'; item.videoUrl = videoUrl; item.progress = 'Terminé';
@@ -1028,6 +1198,7 @@ async function generate() {
         setStatus('❌ ' + e.message, 'error');
     } finally {
         state.running = false; state.stopRequested = false;
+        state.serviceBusy = false;
         document.getElementById('stop-btn').classList.remove('visible');
         updateButton();
     }
@@ -1042,6 +1213,8 @@ function stopGeneration() {
 function emergencyReset() {
     state.running = false; state.stopRequested = false;
     state.completed = 0; state.failed = 0; state.queue = [];
+    state.globalCool = 0; state.serviceBusy = false;
+    state.keys.forEach(k => { k.cool = 0; k.bad = 0; });
     document.getElementById('stop-btn').classList.remove('visible');
     document.getElementById('queue').classList.remove('visible');
     document.getElementById('queue-list').innerHTML = '';
@@ -1103,7 +1276,7 @@ function renderGallery() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   TÉLÉCHARGEMENT MP4 — cascade étendue + fallback sans surprise
+   TÉLÉCHARGEMENT MP4
    ═══════════════════════════════════════════════════════════════ */
 async function downloadVideo(url, baseFilename, btnEl) {
     const uniqueName = baseFilename.replace(/\.mp4$/i, '') + '_' + timestamp() + '.mp4';
@@ -1113,7 +1286,7 @@ async function downloadVideo(url, baseFilename, btnEl) {
 
     const withTimeout = (promise, ms, label) => Promise.race([
         promise,
-        new Promise((_, rej) => setTimeout(() => rej(new Error('Timeout ' + label + ' (' + (ms/1000) + 's)')), ms))
+        new Promise((_, rej) => setTimeout(() => rej(new Error('Timeout ' + label)), ms))
     ]);
 
     async function fetchAsBlob(u, ms, label) {
@@ -1130,7 +1303,6 @@ async function downloadVideo(url, baseFilename, btnEl) {
         })(), ms, label);
     }
 
-    /* Liste de proxies — du plus fiable au moins fiable */
     const proxies = [
         { name: 'isomorphic-git',  make: u => 'https://cors.isomorphic-git.org/' + u },
         { name: 'codetabs',        make: u => 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(u) },
@@ -1142,7 +1314,6 @@ async function downloadVideo(url, baseFilename, btnEl) {
 
     let blob = null, source = null;
 
-    /* 1) Direct */
     try {
         setStatus('<span class="spinner"></span>⬇ Direct…', 'info');
         blob = await fetchAsBlob(url, 12000, 'direct');
@@ -1151,7 +1322,6 @@ async function downloadVideo(url, baseFilename, btnEl) {
         log('wr', 'Direct : ' + e.message);
     }
 
-    /* 2) Proxies en cascade */
     if (!blob) {
         for (let i = 0; i < proxies.length && !blob; i++) {
             const p = proxies[i];
@@ -1166,7 +1336,6 @@ async function downloadVideo(url, baseFilename, btnEl) {
         }
     }
 
-    /* 3) Fallback : message + boutons, PAS d'ouverture automatique */
     if (!blob) {
         log('er', 'Aucun proxy n\'a pu récupérer ' + uniqueName);
         showDownloadHelp(url, uniqueName);
@@ -1174,7 +1343,6 @@ async function downloadVideo(url, baseFilename, btnEl) {
         return;
     }
 
-    /* 4) Sauvegarde locale */
     try {
         const objUrl = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -1197,9 +1365,7 @@ async function downloadVideo(url, baseFilename, btnEl) {
     }
 }
 
-/* Fallback propre : instructions + boutons, AUCUNE redirection automatique */
 function showDownloadHelp(url, filename) {
-    const safeUrl = esc(url);
     setStatus(
         '⚠ <b>Téléchargement automatique bloqué</b> (tous les proxies CORS sont indisponibles).<br><br>' +
         '<b>Solutions :</b><br>' +
@@ -1227,7 +1393,6 @@ function showDownloadHelp(url, filename) {
                 });
         };
         if (openBtn) openBtn.onclick = () => {
-            /* On prévient clairement : c'est volontaire, l'utilisateur peut ensuite faire Ctrl+S */
             window.open(url, '_blank', 'noopener,noreferrer');
         };
     }, 50);
@@ -1338,6 +1503,15 @@ contToggle.addEventListener('click', () => {
     state.strictContinuity = !state.strictContinuity;
     contToggle.classList.toggle('active', state.strictContinuity);
 });
+
+/* ⬇️ NOUVEAU : toggle mode patient */
+const patientToggle = document.getElementById('toggle-patient');
+patientToggle.addEventListener('click', () => {
+    state.patientMode = !state.patientMode;
+    patientToggle.classList.toggle('active', state.patientMode);
+    log('in', '🐢 Mode patient ' + (state.patientMode ? 'ACTIVÉ (attente 2 min sur 503)' : 'désactivé'));
+});
+
 document.getElementById('stages-range').addEventListener('input', e => {
     state.stages = parseInt(e.target.value, 10);
     document.getElementById('stages-val').textContent = state.stages;
@@ -1377,7 +1551,17 @@ try {
     if (planSaved) document.getElementById('plan').value = planSaved;
     const conOn = localStorage.getItem('sss_con');
     if (conOn === '1') toggleConsole(true);
+    const patientSaved = localStorage.getItem('sss_patient');
+    if (patientSaved === '1') {
+        state.patientMode = true;
+        patientToggle.classList.add('active');
+    }
 } catch (e) {}
+
+/* Persister mode patient */
+patientToggle.addEventListener('click', () => {
+    try { localStorage.setItem('sss_patient', state.patientMode ? '1' : '0'); } catch (e) {}
+});
 
 window.addEventListener('beforeunload', e => {
     if (state.running) { e.preventDefault(); e.returnValue = ''; }
@@ -1388,9 +1572,9 @@ renderSeqPreview();
 updateDurationFromSlider();
 setKeys();
 updateButton();
-log('in', 'Seven-Second Shock V4 · Agnes · modèles : ' + MODELS.img + ' / ' + MODELS.vid);
-log('in', 'Correctif 429 actif · safety vidéo ×2.2 · cooldown renforcé · décalage initial des clés');
-log('in', 'Correctif téléchargement · 6 proxies CORS en cascade + timeout 25s chacun');
+log('in', 'Seven-Second Shock V6 · Agnes · modèles : ' + MODELS.img + ' / ' + MODELS.vid);
+log('in', '🛡 V6 · 429 cooldown global · 503 retry long (ne consomme pas les tentatives) · poll 10→25s');
+log('in', '🐢 Active le mode patient si Agnes est saturé aux heures pleines');
 log('in', 'Colle au moins une clé API Agnes pour commencer.');
 </script>
 
