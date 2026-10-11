@@ -707,20 +707,19 @@ async function agnesVideo(prompt, firstFrame, lastFrame, ratio, seconds) {
         prompt: prompt,
         seconds: String(seconds),
         size: '720P',
-        aspect_ratio: ratio
+        aspect_ratio: ratio,
+        mode: (firstFrame && lastFrame) ? 'keyframe' : 'text'   // ⬅️ AJOUT OBLIGATOIRE
     };
     if (firstFrame && lastFrame) {
-        body.mode = 'keyframe';
         body.first_frame = firstFrame;
         body.last_frame = lastFrame;
     }
 
-    /* ⬇️ PATCH 2 : 8 tentatives vidéo au lieu de 4 */
     const { r, o } = await call('vid', AGNES_API + '/videos', body, 8);
     const d = await r.json();
     const id = d.video_id || d.id;
     if (!id) throw new Error('Pas de video_id dans la réponse');
-    log('in', `vidéo envoyée · id=${id.slice(0, 12)}…`);
+    log('in', `vidéo envoyée · mode=${body.mode} · id=${id.slice(0, 12)}…`);
     return await pollVideo(id, o);
 }
 
