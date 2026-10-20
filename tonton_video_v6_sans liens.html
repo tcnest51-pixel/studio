@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TonTon Videos · Agnes v4</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+        --bg: #07080d; --panel: #0f1218; --panel-2: #171b24; --border: #242a35;
+        --ink: #e8e0d0; --ink-dim: #8a8270; --ink-faint: #4f4838;
+        --accent: #9b1c31; --accent-2: #c9a227; --success: #7cb342; --error: #b71c1c;
+        --radius: 12px;
+    }
+    body { font-family: -apple-system, 'Segoe UI', sans-serif; background: var(--bg); color: var(--ink);
+        min-height: 100vh; padding: 2rem 1rem 100px; display: flex; flex-direction: column; align-items: center; }
+    h1 { font-size: 1.6rem; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase;
+        margin-bottom: 0.3rem; text-shadow: 0 0 20px rgba(201,162,39,0.3); text-align: center; }
+    .subtitle { color: var(--ink-dim); font-size: 0.8rem; font-style: italic; margin-bottom: 2rem; text-align: center; }
+    .panel { width: 100%; max-width: 720px; background: var(--panel); border: 1px solid var(--border);
+        border-radius: var(--radius); padding: 1.3rem; margin-bottom: 1rem; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
+    label { display: block; font-size: 0.7rem; color: var(--ink-dim); text-transform: uppercase;
+        letter-spacing: 0.15em; font-weight: 700; margin-bottom: 0.5rem; }
+    textarea, select { width: 100%; padding: 0.85rem 1rem; background: #0a0608; color: var(--ink);
+        border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.9rem; font-style: italic; }
+    textarea:focus, select:focus { outline: none; border-color: var(--accent); }
+    textarea { min-height: 100px; line-height: 1.6; resize: vertical; }
+    select { font-style: normal; min-height: 42px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+    .upload-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 1.5rem 1rem;
+        text-align: center; cursor: pointer; background: var(--panel-2); transition: all 0.2s; margin-bottom: 0.8rem; }
+    .upload-zone:hover { border-color: var(--accent); }
+    .upload-zone input[type="file"] { display: none; }
+    .upload-icon { font-size: 2rem; margin-bottom: 0.4rem; }
+    .upload-text { font-size: 0.9rem; font-weight: 600; }
+    .upload-hint { font-size: 0.72rem; color: var(--ink-dim); margin-top: 0.3rem; font-style: italic; }
+    .images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 0.5rem; margin-top: 0.5rem; }
+    .image-card { position: relative; aspect-ratio: 9/16; border-radius: 8px; overflow: hidden;
+        border: 1px solid var(--border); background: #000; }
+    .image-card img { width: 100%; height: 100%; object-fit: cover; }
+    .image-card .remove-btn { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px;
+        border-radius: 50%; background: var(--accent); color: #fff; border: none; cursor: pointer;
+        font-size: 12px; display: flex; align-items: center; justify-content: center; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between;
+        padding: 0.8rem 1rem; background: var(--panel-2); border: 1px solid var(--border);
+        border-radius: 10px; margin-bottom: 0.6rem; cursor: pointer; transition: all 0.2s; }
+    .toggle-row.active { border-color: var(--accent-2);
+        background: linear-gradient(90deg, rgba(201,162,39,0.08), rgba(155,28,49,0.08)); }
+    .toggle-row .tg-info { flex: 1; }
+    .toggle-row .tg-name { font-size: 0.85rem; font-weight: 700; color: var(--ink); margin-bottom: 0.15rem; }
+    .toggle-row .tg-desc { font-size: 0.7rem; color: var(--ink-dim); font-style: italic; line-height: 1.3; }
+    .toggle-switch { width: 44px; height: 24px; border-radius: 12px; background: var(--border);
+        position: relative; transition: background 0.25s; flex-shrink: 0; margin-left: 0.7rem; }
+    .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px;
+        width: 20px; height: 20px; border-radius: 50%; background: var(--ink-dim); transition: all 0.25s; }
+    .toggle-row.active .toggle-switch { background: var(--accent); }
+    .toggle-row.active .toggle-switch::after { left: 22px; background: var(--ink); box-shadow: 0 0 10px var(--accent); }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+    .chip { padding: 0.5rem 0.9rem; border-radius: 20px; border: 1px solid var(--border);
+        background: var(--panel-2); color: var(--ink); font-size: 0.75rem; font-style: italic;
+        cursor: pointer; transition: all 0.15s; }
+    .chip:hover { border-color: var(--accent-2); }
+    .chip.active { background: linear-gradient(135deg, var(--accent), #6b0e21);
+        border-color: var(--accent-2); color: #f8e8ec; box-shadow: 0 0 10px rgba(155,28,49,0.4); }
+    .chip.off { border-color: var(--error); color: #f0b8b8; opacity: 0.6; }
+    .chip.cd { border-color: var(--accent-2); color: var(--accent-2); }
+    .chip.ok { border-color: var(--success); color: #d8f0b8; }
+    .chip.busy { border-color: var(--error); color: #ff9a9a; animation: pulse 1.6s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+    input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 5px;
+        border-radius: 3px; background: var(--border); outline: none; padding: 0; margin-top: 0.5rem; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px;
+        border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--ink); }
+    .range-val { display: inline-block; margin-left: 0.5rem; padding: 0.1rem 0.5rem;
+        background: var(--accent); color: #fff; border-radius: 8px; font-size: 0.7rem; font-weight: 700; font-style: normal; }
+    .duration-info { font-size: 0.72rem; color: var(--ink-dim); margin-top: 0.5rem; font-style: italic; line-height: 1.5; }
+    .duration-info strong { color: var(--accent-2); font-style: normal; }
+    button.primary { width: 100%; padding: 1.1rem; margin-top: 1rem;
+        background: linear-gradient(135deg, var(--accent), #6b0e21); color: #f8e8ec;
+        border: 1px solid var(--accent); border-radius: 10px; font-family: inherit; font-size: 1rem;
+        font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+    button.primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(155,28,49,0.4); }
+    button.primary:disabled { opacity: 0.4; cursor: not-allowed; }
+    button.stop { width: 100%; padding: 0.9rem; margin-top: 0.6rem; background: transparent;
+        color: #f0b8b8; border: 1px solid var(--error); border-radius: 10px; font-family: inherit;
+        font-size: 0.9rem; font-weight: 700; letter-spacing: 0.1em; cursor: pointer; display: none; }
+    button.stop.visible { display: block; }
+    button.reset { width: 100%; padding: 0.55rem; margin-top: 0.4rem; background: transparent;
+        color: var(--ink-faint); border: 1px dashed var(--border); border-radius: 8px;
+        font-family: inherit; font-size: 0.7rem; cursor: pointer; }
+    button.reset:hover { color: var(--accent-2); border-color: var(--accent-2); }
+    button.merge-duo { width: 100%; padding: 0.75rem; margin-top: 0.6rem;
+        background: linear-gradient(135deg, rgba(201,162,39,0.2), rgba(155,28,49,0.15));
+        color: var(--accent-2); border: 1px solid var(--accent-2); border-radius: 10px;
+        font-family: inherit; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    button.merge-duo:hover:not(:disabled) { background: var(--accent-2); color: #1a1005; }
+    button.merge-duo:disabled { opacity: 0.5; cursor: wait; }
+    #status { margin-top: 1rem; padding: 0.85rem 1rem; background: var(--panel-2);
+        border-left: 3px solid var(--accent-2); border-radius: 6px; font-size: 0.85rem;
+        font-style: italic; display: none; line-height: 1.6; max-width: 720px; width: 100%; }
+    #status.visible { display: block; }
+    #status.error { border-left-color: var(--error); color: #f0b8b8; }
+    #status.success { border-left-color: var(--success); color: #d8f0b8; }
+    #status.info { border-left-color: var(--accent); color: #e8c8d0; }
+    #status.busy { border-left-color: var(--accent-2); color: #ffe9a8;
+        background: linear-gradient(90deg, rgba(201,162,39,0.12), rgba(155,28,49,0.06)); }
+    .queue { margin-top: 1rem; display: none; width: 100%; max-width: 720px; }
+    .queue.visible { display: block; }
+    .queue-summary { padding: 0.7rem 1rem; background: var(--panel-2); border-radius: 8px;
+        font-size: 0.78rem; display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-weight: 700; }
+    .queue-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem;
+        border-radius: 8px; border: 1px solid var(--border); margin-bottom: 0.35rem;
+        font-size: 0.78rem; background: var(--panel); }
+    .queue-item.pending { opacity: 0.5; }
+    .queue-item.creating { border-color: var(--accent-2); }
+    .queue-item.processing { border-color: var(--accent); box-shadow: 0 0 10px rgba(155,28,49,0.25); }
+    .queue-item.waiting { border-color: var(--accent-2); box-shadow: 0 0 10px rgba(201,162,39,0.25); }
+    .queue-item.busy { border-color: var(--error); box-shadow: 0 0 12px rgba(183,28,28,0.35);
+        background: linear-gradient(90deg, rgba(183,28,28,0.08), transparent); }
+    .queue-item.done { border-color: var(--success); }
+    .queue-item.failed { border-color: var(--error); }
+    .q-counter { min-width: 2.2rem; padding: 0.15rem 0.5rem; border-radius: 8px;
+        background: rgba(155,28,49,0.25); color: var(--accent-2); font-family: monospace;
+        font-size: 0.68rem; font-weight: 800; text-align: center; flex-shrink: 0; }
+    .q-info { flex: 1; min-width: 0; }
+    .q-title { font-weight: 700; color: var(--ink); overflow: hidden; text-overflow: ellipsis;
+        white-space: nowrap; font-size: 0.75rem; }
+    .q-status { font-size: 0.68rem; color: var(--ink-dim); font-style: italic; }
+    .q-chain { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 6px;
+        background: rgba(124,179,66,0.2); color: var(--success); font-size: 0.6rem;
+        font-weight: 700; margin-left: 0.4rem; }
+    .q-attempts { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 6px;
+        background: rgba(201,162,39,0.25); color: var(--accent-2); font-size: 0.6rem;
+        font-weight: 800; margin-left: 0.4rem; font-family: monospace; }
+    .gallery { display: none; margin-top: 2rem; width: 100%; max-width: 1000px; }
+    .gallery.visible { display: block; }
+    .gallery-header { display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 1rem; gap: 0.7rem; flex-wrap: wrap; }
+    .gallery-title { font-size: 1rem; color: var(--accent-2); text-transform: uppercase;
+        letter-spacing: 0.1em; text-align: center; }
+    .btn-zip { padding: 0.6rem 1.1rem; border-radius: 20px; border: 1px solid var(--accent-2);
+        background: linear-gradient(135deg, rgba(201,162,39,0.2), rgba(155,28,49,0.15));
+        color: var(--accent-2); font-family: inherit; font-size: 0.75rem; font-weight: 700;
+        letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        display: inline-flex; align-items: center; gap: 0.4rem; }
+    .btn-zip:hover:not(:disabled) { background: var(--accent-2); color: #1a1005;
+        box-shadow: 0 0 16px rgba(201,162,39,0.5); }
+    .btn-zip:active:not(:disabled) { transform: scale(0.97); }
+    .btn-zip:disabled { opacity: 0.55; cursor: wait; border-color: var(--border);
+        color: var(--ink-dim); background: var(--panel-2); }
+    .gallery-group { margin-bottom: 2rem; }
+    .gallery-group-header { padding: 0.6rem 1rem;
+        background: linear-gradient(90deg, rgba(155,28,49,0.2), transparent);
+        border-left: 3px solid var(--accent); margin-bottom: 0.8rem;
+        font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em;
+        display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+    .gallery-group-header > div { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-left: auto; }
+    .play-seq-btn { padding: 0.4rem 0.9rem; border-radius: 20px; background: var(--accent);
+        color: #f8e8ec; border: 1px solid var(--accent-2); font-size: 0.7rem; font-weight: 700;
+        cursor: pointer; font-style: italic; transition: all 0.15s; }
+    .play-seq-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.8rem; }
+    .gallery-item { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border);
+        background: #000; position: relative; }
+    .gallery-item video, .gallery-item img { width: 100%; display: block; border: none; border-radius: 0; }
+    .gallery-item .caption { padding: 0.5rem 0.7rem; background: var(--panel); font-size: 0.68rem;
+        color: var(--ink-dim); font-style: italic; text-align: center; }
+    .gallery-item .chain-badge { position: absolute; top: 6px; left: 6px; padding: 0.15rem 0.5rem;
+        background: rgba(124,179,66,0.85); color: #fff; border-radius: 10px; font-size: 0.6rem;
+        font-weight: 800; letter-spacing: 0.05em; z-index: 2; }
+    .gallery-item .download-btn { position: absolute; bottom: 42px; right: 8px; padding: 0.35rem 0.7rem;
+        border-radius: 20px; background: rgba(10,6,8,0.85); color: var(--accent-2);
+        border: 1px solid var(--accent-2); font-size: 0.68rem; font-weight: 700; cursor: pointer;
+        backdrop-filter: blur(8px); transition: all 0.15s; }
+    .gallery-item .download-btn:hover { background: var(--accent-2); color: #1a1005; }
+    .gallery-item .download-btn:disabled { opacity: 0.5; cursor: wait; }
+    .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(155,28,49,0.3);
+        border-top-color: var(--accent); border-radius: 50%; animation: spin 0.9s linear infinite;
+        margin-right: 0.5rem; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hidden { display: none !important; }
+    .seq-preview { display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+        flex-wrap: wrap; margin-top: 0.8rem; padding: 0.7rem; background: var(--panel-2);
+        border: 1px solid var(--border); border-radius: 10px; }
+    .seq-node { padding: 0.35rem 0.7rem; border-radius: 20px; border: 1px solid var(--border);
+        background: var(--panel); font-size: 0.68rem; font-style: italic; color: var(--ink);
+        font-weight: 700; white-space: nowrap; }
+    .seq-node.start { border-color: var(--success); color: var(--success); }
+    .seq-node.end { background: linear-gradient(135deg, var(--accent), #6b0e21); border-color: var(--accent-2); color: #f8e8ec; }
+    .seq-arrow { color: var(--ink-faint); font-size: 0.8rem; }
+    .modal-player { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000;
+        display: none; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-player.visible { display: flex; }
+    .modal-inner { width: 100%; max-width: 500px; background: var(--panel); border: 1px solid var(--accent);
+        border-radius: var(--radius); padding: 1rem; box-shadow: 0 0 60px rgba(155,28,49,0.3); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;
+        padding-bottom: 0.6rem; border-bottom: 1px solid var(--border); }
+    .modal-title { font-size: 0.85rem; font-weight: 700; color: var(--accent-2); letter-spacing: 0.08em; }
+    .modal-close { background: transparent; border: 1px solid var(--border); color: var(--ink-dim);
+        width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 0.9rem; }
+    .modal-stage { position: relative; aspect-ratio: 9/16; max-height: 65vh; background: #000;
+        border-radius: 10px; overflow: hidden; border: 1px solid var(--border); margin: 0 auto; }
+    .modal-stage video, .modal-stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+    .modal-info { display: flex; justify-content: space-between; align-items: center; margin-top: 0.7rem;
+        font-size: 0.72rem; color: var(--ink-dim); font-style: italic; }
+    .modal-controls { display: flex; gap: 0.5rem; justify-content: center; margin-top: 0.8rem; flex-wrap: wrap; }
+    .modal-btn { padding: 0.6rem 1.2rem; border-radius: 24px; border: 1px solid var(--border);
+        background: var(--panel-2); color: var(--ink); font-family: inherit; font-size: 0.78rem;
+        font-weight: 700; cursor: pointer; }
+    .modal-btn.primary { background: linear-gradient(135deg, var(--accent), #6b0e21);
+        border-color: var(--accent-2); color: #f8e8ec; }
+    .modal-dl { position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 1100;
+        display: none; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-dl.visible { display: flex; }
+    .modal-dl-inner { width: 100%; max-width: 560px; background: var(--panel);
+        border: 1px solid var(--accent-2); border-radius: var(--radius); padding: 1.4rem;
+        box-shadow: 0 0 60px rgba(201,162,39,0.25); }
+    .modal-dl h3 { color: var(--accent-2); font-size: 1.1rem; margin-bottom: 0.6rem;
+        display: flex; justify-content: space-between; align-items: center; }
+    .modal-dl p { font-size: 0.85rem; color: var(--ink); line-height: 1.6; margin-bottom: 0.8rem; }
+    .modal-dl .url-box { display: flex; gap: 0.4rem; margin: 0.8rem 0; }
+    .modal-dl .url-box input { flex: 1; padding: 0.6rem 0.8rem; background: #0a0608;
+        border: 1px solid var(--border); border-radius: 6px; color: var(--ink);
+        font-family: monospace; font-size: 0.72rem; }
+    .modal-dl .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+    .modal-dl .actions button { flex: 1; min-width: 140px; padding: 0.7rem 1rem;
+        border-radius: 8px; font-family: inherit; font-size: 0.82rem; font-weight: 700;
+        cursor: pointer; border: 1px solid var(--border); background: var(--panel-2);
+        color: var(--ink); transition: all 0.15s; }
+    .modal-dl .actions button:hover { border-color: var(--accent-2); }
+    .modal-dl .actions button.primary { background: linear-gradient(135deg, var(--accent), #6b0e21);
+        border-color: var(--accent-2); color: #f8e8ec; }
+    .modal-dl .actions button.gold { background: linear-gradient(135deg, #c9a227, #8a6f14);
+        border-color: var(--accent-2); color: #1a1005; }
+    .modal-dl ol { font-size: 0.82rem; color: var(--ink-dim); margin: 0.6rem 0 0 1.2rem;
+        line-height: 1.7; font-style: italic; }
+    .modal-dl ol li b { color: var(--ink); font-style: normal; }
+    .duo-preview { margin-top: 0.8rem; padding: 0.85rem; background: var(--panel-2);
+        border: 1px solid var(--accent-2); border-radius: 10px; text-align: center; }
+    .duo-preview img { max-width: 100%; max-height: 280px; border-radius: 8px;
+        border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
+    .duo-preview .duo-label { font-size: 0.72rem; color: var(--accent-2); margin-bottom: 0.5rem;
+        font-style: italic; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 700; }
+    .duo-preview .duo-caption { font-size: 0.7rem; color: var(--ink-dim); margin-top: 0.4rem;
+        font-style: italic; }
+    .duo-preview .duo-hint { font-size: 0.68rem; color: var(--ink-dim);
+        background: rgba(201,162,39,0.1); padding: 0.5rem 0.7rem; border-radius: 6px;
+        margin-top: 0.6rem; border-left: 3px solid var(--accent-2); text-align: left; }
+    .duo-preview .duo-hint strong { color: var(--ink); font-style: normal; }
+    #upload-zone2 { margin-top: 0.5rem; border-color: var(--accent-2); }
+    #upload-zone2 .upload-icon { color: var(--accent); }
+    #upload-zone2 .upload-text { color: var(--accent-2); }
+    #ctog { position: fixed; right: 14px; bottom: 14px; z-index: 60; background: #0f1218;
+        color: var(--ink); padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+        font-family: monospace; font-size: 0.75rem; cursor: pointer; box-shadow: 0 4px 18px rgba(0,0,0,0.5); }
+    #ctog b { background: var(--error); color: #fff; padding: 0 6px; margin-left: 6px; display: none; border-radius: 6px; }
+    #con { position: fixed; left: 0; right: 0; bottom: 0; height: 38vh; z-index: 50;
+        background: #0a0608; color: #bfe3ff; transform: translateY(100%); transition: transform .25s;
+        display: flex; flex-direction: column; border-top: 1px solid var(--border); }
+    #con.on { transform: none; }
+    body.con #ctog { bottom: calc(38vh + 14px); }
+    .ch { display: flex; justify-content: space-between; padding: 6px 12px;
+        border-bottom: 1px solid #26405c; font: 12px monospace; }
+    .ch button { padding: 3px 9px; font-size: 11px; background: transparent; color: #bfe3ff;
+        border: 1px solid #4a6a8a; margin-left: 6px; cursor: pointer; border-radius: 4px; }
+    #lb { flex: 1; overflow: auto; padding: 8px 12px; font: 12px/1.5 monospace; }
+    .lg.er { color: #ff8a8a; } .lg.wr { color: #ffc477; } .lg.ok { color: #7dffb5; } .lg.in { color: #8fd0ff; }
+    @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+
+<h1>TonTon Videos</h1>
+<p class="subtitle">« Fait pour décrire vite. Conçu pour choquer. » · Agnes AI · v4</p>
+
+<div class="panel">
+    <label>🔑 Clés API Agnes (une par ligne)</label>
+    <textarea id="keys" placeholder="sk-..." spellcheck="false" style="min-height:70px;"></textarea>
+    <div class="row" style="margin-top:0.8rem;">
+        <div>
+            <label>Type de clé</label>
+            <select id="plan">
+                <option value="plan">Plan (payant)</option>
+                <option value="ent">Entreprise vérifiée</option>
+                <option value="free">Gratuite</option>
+            </select>
+        </div>
+        <div>
+            <label>État des clés</label>
+            <div class="chips" id="keys-status"><span class="chip off">Aucune clé</span></div>
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <label>📸 Portraits (optionnel)</label>
+    <div class="toggle-row" id="toggle-duo" style="margin-bottom:0.8rem;">
+        <div class="tg-info">
+            <div class="tg-name">👥 Mode Duo IA — 2 personnages</div>
+            <div class="tg-desc">Fusionne <strong>2 photos</strong> en une seule scène unifiée par IA (pas de split-screen)</div>
+        </div>
+        <div class="toggle-switch"></div>
+    </div>
+    <div class="upload-zone" id="upload-zone">
+        <input type="file" id="file-input" accept="image/*" multiple>
+        <div class="upload-icon">🐺</div>
+        <div class="upload-text" id="upload-text-main">Ajouter des portraits</div>
+        <div class="upload-hint">Sans photo → texte-vers-{vidéo|image}</div>
+    </div>
+    <div class="upload-zone hidden" id="upload-zone2">
+        <input type="file" id="file-input2" accept="image/*">
+        <div class="upload-icon">👤</div>
+        <div class="upload-text">Photo 2 (personnage B)</div>
+        <div class="upload-hint">Le second personnage du duo</div>
+    </div>
+    <div class="images-grid" id="images-grid"></div>
+    <div class="duo-preview hidden" id="duo-preview"></div>
+    <button type="button" class="merge-duo hidden" id="duo-merge-btn">
+        🔮 Re-fusionner les 2 photos (utilise le prompt actuel)
+    </button>
+</div>
+
+<div class="panel">
+    <label for="prompt">💡 Prompt</label>
+    <textarea id="prompt" placeholder="Ex : Werewolf howling at the full moon, thick dark fur, sharp fangs, glowing yellow eyes, cinematic Halloween horror, dramatic moonlight"></textarea>
+    <div class="row">
+        <div>
+            <label for="duration-range">Durée <span class="range-val" id="duration-val">6 s</span></label>
+            <input type="range" id="duration-range" min="4" max="12" step="1" value="6">
+            <div class="duration-info" id="duration-info">→ <strong>6 s</strong> · 720P · Agnes video (max 12 s)</div>
+        </div>
+        <div>
+            <label>Format</label>
+            <div class="chips" id="format-chips"></div>
+        </div>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="toggle-row" id="toggle-sequence">
+        <div class="tg-info">
+            <div class="tg-name">🎞️ Mode séquence</div>
+            <div class="tg-desc">Génère N stades progressifs à partir d'un seul prompt</div>
+        </div>
+        <div class="toggle-switch"></div>
+    </div>
+    <div class="toggle-row active" id="toggle-continuity" style="margin-top:0.6rem; border-color:var(--accent-2);">
+        <div class="tg-info">
+            <div class="tg-name">🔗 Continuité de transformation <span style="color:var(--accent-2); font-size:0.65rem;">(recommandé)</span></div>
+            <div class="tg-desc">Le keyframe de fin du stade précédent devient l'image de départ du suivant</div>
+        </div>
+        <div class="toggle-switch"></div>
+    </div>
+    <div class="toggle-row" id="toggle-patient" style="margin-top:0.6rem;">
+        <div class="tg-info">
+            <div class="tg-name">🐢 Mode patient <span style="color:var(--accent-2); font-size:0.65rem;">(anti-503)</span></div>
+            <div class="tg-desc">Attend 2 min entre chaque tentative au lieu de 45 s.</div>
+        </div>
+        <div class="toggle-switch"></div>
+    </div>
+    <div id="sequence-options" class="hidden" style="margin-top:0.8rem;">
+        <label>Nombre de stades <span class="range-val" id="stages-val">3</span></label>
+        <input type="range" id="stages-range" min="2" max="6" step="1" value="3">
+        <div class="seq-preview" id="seq-preview"></div>
+    </div>
+</div>
+
+<div class="panel">
+    <label>🎨 Mode de génération</label>
+    <div class="chips" id="mode-chips">
+        <div class="chip active" data-mode="video">🎬 Vidéo</div>
+        <div class="chip" data-mode="image">🖼️ Image (image-to-image)</div>
+    </div>
+    <div class="duration-info" id="mode-info" style="margin-top:0.6rem;">
+        → Génère des <strong>vidéos</strong> avec keyframes et continuité
+    </div>
+</div>
+
+<button class="primary" id="generate-btn">🚀 Lancer le choc</button>
+<button class="stop" id="stop-btn">⏹ Arrêter</button>
+<button class="reset" id="reset-btn">🔄 Réinitialiser l'état (si bloqué)</button>
+
+<div id="status"></div>
+
+<div class="queue" id="queue">
+    <div class="queue-summary">
+        <span id="queue-progress">0/0</span>
+        <span id="queue-eta">—</span>
+    </div>
+    <div id="queue-list"></div>
+</div>
+
+<div class="gallery" id="gallery">
+    <div class="gallery-header">
+        <div class="gallery-title">✨ Créations</div>
+        <button type="button" class="btn-zip" id="download-zip-btn" title="Télécharger tout dans une archive ZIP">📦 Tout télécharger (.zip)</button>
+    </div>
+    <div id="gallery-groups"></div>
+</div>
+
+<div class="modal-player" id="modal-player">
+    <div class="modal-inner">
+        <div class="modal-header">
+            <span class="modal-title" id="modal-title">🎞️ Séquence</span>
+            <button class="modal-close" id="modal-close-btn">✕</button>
+        </div>
+        <div class="modal-stage">
+            <video id="modal-video" controls playsinline></video>
+        </div>
+        <div class="modal-info">
+            <span id="modal-stage-label">Stade 1</span>
+            <span id="modal-counter">1/1</span>
+        </div>
+        <div class="modal-controls">
+            <button class="modal-btn primary" id="modal-play">▶ Lancer la séquence</button>
+            <button class="modal-btn" id="modal-loop">🔁 Boucle</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-dl" id="modal-dl">
+    <div class="modal-dl-inner">
+        <h3>
+            <span>⚠️ Téléchargement automatique impossible</span>
+            <button class="modal-close" id="modal-dl-close">✕</button>
+        </h3>
+        <p>Les sources testées (direct + proxies CORS + Worker) n'ont pas pu récupérer
+            <b id="modal-dl-filename">fichier.mp4</b>.</p>
+        <p><b>Deux solutions garanties :</b></p>
+        <ol>
+            <li><b>Clic droit</b> sur la vidéo dans la galerie → <b>« Enregistrer la vidéo sous… »</b></li>
+            <li>Ou utilise le bouton ci-dessous pour l'ouvrir dans un onglet, puis
+                <b>⋮</b> (Chrome) / <b>▼</b> (Firefox) → <b>Télécharger</b></li>
+        </ol>
+        <div class="url-box">
+            <input type="text" id="modal-dl-url" readonly>
+            <button class="modal-btn" id="modal-dl-copy" style="padding: 0.6rem 1rem;">📋 Copier</button>
+        </div>
+        <div class="actions">
+            <button class="gold" id="modal-dl-open">🌐 Ouvrir dans un onglet</button>
+            <button id="modal-dl-retry">🔄 Réessayer les proxies</button>
+            <button class="primary" id="modal-dl-close-2">✓ Compris</button>
+        </div>
+    </div>
+</div>
+
+<button id="ctog">▲ Console <b id="lc">0</b></button>
+<div id="con">
+    <div class="ch">
+        <span>CONSOLE · Agnes</span>
+        <span>
+            <button id="cpy">Copier</button>
+            <button id="cx">✕ Fermer</button>
+        </span>
+    </div>
+    <div id="lb"></div>
+</div>
+
+<script>
+/* CONFIG */
+const AGNES_API  = 'https://apihub.agnes-ai.com/v1';
+const AGNES_POLL = 'https://apihub.agnes-ai.com/agnesapi';
+const WORKER_URL = ''; // insere ton lien worker sur https://dash.cloudflare.com/
+const WORKER_KEY = ''; // insere ta cle worker
+
+const MODELS = {
+    txt: ['agnes-3.0-flash', 'agnes-2.5-flash'],
+    img: 'agnes-image-2.5-flash',
+    vid: 'agnes-video-2.5-flash'
+};
+
+const DUO_PRE_PROMPT = "La scène contient exactement DEUX personnages qui interagissent ensemble dans le même espace. Les visages et les traits physiques des deux personnes sur les photos de référence doivent être conservés à l'identique. Voici l'action : ";
+
+const RPM = {
+    free: { img: 10, vid: 1,  txt: 10  },
+    ent:  { img: 40, vid: 2,  txt: 20  },
+    plan: { img: 100, vid: 5, txt: 600 }
+};
+const SAFETY = { img: 1.5, vid: 3.0, txt: 1.4 };
+const COOL_BASE = 60000;
+const COOL_EXTRA_VID = 60000;
+const COOL_EXTRA_OTHER = 20000;
+const BUSY_WAIT_NORMAL = 45000;
+const BUSY_WAIT_PATIENT = 120000;
+
+const FORMATS = [
+    { id: 'portrait',  ratio: '9:16', icon: '📱', label: 'Vertical 9:16'   },
+    { id: 'landscape', ratio: '16:9', icon: '▶️', label: 'Horizontal 16:9' },
+    { id: 'square',    ratio: '1:1',  icon: '⬜', label: 'Carré 1:1'       }
+];
+const RATIO_OF = id => (FORMATS.find(f => f.id === id) || FORMATS[0]).ratio;
+
+const state = {
+    keys: [],
+    plan: 'plan',
+    factor: 1,
+    okCount: 0,
+    globalCool: 0,
+    serviceBusy: false,
+    patientMode: false,
+    mode: 'video',
+    images: [],
+    duoMode: false,
+    image2: null,
+    duoComposite: null,
+    running: false,
+    stopRequested: false,
+    sequence: false,
+    stages: 3,
+    strictContinuity: true,
+    formats: new Set(['portrait']),
+    queue: [],
+    completed: 0,
+    failed: 0,
+    results: [],
+    durationSeconds: 6,
+    logs: [],
+    errCount: 0
+};
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[c]));
+
+function sanitizeFilename(s) {
+    return String(s || '').replace(/[^a-z0-9_-]+/gi, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').slice(0, 60);
+}
+function generateDateStr() {
+    const d = new Date(); const p = n => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+}
+function generateTimeStr() {
+    const d = new Date(); const p = n => String(n).padStart(2, '0');
+    return p(d.getHours()) + '-' + p(d.getMinutes()) + '-' + p(d.getSeconds());
+}
+function setStatus(text, type) {
+    const el = document.getElementById('status');
+    if (!text) { el.className = ''; el.innerHTML = ''; return; }
+    el.className = 'visible' + (type ? ' ' + type : '');
+    el.innerHTML = text;
+}
+function timestamp() {
+    const n = new Date(); const p = x => String(x).padStart(2, '0');
+    return n.getFullYear() + p(n.getMonth() + 1) + p(n.getDate()) + '_' +
+           p(n.getHours()) + p(n.getMinutes()) + p(n.getSeconds());
+}
+function fmtTime(ms) {
+    const s = Math.round(ms / 1000);
+    if (s < 60) return s + 's';
+    const m = Math.floor(s / 60), r = s % 60;
+    return m + 'min' + (r > 0 ? r + 's' : '');
+}
+
+/* CONSOLE */
+function log(level, msg) {
+    const t = new Date().toLocaleTimeString('fr-FR') + '  ' + msg;
+    state.logs.push(t);
+    const d = document.createElement('div');
+    d.className = 'lg ' + level;
+    d.textContent = t;
+    const b = document.getElementById('lb');
+    b.appendChild(d);
+    while (b.children.length > 500) b.firstChild.remove();
+    b.scrollTop = b.scrollHeight;
+    if (level === 'er') {
+        state.errCount++;
+        document.getElementById('lc').textContent = state.errCount;
+        document.getElementById('lc').style.display = 'inline';
+    }
+}
+function toggleConsole(force) {
+    const con = document.getElementById('con');
+    const on = force == null ? !con.classList.contains('on') : force;
+    con.classList.toggle('on', on);
+    document.body.classList.toggle('con', on);
+    document.getElementById('ctog').firstChild.textContent = on ? '▼ Console ' : '▲ Console ';
+    try { localStorage.setItem('sss_con', on ? '1' : '0'); } catch (e) {}
+}
+
+/* CLÉS */
+function parseKeys() {
+    return [...new Set(
+        document.getElementById('keys').value
+            .split(/[\s,;]+/).map(s => s.trim()).filter(s => s.length > 12)
+    )];
+}
+function setKeys() {
+    const ks = parseKeys();
+    state.keys = ks.map(k =>
+        state.keys.find(o => o.k === k) || { k, img: 0, vid: 0, txt: 0, cool: 0, bad: 0, off: false }
+    );
+    try {
+        localStorage.setItem('sss_keys', ks.join('\n'));
+        localStorage.setItem('sss_plan', document.getElementById('plan').value);
+    } catch (e) {}
+    state.plan = document.getElementById('plan').value;
+    renderKeysStatus();
+    updateButton();
+}
+function renderKeysStatus() {
+    const now = Date.now();
+    const el = document.getElementById('keys-status');
+    if (!state.keys.length) { el.innerHTML = '<span class="chip off">Aucune clé</span>'; return; }
+    let html = '';
+    if (state.serviceBusy) html += '<span class="chip busy">⚡ Agnes saturé (503)</span>';
+    if (state.globalCool > now) html += '<span class="chip cd">🌍 Cooldown ' + Math.ceil((state.globalCool - now) / 1000) + 's</span>';
+    html += state.keys.map((k, i) => {
+        let cls = 'chip ok', txt = 'OK';
+        if (k.off) { cls = 'chip off'; txt = 'OFF'; }
+        else if (k.cool > now) { cls = 'chip cd'; txt = 'PAUSE ' + Math.ceil((k.cool - now) / 1000) + 's'; }
+        return '<span class="' + cls + '">#' + (i + 1) + ' …' + esc(k.k.slice(-4)) + ' ' + txt + '</span>';
+    }).join('');
+    el.innerHTML = html;
+}
+setInterval(renderKeysStatus, 1000);
+
+async function slot(kind) {
+    for (;;) {
+        if (state.stopRequested) throw new Error('ARRÊT_DEMANDÉ');
+        const nowCheck = Date.now();
+        if (state.globalCool > nowCheck) {
+            const wait = state.globalCool - nowCheck;
+            log('in', '🌍 cooldown global : ' + fmtTime(wait) + ' avant ' + kind + '…');
+            await sleep(Math.min(wait, 5000));
+            continue;
+        }
+        const live = state.keys.filter(o => !o.off);
+        if (!live.length) throw Object.assign(new Error('Aucune clé active'), { fatal: true });
+
+        const rpm = Math.max(1, RPM[state.plan][kind]);
+        const safety = SAFETY[kind] || 1.5;
+        const iv = (60000 / rpm) * safety * state.factor;
+
+        const now = Date.now();
+        let best = null, bt = Infinity;
+        for (const o of live) {
+            const last = o[kind] || 0;
+            const t = Math.max(last + iv, o.cool || 0, now);
+            if (t < bt) { bt = t; best = o; }
+        }
+        best[kind] = bt;
+
+        if (bt > now) {
+            const wait = bt - now;
+            if (wait > 500) log('in', '⏳ attente ' + fmtTime(wait) + ' avant ' + kind + ' (clé #' + (state.keys.indexOf(best) + 1) + ')…');
+            await sleep(wait);
+        }
+        if (state.stopRequested) throw new Error('ARRÊT_DEMANDÉ');
+        if (best.cool > Date.now()) continue;
+        return best;
+    }
+}
+
+async function call(kind, url, body, tries) {
+    let err;
+    let attempt = 0;
+    while (attempt < tries) {
+        if (state.stopRequested) throw new Error('ARRÊT_DEMANDÉ');
+        const o = await slot(kind);
+        try {
+            log('in', '→ ' + kind + ' (clé #' + (state.keys.indexOf(o) + 1) + ', tentative ' + (attempt + 1) + '/' + tries + ')');
+            const r = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + o.k },
+                body: JSON.stringify(body)
+            });
+            if (r.ok) {
+                o.bad = 0;
+                state.serviceBusy = false;
+                if (state.factor > 1 && ++state.okCount % 8 === 0) state.factor = Math.max(1, state.factor * 0.9);
+                return { r, o };
+            }
+            const tx = (await r.text()).slice(0, 300);
+            log('er', kind + ' #' + (state.keys.indexOf(o) + 1) + ' HTTP ' + r.status + ' ' + tx.slice(0, 180));
+
+            if (r.status === 429) {
+                const raRaw = r.headers.get('Retry-After');
+                const ra = parseInt(raRaw, 10);
+                const baseCool = (isFinite(ra) && ra > 0 ? ra : COOL_BASE / 1000) * 1000;
+                const extra = kind === 'vid' ? COOL_EXTRA_VID : COOL_EXTRA_OTHER;
+                const coolMs = baseCool + extra;
+                o.cool = Date.now() + coolMs;
+                state.globalCool = Math.max(state.globalCool, Date.now() + coolMs);
+                state.factor = Math.min(8, state.factor * 2.0);
+                log('wr', '429 · cooldown GLOBAL ' + fmtTime(coolMs) + ' (facteur ×' + state.factor.toFixed(2) + ')');
+                err = new Error('429');
+                attempt++;
+                continue;
+            }
+
+            if (r.status === 503) {
+                state.serviceBusy = true;
+                const retryAfter = parseInt(r.headers.get('Retry-After'), 10);
+                let waitMs;
+                if (isFinite(retryAfter) && retryAfter > 0) waitMs = retryAfter * 1000;
+                else if (state.patientMode) waitMs = BUSY_WAIT_PATIENT + Math.random() * 30000;
+                else waitMs = BUSY_WAIT_NORMAL + Math.random() * 15000;
+                log('wr', '503 · file Agnes pleine · attente ' + fmtTime(waitMs) + ' · tentative ' + (attempt + 2) + '/' + tries);
+                setStatus(
+                    '<span class="spinner"></span>⏳ <b>File d\'attente Agnes saturée</b> (503).<br>' +
+                    'Nouvelle tentative dans <b>' + fmtTime(waitMs) + '</b>.<br>' +
+                    '<span style="opacity:0.7; font-size:0.8em;">' +
+                    (state.patientMode ? '🐢 Mode patient actif.' : '💡 Active le 🐢 mode patient si ça dure.') +
+                    '</span>',
+                    'busy'
+                );
+                state.globalCool = Math.max(state.globalCool, Date.now() + waitMs);
+                const end = Date.now() + waitMs;
+                while (Date.now() < end && !state.stopRequested) {
+                    await sleep(Math.min(2000, end - Date.now()));
+                }
+                err = new Error('503');
+                attempt++;
+                continue;
+            }
+
+            if ([401, 402, 403].includes(r.status)) {
+                if (++o.bad >= 2) { o.off = true; log('wr', 'clé …' + o.k.slice(-4) + ' désactivée'); }
+                err = new Error('HTTP ' + r.status + ' ' + tx);
+                attempt++;
+                continue;
+            }
+
+            if (r.status >= 500 || r.status === 408 || r.status === 409) {
+                err = new Error('HTTP ' + r.status);
+                attempt++;
+                await sleep(2000 * Math.pow(2, attempt));
+                continue;
+            }
+
+            throw Object.assign(new Error('HTTP ' + r.status + ' ' + tx), { fatal: true });
+        } catch (e) {
+            if (e.fatal || e.message === 'ARRÊT_DEMANDÉ') throw e;
+            err = e;
+            attempt++;
+            await sleep(1500 * attempt);
+        }
+    }
+    throw err || new Error('Échec après ' + tries + ' tentatives');
+}
+
+/* URL → dataURI (fallback proxies) */
+async function urlToDataUri(url) {
+    if (!url || !url.startsWith('http')) return url;
+    try {
+        const r = await fetch(url, { mode: 'cors', credentials: 'omit' });
+        if (r.ok) {
+            const blob = await r.blob();
+            return await new Promise((res, rej) => {
+                const fr = new FileReader();
+                fr.onload = e => res(e.target.result);
+                fr.onerror = () => rej(new Error('lecture blob'));
+                fr.readAsDataURL(blob);
+            });
+        }
+    } catch (e) { /* fallback */ }
+    const result = await downloadBlobParallel(url, true);
+    if (result && result.blob) {
+        return await new Promise((res, rej) => {
+            const fr = new FileReader();
+            fr.onload = e => res(e.target.result);
+            fr.onerror = () => rej(new Error('lecture blob'));
+            fr.readAsDataURL(result.blob);
+        });
+    }
+    throw new Error('Impossible de récupérer l\'image : ' + url.slice(0, 80));
+}
+
+/* FORCE RATIO — recadre au ratio cible, clamp [256, 5760] */
+async function forceRatio(dataUri, targetRatio) {
+    if (!dataUri) return dataUri;
+    if (dataUri.startsWith('http')) {
+        try { dataUri = await urlToDataUri(dataUri); }
+        catch (e) {
+            log('wr', 'forceRatio : URL → dataURI échoué (' + e.message + ')');
+            return dataUri;
+        }
+    }
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+            try {
+                const parts = targetRatio.split(':');
+                const rw = parseInt(parts[0], 10);
+                const rh = parseInt(parts[1], 10);
+                const target = rw / rh;
+                const MIN = 256, MAX = 5760;
+                const iw = img.width, ih = img.height;
+                const longSide = Math.max(iw, ih);
+                let scale = 1;
+                if (longSide > MAX) scale = MAX / longSide;
+                else if (longSide < MIN) scale = MIN / longSide;
+                const baseW = Math.round(iw * scale);
+                const baseH = Math.round(ih * scale);
+                let outW, outH;
+                if (target >= 1) { outW = baseW; outH = Math.round(baseW / target); }
+                else { outH = baseH; outW = Math.round(baseH * target); }
+                if (outW > MAX) { outW = MAX; outH = Math.round(outW / target); }
+                if (outH > MAX) { outH = MAX; outW = Math.round(outH * target); }
+                if (outW < MIN) { outW = MIN; outH = Math.round(outW / target); }
+                if (outH < MIN) { outH = MIN; outW = Math.round(outH * target); }
+                outW = Math.max(MIN, Math.min(MAX, outW));
+                outH = Math.max(MIN, Math.min(MAX, outH));
+                const canvas = document.createElement('canvas');
+                canvas.width = outW; canvas.height = outH;
+                const ctx = canvas.getContext('2d');
+                const current = iw / ih;
+                let sx, sy, sw, sh;
+                if (current > target) {
+                    sh = ih; sw = Math.round(ih * target);
+                    sx = Math.round((iw - sw) / 2); sy = 0;
+                } else {
+                    sw = iw; sh = Math.round(iw / target);
+                    sx = 0; sy = Math.round((ih - sh) / 2);
+                }
+                ctx.drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH);
+                const out = canvas.toDataURL('image/jpeg', 0.92);
+                log('in', '🔧 forceRatio : ' + iw + '×' + ih + ' → ' + outW + '×' + outH + ' (' + targetRatio + ')');
+                resolve(out);
+            } catch (e) {
+                log('er', 'forceRatio erreur : ' + e.message);
+                resolve(dataUri);
+            }
+        };
+        img.onerror = () => resolve(dataUri);
+        img.src = dataUri;
+    });
+}
+
+/* AGNES · IMAGE */
+async function agnesImage(prompt, refImage, ratio) {
+    const body = {
+        model: MODELS.img,
+        prompt: prompt,
+        size: '1K',
+        ratio: ratio,
+        extra_body: { response_format: 'url' }
+    };
+    if (refImage) body.extra_body.image = [refImage];
+    const { r } = await call('img', AGNES_API + '/images/generations', body, 3);
+    const d = await r.json();
+    const url = d.data && d.data[0] && d.data[0].url;
+    if (!url) throw new Error('Pas d\'URL image dans la réponse');
+    return url;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DUO IA — Fusion des 2 photos en une scène unifiée
+   ═══════════════════════════════════════════════════════════════ */
+async function mergeDuoWithAI(photo1Uri, photo2Uri, scenePrompt, ratio) {
+    const mergePrompt =
+        'Create a UNIFIED cinematic scene where these TWO PEOPLE are together in the SAME physical space, ' +
+        'interacting naturally with each other. ' +
+        'The FIRST reference image is PERSON A. The SECOND reference image is PERSON B. ' +
+        '\n\nCRITICAL RULES:\n' +
+        '- BOTH people must appear in the output\n' +
+        '- NO split-screen, NO vertical dividing line, NO collage\n' +
+        '- They must be in the SAME shared environment with coherent lighting\n' +
+        '- Preserve their faces, hair, body type and key identity features\n' +
+        '- Match lighting, color grading, shadows across both people\n' +
+        '- Their bodies may overlap naturally (one behind the other, side by side, facing each other)\n' +
+        '\n\nSCENE: ' + scenePrompt + '\n\n' +
+        'Cinematic film still, dramatic lighting, no text, no watermark, no border.';
+
+    const body = {
+        model: MODELS.img,
+        prompt: mergePrompt,
+        size: '1K',
+        ratio: ratio,
+        extra_body: {
+            response_format: 'url',
+            image: [photo1Uri, photo2Uri]
+        }
+    };
+
+    const { r } = await call('img', AGNES_API + '/images/generations', body, 3);
+    const d = await r.json();
+    const url = d.data && d.data[0] && d.data[0].url;
+    if (!url) throw new Error('Pas d\'URL dans la réponse merge');
+    log('in', '🎭 Duo fusionné · url=' + url.slice(0, 60) + '…');
+    return url;
+}
+
+/* AGNES · VIDEO */
+async function agnesVideo(prompt, firstFrame, lastFrame, ratio, seconds) {
+    seconds = Math.max(4, Math.min(12, parseInt(seconds, 10) || 6));
+    const hasKeyframes = !!(firstFrame && lastFrame);
+    const body = {
+        model: MODELS.vid,
+        prompt: prompt,
+        seconds: String(seconds),
+        size: '720P',
+        aspect_ratio: ratio,
+        mode: hasKeyframes ? 'keyframe' : 'text'
+    };
+    if (hasKeyframes) {
+        body.first_frame = firstFrame;
+        body.last_frame = lastFrame;
+    }
+    const { r, o } = await call('vid', AGNES_API + '/videos', body, 999);
+    const d = await r.json();
+    const id = d.video_id || d.id;
+    if (!id) throw new Error('Pas de video_id dans la réponse');
+    log('in', 'vidéo envoyée · mode=' + body.mode + ' · ' + seconds + 's · id=' + id.slice(0, 12) + '…');
+    return await pollVideo(id, o);
+}
+
+async function pollVideo(id, keyObj) {
+    const end = Date.now() + 25 * 60000;
+    let miss = 0;
+    let iv = 30000;
+    const startPoll = Date.now();
+    while (Date.now() < end) {
+        if (state.stopRequested) throw new Error('ARRÊT_DEMANDÉ');
+        const nowCheck = Date.now();
+        if (state.globalCool > nowCheck) {
+            const w = state.globalCool - nowCheck;
+            log('in', '🌍 poll · cooldown global ' + fmtTime(w));
+            await sleep(Math.min(w + 500, iv));
+            continue;
+        }
+        await sleep(iv + Math.random() * 1500);
+        const polledFor = (Date.now() - startPoll) / 1000;
+        if (polledFor > 30) iv = Math.min(60000, 30000 + (polledFor - 30) * 300);
+        try {
+            const r = await fetch(AGNES_POLL + '?video_id=' + encodeURIComponent(id) + '&model_name=' + MODELS.vid,
+                { headers: { Authorization: 'Bearer ' + keyObj.k } });
+            if (r.status === 429) {
+                const retryAfter = parseInt(r.headers.get('Retry-After'), 10) || 60;
+                state.globalCool = Math.max(state.globalCool, Date.now() + retryAfter * 1000);
+                iv = Math.min(60000, Math.max(iv * 3, retryAfter * 1000));
+                log('wr', 'poll 429 · pause globale ' + retryAfter + 's · prochain poll dans ' + fmtTime(iv));
+                continue;
+            }
+            if (r.status === 503) {
+                state.serviceBusy = true;
+                iv = Math.min(60000, iv * 1.5);
+                log('wr', 'poll 503 · Agnes saturé, prochain poll dans ' + fmtTime(iv));
+                continue;
+            }
+            if (r.status === 404 && ++miss < 8) continue;
+            if (!r.ok) throw Object.assign(new Error('poll HTTP ' + r.status), { fin: 1 });
+            const d = await r.json();
+            if (d.progress != null) updateLiveProgress(d.progress);
+            if (d.status === 'completed') {
+                if (d.url) return d.url;
+                throw Object.assign(new Error('terminé sans URL'), { fin: 1 });
+            }
+            if (d.status === 'failed') throw Object.assign(new Error((d.error && d.error.message) || 'génération échouée'), { fin: 1 });
+        } catch (e) {
+            if (e.fin || e.message === 'ARRÊT_DEMANDÉ') throw e;
+            iv = Math.min(60000, iv * 1.3);
+        }
+    }
+    throw new Error('Délai dépassé (25 min)');
+}
+
+function updateLiveProgress(p) {
+    const items = state.queue.filter(q => q.status === 'processing' || q.status === 'waiting' || q.status === 'busy');
+    if (items.length) {
+        items[items.length - 1].progress = 'Rendu ' + p + '%';
+        renderQueue();
+    }
+}
+
+/* UPLOAD */
+function fileToDataUri(file) {
+    return new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = e => res(e.target.result);
+        r.onerror = () => rej(new Error('Erreur lecture'));
+        r.readAsDataURL(file);
+    });
+}
+function generateThumbnail(dataUri) {
+    return new Promise(res => {
+        const img = new Image();
+        img.onload = () => {
+            try {
+                const c = document.createElement('canvas');
+                const W = 120; const ratio = img.height / img.width;
+                c.width = W; c.height = Math.round(W * ratio);
+                c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                res(c.toDataURL('image/jpeg', 0.7));
+            } catch (e) { res(dataUri); }
+        };
+        img.onerror = () => res(dataUri);
+        img.src = dataUri;
+    });
+}
+async function handleFiles(files) {
+    for (const file of Array.from(files)) {
+        if (!file.type.startsWith('image/')) continue;
+        if (file.size > 12 * 1024 * 1024) { alert('Image trop lourde (max 12 MB)'); continue; }
+        try {
+            const dataUri = await fileToDataUri(file);
+            const testImg = new Image();
+            await new Promise(res => { testImg.onload = res; testImg.onerror = res; testImg.src = dataUri; });
+            if (Math.min(testImg.width, testImg.height) < 512) {
+                if (!confirm('Image ' + file.name + ' très petite (' + testImg.width + '×' + testImg.height + ').\nLa vidéo risque d\'être floue.\n\nContinuer ?')) continue;
+            }
+            const thumbnail = await generateThumbnail(dataUri);
+            state.images.push({ id: Date.now() + Math.random(), dataUri, thumbnail, name: file.name });
+        } catch (e) { console.error(e); }
+    }
+    renderImages();
+    if (state.duoMode) await refreshDuoComposite();
+    updateButton();
+}
+async function handleSecondPhoto(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    if (file.size > 12 * 1024 * 1024) { setStatus('⚠ Photo 2 trop lourde (max 12 MB)', 'error'); return; }
+    try {
+        const dataUri = await fileToDataUri(file);
+        const thumbnail = await generateThumbnail(dataUri);
+        state.image2 = { id: Date.now() + Math.random(), dataUri, thumbnail, name: file.name };
+        log('ok', '📸 Photo 2 chargée : ' + file.name);
+        if (state.duoMode && state.images[0]) {
+            await refreshDuoComposite();
+        }
+        updateButton();
+    } catch (e) {
+        log('er', 'Erreur chargement photo 2 : ' + e.message);
+        setStatus('❌ Erreur chargement photo 2', 'error');
+    }
+}
+function removeImage(id) {
+    state.images = state.images.filter(i => i.id !== id);
+    renderImages();
+    if (state.duoMode) refreshDuoComposite();
+    updateButton();
+}
+function renderImages() {
+    const grid = document.getElementById('images-grid');
+    grid.innerHTML = state.images.map(img =>
+        '<div class="image-card">' +
+            '<img src="' + (img.thumbnail || img.dataUri) + '">' +
+            '<button class="remove-btn" data-remove="' + img.id + '">✕</button>' +
+        '</div>'
+    ).join('');
+    grid.querySelectorAll('[data-remove]').forEach(b => {
+        b.addEventListener('click', () => removeImage(parseFloat(b.dataset.remove)));
+    });
+}
+
+/* DUO — Fallback canvas avec fondu doux */
+function combineDuoPhotos(uri1, uri2) {
+    return new Promise((resolve, reject) => {
+        const img1 = new Image();
+        const img2 = new Image();
+        let loaded = 0;
+        const onLoad = () => {
+            loaded++;
+            if (loaded < 2) return;
+            try {
+                const W = 720, H = 1280;
+                const halfW = W / 2;
+                const canvas = document.createElement('canvas');
+                canvas.width = W; canvas.height = H;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, W, H);
+                const drawCover = (img, x, y, w, h) => {
+                    const ir = img.width / img.height;
+                    const tr = w / h;
+                    let sx, sy, sw, sh;
+                    if (ir > tr) { sh = img.height; sw = sh * tr; sx = (img.width - sw) / 2; sy = 0; }
+                    else { sw = img.width; sh = sw / tr; sx = 0; sy = (img.height - sh) / 2; }
+                    ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+                };
+                /* Chevauchement de 40 px pour éviter la ligne nette */
+                drawCover(img1, 0, 0, halfW + 40, H);
+                drawCover(img2, halfW - 40, 0, halfW + 40, H);
+                /* Fondu doux au centre */
+                const grad = ctx.createLinearGradient(halfW - 80, 0, halfW + 80, 0);
+                grad.addColorStop(0, 'rgba(0,0,0,0)');
+                grad.addColorStop(0.5, 'rgba(0,0,0,0.35)');
+                grad.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(halfW - 80, 0, 160, H);
+                resolve(canvas.toDataURL('image/jpeg', 0.88));
+            } catch (e) { reject(new Error('Canvas duo : ' + e.message)); }
+        };
+        img1.onload = onLoad;
+        img2.onload = onLoad;
+        img1.onerror = () => reject(new Error('Chargement photo 1 échoué'));
+        img2.onerror = () => reject(new Error('Chargement photo 2 échoué'));
+        img1.src = uri1;
+        img2.src = uri2;
+    });
+}
+
+/* DUO — Fusion IA (avec fallback canvas) */
+async function refreshDuoComposite() {
+    if (!state.duoMode || !state.images[0] || !state.image2) {
+        state.duoComposite = null;
+        renderDuoPreview();
+        return;
+    }
+    try {
+        setStatus('<span class="spinner"></span>🎭 Fusion IA des 2 photos… (30-40 s)', 'info');
+        log('in', '🎭 Fusion duo via Agnes image-to-image…');
+        const promptEl = document.getElementById('prompt');
+                const rawSceneDesc = (promptEl && promptEl.value.trim()) || 'two people together in a cinematic scene';
+        const sceneDesc = DUO_PRE_PROMPT + rawSceneDesc;
+        const firstFmt = Array.from(state.formats)[0] || 'portrait';
+        const mergeRatio = RATIO_OF(firstFmt);
+
+        const mergeUrl = await mergeDuoWithAI(
+            state.images[0].dataUri, state.image2.dataUri, sceneDesc, mergeRatio
+        );
+        const dataUri = await urlToDataUri(mergeUrl);
+        const forced = await forceRatio(dataUri, mergeRatio);
+        state.duoComposite = forced;
+        log('ok', '✓ Duo fusionné par IA (' + Math.round(forced.length / 1024) + ' KB)');
+        renderDuoPreview();
+        setStatus(null);
+    } catch (e) {
+        log('er', '✗ Fusion IA échouée : ' + e.message + ' → fallback canvas');
+        try {
+            state.duoComposite = await combineDuoPhotos(state.images[0].dataUri, state.image2.dataUri);
+            log('wr', '⚠ Fallback : composite canvas (qualité réduite)');
+            renderDuoPreview();
+            setStatus(null);
+        } catch (e2) {
+            log('er', '✗ Fallback canvas échoué : ' + e2.message);
+            state.duoComposite = null;
+            renderDuoPreview();
+            setStatus(null);
+        }
+    }
+}
+
+function renderDuoPreview() {
+    const el = document.getElementById('duo-preview');
+    const mergeBtn = document.getElementById('duo-merge-btn');
+    if (!el) return;
+    if (!state.duoMode || !state.duoComposite) {
+        el.classList.add('hidden');
+        el.innerHTML = '';
+        if (mergeBtn) mergeBtn.classList.add('hidden');
+        return;
+    }
+    el.classList.remove('hidden');
+    if (mergeBtn) mergeBtn.classList.remove('hidden');
+    el.innerHTML = '<div class="duo-label">👥 Aperçu duo fusionné par IA</div>' +
+        '<img src="' + state.duoComposite + '" alt="duo">' +
+        '<div class="duo-caption">Les 2 personnes dans la même scène (pas de split-screen)</div>' +
+        '<div class="duo-hint"><strong>💡 Astuce :</strong> si le résultat ne te plaît pas, modifie le prompt (décris la scène et l\'interaction) puis clique "🔮 Re-fusionner".</div>';
+}
+function updateDuoUI() {
+    const duoOn = state.duoMode;
+    const zone2 = document.getElementById('upload-zone2');
+    const mainText = document.getElementById('upload-text-main');
+    if (zone2) zone2.classList.toggle('hidden', !duoOn);
+    if (mainText) mainText.textContent = duoOn ? 'Photo 1 (personnage A)' : 'Ajouter des portraits';
+    if (!duoOn) {
+        state.image2 = null;
+        state.duoComposite = null;
+        const fi2 = document.getElementById('file-input2');
+        if (fi2) fi2.value = '';
+    }
+    renderDuoPreview();
+    updateButton();
+}
+
+/* FORMATS */
+function renderFormatChips() {
+    document.getElementById('format-chips').innerHTML = FORMATS.map(f =>
+        '<div class="chip ' + (state.formats.has(f.id) ? 'active' : '') + '" data-format="' + f.id + '">' +
+            f.icon + ' ' + f.label +
+        '</div>'
+    ).join('');
+    document.querySelectorAll('[data-format]').forEach(el => {
+        el.addEventListener('click', () => toggleFormat(el.dataset.format));
+    });
+}
+function toggleFormat(id) {
+    if (state.formats.has(id)) {
+        if (state.formats.size <= 1) { alert('Garde au moins 1 format'); return; }
+        state.formats.delete(id);
+    } else state.formats.add(id);
+    renderFormatChips(); updateButton();
+}
+function renderModeChips() {
+    document.querySelectorAll('#mode-chips [data-mode]').forEach(el => {
+        el.classList.toggle('active', el.dataset.mode === state.mode);
+    });
+    const info = document.getElementById('mode-info');
+    if (state.mode === 'video') {
+        info.innerHTML = '→ Génère des <strong>vidéos</strong> avec keyframes et continuité. Soumis à la file d\'attente vidéo Agnes (parfois 503).';
+    } else {
+        info.innerHTML = '→ Génère <strong>uniquement les images</strong> (rapide, pas de 503).';
+    }
+}
+document.querySelectorAll('#mode-chips [data-mode]').forEach(el => {
+    el.addEventListener('click', () => {
+        state.mode = el.dataset.mode;
+        renderModeChips();
+        updateButton();
+        log('in', '🎨 Mode ' + (state.mode === 'image' ? 'IMAGE (image-to-image)' : 'VIDÉO'));
+    });
+});
+
+/* SÉQUENCE */
+function getStageHint(stageIdx, totalStages) {
+    if (totalStages <= 1) return { label: 'Unique' };
+    if (totalStages === 2) return { label: ['Début', 'Final'][stageIdx] };
+    if (totalStages === 3) return { label: ['Début', 'Milieu', 'Final'][stageIdx] };
+    const labels = ['Début', 'Début+', 'Milieu', 'Milieu+', 'Avancé', 'Final'];
+    return { label: labels[Math.min(stageIdx, labels.length - 1)] };
+}
+function renderSeqPreview() {
+    const c = document.getElementById('seq-preview');
+    if (!state.sequence) { c.innerHTML = ''; return; }
+    const nodes = [];
+    for (let i = 0; i < state.stages; i++) {
+        const hint = getStageHint(i, state.stages);
+        const pct = Math.round(((i + 1) / state.stages) * 100);
+        let cls = 'seq-node';
+        if (i === 0) cls += ' start';
+        if (i === state.stages - 1) cls += ' end';
+        nodes.push('<span class="' + cls + '">' + (i + 1) + '. ' + hint.label + ' (' + pct + '%)</span>');
+        if (i < state.stages - 1) nodes.push('<span class="seq-arrow">→</span>');
+    }
+    c.innerHTML = nodes.join('');
+}
+
+/* BOUTON */
+function computeTotal() {
+    const imgCount = state.duoMode ? 1 : (state.images.length || 1);
+    const stageCount = state.sequence ? state.stages : 1;
+    return imgCount * stageCount * state.formats.size;
+}
+function updateButton() {
+    const btn = document.getElementById('generate-btn');
+    const hasPrompt = document.getElementById('prompt').value.trim().length > 0;
+    const hasKeys = state.keys.length > 0;
+    const duoBlocked = state.duoMode && (!state.images[0] || !state.image2);
+    const hasContent = state.duoMode ? !!state.duoComposite : (state.images.length > 0 || hasPrompt);
+    const can = !state.running && hasPrompt && hasKeys && state.formats.size > 0 && hasContent && !duoBlocked;
+    btn.disabled = !can;
+    if (state.running) {
+        btn.textContent = '⏳ Génération en cours…';
+    } else if (!hasKeys) {
+        btn.textContent = '🔑 Ajoute une clé API';
+    } else if (!hasPrompt) {
+        btn.textContent = '✍ Écris une idée';
+    } else if (duoBlocked) {
+        btn.textContent = '👥 Ajoute les 2 photos du duo';
+    } else if (state.duoMode && !state.duoComposite) {
+        btn.textContent = '🎭 Fusion duo en cours…';
+    } else {
+        const total = computeTotal();
+        const unit = state.mode === 'image' ? 'image' : 'vidéo';
+        const isTextOnly = state.images.length === 0 && !state.duoMode;
+        const prefix = state.duoMode ? '👥 ' : (state.mode === 'image' ? '🖼️ ' : (isTextOnly ? '✨ ' : '🚀 '));
+        let label;
+        if (state.duoMode) label = 'Générer le duo';
+        else if (state.mode === 'image') label = isTextOnly ? 'Texte-vers-image' : 'Générer';
+        else label = isTextOnly ? 'Texte-vers-vidéo' : 'Lancer le choc';
+        btn.textContent = prefix + label + ' (' + total + ' ' + unit + (total > 1 ? 's' : '') + ')';
+    }
+}
+
+/* QUEUE */
+function renderQueue() {
+    const q = document.getElementById('queue');
+    if (!state.queue.length) { q.classList.remove('visible'); return; }
+    q.classList.add('visible');
+    const total = state.queue.length;
+    const done = state.completed + state.failed;
+    document.getElementById('queue-progress').textContent = done + '/' + total;
+    const remaining = total - done;
+    const etaMin = Math.round(remaining * (state.mode === 'image' ? 0.3 : 1.5));
+    document.getElementById('queue-eta').textContent = remaining > 0
+        ? '≈ ' + etaMin + ' min restant' : '✓ Terminé';
+    document.getElementById('queue-list').innerHTML = state.queue.map((item, i) => {
+        let cls = 'pending', st = 'En file', icon = '○';
+        if (item.status === 'busy') { cls = 'busy'; st = item.progress || '⚡ File Agnes saturée…'; icon = '⚡'; }
+        else if (item.status === 'waiting') { cls = 'waiting'; st = item.progress || '⏳ Attente…'; icon = '⏳'; }
+        else if (item.status === 'creating') { cls = 'creating'; st = 'Création…'; icon = '◐'; }
+        else if (item.status === 'processing') { cls = 'processing'; st = item.progress || 'En cours'; icon = '◐'; }
+        else if (item.status === 'done') { cls = 'done'; st = 'Terminé'; icon = '●'; }
+        else if (item.status === 'failed') { cls = 'failed'; st = item.error || 'Échec'; icon = '✕'; }
+        const stageLabel = state.sequence
+            ? (item.stageIndex >= 0 ? getStageHint(item.stageIndex, state.stages).label : '')
+            : '';
+        const pct = state.sequence ? Math.round(((item.stageIndex + 1) / state.stages) * 100) : 0;
+        const unit = state.mode === 'image' ? 'Img' : 'Vid';
+        const duoTag = state.duoMode ? 'Duo · ' : '';
+        const title = duoTag + 'Portrait ' + (item.imageIndex + 1) +
+            (state.sequence ? ' · Stade ' + (item.stageIndex + 1) + ' (' + stageLabel + ' ' + pct + '%)' : '') +
+            ' · ' + unit + ' ' + RATIO_OF(item.format);
+        const chainBadge = item.chained ? '<span class="q-chain">🔗</span>' : '';
+        const attemptsBadge = (item.attempts && item.attempts > 1)
+            ? '<span class="q-attempts">↻ ' + item.attempts + '</span>' : '';
+        return '<div class="queue-item ' + cls + '">' +
+            '<div class="q-counter">' + (i + 1) + '/' + total + '</div>' +
+            '<div class="q-info">' +
+                '<div class="q-title">' + icon + ' ' + esc(title) + chainBadge + attemptsBadge + '</div>' +
+                '<div class="q-status">' + esc(st) + '</div>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+/* PROMPTS */
+function ratioHint(ratio) {
+    if (ratio === '9:16') return '9:16 vertical';
+    if (ratio === '16:9') return '16:9 horizontal widescreen';
+    if (ratio === '1:1')  return '1:1 square';
+    return '9:16 vertical';
+}
+function buildStageImagePrompt(basePrompt, stageIdx, totalStages, ratio) {
+    const isDuo = state.duoMode && state.duoComposite;
+    const rh = ratioHint(ratio);
+    let duoPrefix = '';
+    if (isDuo) {
+        duoPrefix = 'The input image shows TWO PEOPLE together in a unified scene. ' +
+                    'Preserve BOTH identities: same faces, same features. Both transform together. ';
+    }
+    if (totalStages <= 1) {
+        return duoPrefix +
+               'Cinematic film still, ' + rh + ', dramatic lighting. ' + basePrompt + '. ' +
+               'Maximum intensity, powerful, epic. No text, no watermark.';
+    }
+    const pct = Math.round(((stageIdx + 1) / totalStages) * 100);
+    const isFirst = stageIdx === 0;
+    const isLast = stageIdx === totalStages - 1;
+    let stateDesc;
+    if (isFirst) {
+        stateDesc = 'EARLY stage (' + pct + '% transformed). The subjects are STILL CLEARLY HUMAN — only subtle signs of the transformation have appeared.';
+    } else if (isLast) {
+        stateDesc = 'FINAL stage (' + pct + '% transformed). COMPLETE, TOTAL, MAXIMUM transformation. Every feature at maximum intensity.';
+    } else {
+        stateDesc = 'MID stage (' + pct + '% transformed). VISIBLY MORE ADVANCED — half-transformed, creature features clearly visible.';
+    }
+    const duoReminder = isDuo ? 'REMINDER: both people transform together, keep both identities. ' : '';
+    return duoPrefix + 'Cinematic film still, ' + rh + '. ' + stateDesc + ' ' +
+           'Target final form: ' + basePrompt + '. ' +
+           'Keep the SAME person(s), SAME environment, SAME lighting, SAME camera framing as the reference image. ' +
+           duoReminder +
+           'No text, no watermark, no border.';
+}
+function buildStageVideoPrompt(basePrompt, stageIdx, totalStages, isChained, ratio) {
+    const isDuo = state.duoMode && state.duoComposite;
+    const rh = ratioHint(ratio);
+    let duoPrefix = '';
+    if (isDuo) {
+        duoPrefix = 'The input image shows TWO PEOPLE together in a unified scene. ' +
+                    'Preserve BOTH identities: same faces, same features. Both transform together. ';
+    }
+    if (totalStages <= 1) {
+        return duoPrefix + rh + '. ' + basePrompt + '. Smooth cinematic motion, dramatic lighting, 24fps. No text, no watermark.';
+    }
+    const pct = Math.round(((stageIdx + 1) / totalStages) * 100);
+    const isFirst = stageIdx === 0;
+    const isLast = stageIdx === totalStages - 1;
+    let motionDesc;
+    if (isFirst) motionDesc = 'The transformation begins — subtle early signs emerge gradually.';
+    else if (isLast) motionDesc = 'The transformation completes — every feature reaches maximum intensity.';
+    else motionDesc = 'The transformation continues — creature features become more pronounced.';
+    const continuity = isChained
+        ? 'CRITICAL: This is a seamless continuation from the input keyframe. Do NOT revert. Keep identity, environment, lighting, camera identical. '
+        : '';
+    const duoReminder = isDuo ? 'REMINDER: both people transform together, keep both identities. ' : '';
+    return duoPrefix + rh + '. ' + continuity + motionDesc + ' Stage ' + (stageIdx + 1) + '/' + totalStages + ' (' + pct + '% transformed). ' +
+           'Target final form: ' + basePrompt + '. ' +
+           duoReminder +
+           'Smooth continuous motion, cinematic 24fps, dramatic. No text, no watermark.';
+}
+function buildTextOnlyStagePrompt(basePrompt, stageIdx, totalStages, ratio) {
+    const rh = ratioHint(ratio);
+    if (totalStages <= 1) {
+        return basePrompt + '. ' + rh + '. Cinematic, dramatic, 24fps, no text, no watermark.';
+    }
+    const pct = Math.round(((stageIdx + 1) / totalStages) * 100);
+    const isFirst = stageIdx === 0;
+    const isLast = stageIdx === totalStages - 1;
+    let stateDesc;
+    if (isFirst) stateDesc = 'EARLY stage (' + pct + '% transformed) — subtle, still mostly original form.';
+    else if (isLast) stateDesc = 'FINAL stage (' + pct + '% transformed) — complete, maximum intensity, fully transformed.';
+    else stateDesc = 'MID stage (' + pct + '% transformed) — half-transformed, clearly more advanced.';
+    return basePrompt + '. ' + rh + '. ' + stateDesc + ' Cinematic, dramatic, 24fps, no text, no watermark.';
+}
+
+/* GÉNÉRATION */
+async function generate() {
+       let basePrompt = document.getElementById('prompt').value.trim();
+    if (!basePrompt) { setStatus('⚠ Écris un prompt', 'error'); return; }
+    
+    if (state.duoMode) {
+        basePrompt = DUO_PRE_PROMPT + basePrompt;
+    }
+    const seconds = state.durationSeconds;
+    if (!basePrompt) { setStatus('⚠ Écris un prompt', 'error'); return; }
+    if (!state.keys.length) { setStatus('⚠ Ajoute au moins une clé API Agnes', 'error'); return; }
+    if (state.running) return;
+
+    if (state.duoMode) {
+        if (!state.images[0]) { setStatus('⚠ Duo : ajoute la photo 1', 'error'); return; }
+        if (!state.image2) { setStatus('⚠ Duo : ajoute la photo 2', 'error'); return; }
+        if (!state.duoComposite) {
+            await refreshDuoComposite();
+            if (!state.duoComposite) { setStatus('❌ Impossible de fusionner les 2 photos', 'error'); return; }
+        }
+    }
+
+    const imagesToUse = state.duoMode
+        ? [{ id: 'duo', dataUri: state.duoComposite, thumbnail: null, name: 'duo-composite' }]
+        : (state.images.length > 0
+            ? state.images
+            : [{ id: 'text', dataUri: null, thumbnail: null, name: 'text-to-video' }]);
+
+    const stageCount = state.sequence ? state.stages : 1;
+    const formatsArr = Array.from(state.formats);
+
+    state.queue = [];
+    for (let imgIdx = 0; imgIdx < imagesToUse.length; imgIdx++) {
+        for (let stgIdx = 0; stgIdx < stageCount; stgIdx++) {
+            for (const fmt of formatsArr) {
+                state.queue.push({
+                    imageIndex: imgIdx, stageIndex: stgIdx, format: fmt,
+                    image: imagesToUse[imgIdx], status: 'pending',
+                    progress: null, error: null, videoUrl: null, chained: stgIdx > 0,
+                    attempts: 0
+                });
+            }
+        }
+    }
+    state.running = true; state.stopRequested = false;
+    state.completed = 0; state.failed = 0; state.results = [];
+    state.okCount = 0; state.factor = 1;
+    state.globalCool = 0;
+    state.serviceBusy = false;
+
+    state.keys.forEach((k, i) => {
+        k.off = false; k.bad = 0; k.cool = 0;
+        k.vid = Date.now() + i * 30000;
+        k.img = Date.now() + i * 5000;
+        k.txt = Date.now();
+    });
+
+    document.getElementById('gallery').classList.remove('visible');
+    document.getElementById('gallery-groups').innerHTML = '';
+    document.getElementById('stop-btn').classList.add('visible');
+    updateButton(); renderQueue();
+    setStatus('<span class="spinner"></span>Démarrage…');
+    log('in', '═══ Nouveau run · ' + (state.duoMode ? '👥 DUO' : (state.mode === 'image' ? '🖼️ IMAGE' : '🎬 VIDÉO')) + ' · ' +
+        imagesToUse.length + ' portrait(s) · ' + stageCount + ' stade(s) · ' +
+        formatsArr.length + ' format(s) · ' + state.keys.length + ' clé(s)');
+
+    const startTime = Date.now();
+    try {
+        for (let imgIdx = 0; imgIdx < imagesToUse.length; imgIdx++) {
+            if (state.stopRequested) break;
+            const img = imagesToUse[imgIdx];
+
+            for (const fmt of formatsArr) {
+                if (state.stopRequested) break;
+                log('in', '─── ' + (state.duoMode ? 'DUO' : 'Portrait ' + (imgIdx + 1)) + ' · ' + RATIO_OF(fmt) + ' ───');
+
+                let prevEndImage = null;
+                const isTextOnly = !img.dataUri;
+                const ratio = RATIO_OF(fmt);
+
+                for (let stgIdx = 0; stgIdx < stageCount; stgIdx++) {
+                    if (state.stopRequested) break;
+                    const hint = getStageHint(stgIdx, stageCount);
+                    const pct = Math.round(((stgIdx + 1) / stageCount) * 100);
+                    const item = state.queue.find(q =>
+                        q.imageIndex === imgIdx && q.stageIndex === stgIdx && q.format === fmt
+                    );
+                    if (!item) continue;
+
+                    const isChained = stgIdx > 0 && !!prevEndImage && state.strictContinuity;
+                    item.chained = isChained;
+                    item.attempts = 0;
+
+                    try {
+                        if (isTextOnly) {
+                            if (state.mode === 'image') {
+                                item.status = 'creating'; item.progress = 'Image…';
+                                item.attempts++;
+                                renderQueue();
+                                setStatus('<span class="spinner"></span>Stade ' + (stgIdx + 1) +
+                                    '/' + stageCount + ' (' + hint.label + ' ' + pct + '%) · ' + ratio + ' · text-to-image…');
+                                const stagePrompt = buildTextOnlyStagePrompt(basePrompt, stgIdx, stageCount, ratio);
+                                const imageUrl = await agnesImage(stagePrompt, null, ratio);
+                                item.status = 'done'; item.progress = 'Terminé';
+                                state.completed++;
+                                state.results.push({
+                                    imageIndex: imgIdx, stageIndex: stgIdx, format: fmt,
+                                    url: imageUrl, chained: false, label: hint.label, type: 'image'
+                                });
+                                log('ok', '✓ Image stade ' + (stgIdx + 1) + ' prête (' + ratio + ')');
+                                renderQueue(); renderGallery();
+                                continue;
+                            }
+                            item.status = 'creating'; item.progress = 'Création…';
+                            renderQueue();
+                            setStatus('<span class="spinner"></span>Stade ' + (stgIdx + 1) + '/' + stageCount +
+                                ' (' + hint.label + ' ' + pct + '%) · ' + ratio + ' · texte-vers-vidéo…');
+                            const stagePrompt = buildTextOnlyStagePrompt(basePrompt, stgIdx, stageCount, ratio);
+                            item.status = 'waiting'; item.progress = '⏳ Attente…';
+                            renderQueue();
+                            item.attempts++;
+                            const videoUrl = await agnesVideo(stagePrompt, null, null, ratio, seconds);
+                            item.status = 'done'; item.videoUrl = videoUrl; item.progress = 'Terminé';
+                            state.completed++;
+                            state.results.push({
+                                imageIndex: imgIdx, stageIndex: stgIdx, format: fmt,
+                                url: videoUrl, chained: false, label: hint.label, type: 'video'
+                            });
+                            log('ok', '✓ Vidéo stade ' + (stgIdx + 1) + ' prête (' + ratio + ')');
+                            renderQueue(); renderGallery();
+                            continue;
+                        }
+
+                        let startImage = isChained ? prevEndImage : img.dataUri;
+                        startImage = await forceRatio(startImage, ratio);
+
+                        item.status = 'creating';
+                        item.progress = state.mode === 'image' ? 'Transformation…' : 'Keyframe fin…';
+                        item.attempts++;
+                        renderQueue();
+                        if (state.mode === 'image') {
+                            setStatus('<span class="spinner"></span>Stade ' + (stgIdx + 1) + '/' + stageCount +
+                                ' (' + hint.label + ' ' + pct + '%) · ' + ratio + ' · image-to-image' + (isChained ? ' 🔗' : '') + '…');
+                        } else {
+                            setStatus('<span class="spinner"></span>Stade ' + (stgIdx + 1) + '/' + stageCount +
+                                ' (' + hint.label + ' ' + pct + '%) · ' + ratio + ' · génération keyframe…');
+                        }
+                        const imgPrompt = buildStageImagePrompt(basePrompt, stgIdx, stageCount, ratio);
+                        log('in', '🖼 Prompt image' + (state.mode === 'image' ? '→image' : ' keyframe') + ' : ' + imgPrompt.slice(0, 200));
+                        const endImageRaw = await agnesImage(imgPrompt, startImage, ratio);
+                        log('ok', '✓ Image générée' + (state.mode === 'video' ? ' (keyframe fin)' : ''));
+
+                        const endImage = await forceRatio(endImageRaw, ratio);
+
+                        if (state.mode === 'image') {
+                            item.status = 'done'; item.progress = 'Terminé';
+                            item.endImage = endImage;
+                            state.completed++;
+                            state.results.push({
+                                imageIndex: imgIdx, stageIndex: stgIdx, format: fmt,
+                                url: endImage, chained: isChained, label: hint.label,
+                                type: 'image', endImage
+                            });
+                            log('ok', '✓ Image stade ' + (stgIdx + 1) + ' prête (' + ratio + ')' + (isChained ? ' [chaîné]' : ''));
+                            renderQueue(); renderGallery();
+                            prevEndImage = endImage;
+                            continue;
+                        }
+
+                        item.status = 'waiting'; item.progress = '⏳ Attente…';
+                        renderQueue();
+                        setStatus('<span class="spinner"></span>Stade ' + (stgIdx + 1) + '/' + stageCount +
+                            ' · ' + ratio + ' · rendu vidéo' + (isChained ? ' 🔗' : '') + '…');
+                        const vidPrompt = buildStageVideoPrompt(basePrompt, stgIdx, stageCount, isChained, ratio);
+                        log('in', '🎬 Prompt vidéo : ' + vidPrompt.slice(0, 200));
+                        const videoUrl = await agnesVideo(vidPrompt, startImage, endImage, ratio, seconds);
+                        item.status = 'done'; item.videoUrl = videoUrl; item.progress = 'Terminé';
+                        item.endImage = endImage;
+                        state.completed++;
+                        state.results.push({
+                            imageIndex: imgIdx, stageIndex: stgIdx, format: fmt,
+                            url: videoUrl, chained: isChained, label: hint.label,
+                            type: 'video', endImage
+                        });
+                        log('ok', '✓ Vidéo stade ' + (stgIdx + 1) + ' prête (' + ratio + ')' + (isChained ? ' [chaîné]' : ''));
+                        renderQueue(); renderGallery();
+                        prevEndImage = endImage;
+                    } catch (error) {
+                        if (error.message === 'ARRÊT_DEMANDÉ' || error.name === 'AbortError') {
+                            log('wr', '⏹ Stade annulé');
+                            item.status = 'failed'; item.error = 'Annulé';
+                            state.stopRequested = true; renderQueue(); break;
+                        }
+                        log('er', '✗ ' + error.message);
+                        item.status = 'failed'; item.error = error.message;
+                        state.failed++; renderQueue();
+                    }
+                }
+            }
+        }
+
+        const elapsed = Math.round((Date.now() - startTime) / 1000);
+        const unit = state.mode === 'image' ? 'image' : 'vidéo';
+        if (state.stopRequested) {
+            setStatus('⏹ Arrêté — ' + state.completed + ' ' + unit + (state.completed > 1 ? 's' : '') + ' créée' + (state.completed > 1 ? 's' : ''), 'error');
+        } else {
+            setStatus('🎉 ' + state.completed + ' ' + unit + (state.completed > 1 ? 's' : '') + ' créée' + (state.completed > 1 ? 's' : '') + ' en ' + elapsed + 's', 'success');
+        }
+    } catch (e) {
+        log('er', e.message);
+        setStatus('❌ ' + e.message, 'error');
+    } finally {
+        state.running = false; state.stopRequested = false;
+        state.serviceBusy = false;
+        document.getElementById('stop-btn').classList.remove('visible');
+        updateButton();
+    }
+}
+
+function stopGeneration() {
+    if (!state.running) return;
+    state.stopRequested = true;
+    setStatus('<span class="spinner"></span>Arrêt immédiat…');
+    log('wr', 'Arrêt demandé');
+}
+function emergencyReset() {
+    state.running = false; state.stopRequested = false;
+    state.completed = 0; state.failed = 0; state.queue = [];
+    state.globalCool = 0; state.serviceBusy = false;
+    state.keys.forEach(k => { k.cool = 0; k.bad = 0; });
+    document.getElementById('stop-btn').classList.remove('visible');
+    document.getElementById('queue').classList.remove('visible');
+    document.getElementById('queue-list').innerHTML = '';
+    setStatus('🔄 État réinitialisé.', 'info');
+    setTimeout(() => setStatus(null), 2000);
+    updateButton();
+}
+
+/* GALERIE */
+function renderGallery() {
+    if (!state.results.length) return;
+    document.getElementById('gallery').classList.add('visible');
+    const groups = {};
+    state.results.forEach(r => {
+        if (!groups[r.imageIndex]) groups[r.imageIndex] = [];
+        groups[r.imageIndex].push(r);
+    });
+    let html = '';
+    Object.keys(groups).sort((a, b) => a - b).forEach(imgIdx => {
+        const items = groups[imgIdx].slice().sort((a, b) => a.stageIndex - b.stageIndex);
+        const isText = state.images.length === 0 && !state.duoMode;
+        const isImageMode = items[0] && items[0].type === 'image';
+        const hasSequence = state.sequence && new Set(items.map(i => i.stageIndex)).size > 1;
+        const modeLabel = state.duoMode ? '👥' : (isImageMode ? '🖼️' : '🎬');
+        const groupLabel = state.duoMode ? 'Duo' : (isText ? 'Text-to-' + (isImageMode ? 'image' : 'video') : 'Portrait ' + (parseInt(imgIdx) + 1));
+        html += '<div class="gallery-group">';
+        html += '<div class="gallery-group-header">' +
+            '<span>' + modeLabel + ' ' + groupLabel +
+            ' — ' + items.length + ' ' + (isImageMode ? 'image' : 'vidéo') + (items.length > 1 ? 's' : '') +
+            (hasSequence ? ' · ' + state.stages + ' stades' : '') + '</span>' +
+            '<div>' +
+                (hasSequence && !isImageMode ? '<button class="play-seq-btn" data-play-seq="' + imgIdx + '">▶ Voir la séquence</button>' : '') +
+                (hasSequence && isImageMode ? '<button class="play-seq-btn" data-play-seq-img="' + imgIdx + '">▶ Voir la séquence</button>' : '') +
+            '</div>' +
+            '</div>';
+        html += '<div class="gallery-grid">';
+        items.forEach(r => {
+            const pct = state.sequence ? Math.round(((r.stageIndex + 1) / state.stages) * 100) : 0;
+            const stageLabel = state.sequence
+                ? 'Stade ' + (r.stageIndex + 1) + '/' + state.stages + ' · ' + r.label + ' ' + pct + '%'
+                : 'Résultat';
+            const formatTag = RATIO_OF(r.format).replace(':', '-');
+            const isImg = r.type === 'image';
+            const ext = isImg ? 'jpg' : 'mp4';
+            const duoTag = state.duoMode ? 'duo_' : 'shock_';
+            const filename = duoTag + 'p' + (imgIdx + 1) + '_s' + (r.stageIndex + 1) + '_' + formatTag + '.' + ext;
+            const chainBadge = r.chained ? '<div class="chain-badge">🔗</div>' : '';
+            const mediaTag = isImg
+                ? '<img src="' + r.url + '" alt="" style="width:100%; display:block;">'
+                : '<video controls playsinline preload="metadata" src="' + r.url + '"></video>';
+            html += '<div class="gallery-item">' +
+                chainBadge +
+                mediaTag +
+                '<button class="download-btn" data-download-url="' + esc(r.url) + '" data-download-name="' + esc(filename) + '" data-is-image="' + (isImg ? '1' : '0') + '">⬇ ' + (isImg ? 'JPG' : 'MP4') + '</button>' +
+                '<div class="caption">' + esc(stageLabel) + ' · ' + RATIO_OF(r.format) + '</div>' +
+            '</div>';
+        });
+        html += '</div></div>';
+    });
+    document.getElementById('gallery-groups').innerHTML = html;
+    document.querySelectorAll('[data-play-seq]').forEach(b => {
+        b.addEventListener('click', () => openSequencePlayer(parseInt(b.dataset.playSeq, 10)));
+    });
+    document.querySelectorAll('[data-play-seq-img]').forEach(b => {
+        b.addEventListener('click', () => openImageSequence(parseInt(b.dataset.playSeqImg, 10)));
+    });
+    document.querySelectorAll('[data-download-url]').forEach(b => {
+        b.addEventListener('click', () => {
+            const isImg = b.dataset.isImage === '1';
+            if (isImg) downloadImage(b.dataset.downloadUrl, b.dataset.downloadName, b);
+            else downloadVideo(b.dataset.downloadUrl, b.dataset.downloadName, b);
+        });
+    });
+}
+
+/* TÉLÉCHARGEMENT */
+const DOWNLOAD_SOURCES = [
+    { name: 'direct',         make: u => u },
+    { name: 'isomorphic-git', make: u => 'https://cors.isomorphic-git.org/' + u },
+    { name: 'codetabs',       make: u => 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(u) },
+    { name: 'allorigins-raw', make: u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u) },
+    { name: 'allorigins-b64', make: u => 'https://api.allorigins.win/get?url=' + encodeURIComponent(u), base64: true },
+    { name: 'cors.lol',       make: u => 'https://api.cors.lol/?url=' + encodeURIComponent(u) },
+    { name: 'whateverorigin', make: u => 'https://whateverorigin.org/get?url=' + encodeURIComponent(u), base64: true },
+    { name: 'workers.dev',    make: u => 'https://test.cors.workers.dev/?' + u },
+    { name: 'thingproxy',     make: u => 'https://thingproxy.freeboard.io/fetch/' + u },
+    { name: 'corsproxy.io',   make: u => 'https://corsproxy.io/?url=' + encodeURIComponent(u) }
+];
+async function fetchViaWorker(url, filename) {
+    if (!WORKER_URL || !WORKER_KEY) throw new Error('Worker non configuré');
+    let workerUrl = WORKER_URL + '/?key=' + encodeURIComponent(WORKER_KEY) + '&url=' + encodeURIComponent(url);
+    if (filename) workerUrl += '&filename=' + encodeURIComponent(filename);
+    const res = await fetch(workerUrl);
+    if (!res.ok) throw new Error('Worker HTTP ' + res.status);
+    const blob = await res.blob();
+    if (blob.size < 500) throw new Error('Fichier trop petit');
+    return blob;
+}
+async function fetchWithTimeout(url, ms, label, isBase64) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ms);
+    try {
+        const r = await fetch(url, {
+            mode: 'cors', credentials: 'omit', redirect: 'follow', signal: ctrl.signal
+        });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const ct = (r.headers.get('content-type') || '').toLowerCase();
+        if (isBase64) {
+            const j = await r.json();
+            if (!j || !j.contents) throw new Error('base64 vide');
+            const b64 = j.contents.replace(/^data:[^;]+;base64,/, '');
+            const bin = atob(b64);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            const blob = new Blob([bytes]);
+            if (blob.size < 500) throw new Error('Fichier trop petit (' + blob.size + 'o)');
+            return blob;
+        }
+        if (ct.includes('text/html') || ct.includes('application/json')) {
+            throw new Error('Réponse non-binaire (' + ct + ')');
+        }
+        const blob = await r.blob();
+        if (blob.size < 500) throw new Error('Fichier trop petit (' + blob.size + 'o)');
+        return blob;
+    } finally {
+        clearTimeout(timer);
+    }
+}
+async function downloadBlobParallel(url, isImage) {
+    /* Worker d'abord (fiable pour Agnes) */
+    try {
+        log('in', '🎯 Tentative Worker direct…');
+        const blob = await fetchViaWorker(url);
+        log('ok', '✅ Worker → ' + Math.round(blob.size / 1024) + ' Ko');
+        return { blob, source: 'worker' };
+    } catch (e) {
+        log('wr', 'Worker échoué, fallback proxies…');
+    }
+    /* Fallback proxies */
+    const timeoutMs = 25000;
+    log('in', '🚀 ' + DOWNLOAD_SOURCES.length + ' sources en parallèle…');
+    let winnerFound = false;
+    const promises = DOWNLOAD_SOURCES.map(src => (async () => {
+        if (winnerFound) throw new Error('skip');
+        try {
+            const proxiedUrl = src.make(url);
+            const blob = await fetchWithTimeout(proxiedUrl, timeoutMs, src.name, src.base64);
+            if (winnerFound) throw new Error('already won');
+            winnerFound = true;
+            log('ok', '✅ ' + src.name + ' → ' + Math.round(blob.size / 1024) + ' Ko');
+            return { blob, source: src.name };
+        } catch (e) { throw e; }
+    })());
+    try {
+        return await Promise.any(promises);
+    } catch (e) {
+        log('er', '❌ Tous les proxies ont échoué');
+        return null;
+    }
+}
+function triggerSaveBlob(blob, filename) {
+    const objUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objUrl; a.download = filename; a.style.display = 'none';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { a.remove(); URL.revokeObjectURL(objUrl); }, 8000);
+}
+async function downloadVideo(url, baseFilename, btnEl) {
+    const uniqueName = baseFilename.replace(/\.mp4$/i, '') + '_' + timestamp() + '.mp4';
+    if (btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳…'; }
+    setStatus('<span class="spinner"></span>⬇ Recherche de la meilleure source…', 'info');
+    log('in', '⬇ Vidéo : ' + uniqueName);
+    const result = await downloadBlobParallel(url, false);
+    if (!result) {
+        showDownloadModal(url, uniqueName, false);
+        if (btnEl) { btnEl.disabled = false; btnEl.textContent = '⬇ MP4'; }
+        setStatus(null);
+        return;
+    }
+    try {
+        triggerSaveBlob(result.blob, uniqueName);
+        const sizeMB = (result.blob.size / 1048576).toFixed(1);
+        setStatus('✅ Téléchargé : <b>' + esc(uniqueName) + '</b> (' + sizeMB + ' Mo · via ' + result.source + ')', 'success');
+        log('ok', 'Vidéo enregistrée (' + sizeMB + ' Mo · via ' + result.source + ')');
+        setTimeout(() => { if (!state.running) setStatus(null); }, 6000);
+    } catch (e) {
+        log('er', 'Sauvegarde : ' + e.message);
+        showDownloadModal(url, uniqueName, false);
+    } finally {
+        if (btnEl) { btnEl.disabled = false; btnEl.textContent = '⬇ MP4'; }
+    }
+}
+async function downloadImage(url, baseFilename, btnEl) {
+    const uniqueName = baseFilename.replace(/\.(jpg|jpeg|png)$/i, '') + '_' + timestamp() + '.jpg';
+    if (btnEl) { btnEl.disabled = true; btnEl.textContent = '⏳…'; }
+    setStatus('<span class="spinner"></span>⬇ Recherche de la meilleure source…', 'info');
+    log('in', '⬇ Image : ' + uniqueName);
+    const result = await downloadBlobParallel(url, true);
+    if (!result) {
+        showDownloadModal(url, uniqueName, true);
+        if (btnEl) { btnEl.disabled = false; btnEl.textContent = '⬇ JPG'; }
+        setStatus(null);
+        return;
+    }
+    try {
+        triggerSaveBlob(result.blob, uniqueName);
+        const sizeKB = Math.round(result.blob.size / 1024);
+        setStatus('✅ Téléchargé : <b>' + esc(uniqueName) + '</b> (' + sizeKB + ' Ko · via ' + result.source + ')', 'success');
+        log('ok', 'Image enregistrée (' + sizeKB + ' Ko · via ' + result.source + ')');
+        setTimeout(() => { if (!state.running) setStatus(null); }, 6000);
+    } catch (e) {
+        log('er', 'Sauvegarde : ' + e.message);
+        showDownloadModal(url, uniqueName, true);
+    } finally {
+        if (btnEl) { btnEl.disabled = false; btnEl.textContent = '⬇ JPG'; }
+    }
+}
+async function downloadAllAsZip() {
+    if (!state.results.length) {
+        setStatus('⚠ Aucune création à télécharger', 'error');
+        setTimeout(() => setStatus(null), 2500);
+        return;
+    }
+    if (typeof JSZip === 'undefined') {
+        setStatus('❌ Bibliothèque ZIP non chargée', 'error');
+        setTimeout(() => setStatus(null), 4000);
+        return;
+    }
+    const btn = document.getElementById('download-zip-btn');
+    const origText = btn.textContent;
+    btn.disabled = true;
+    const zip = new JSZip();
+    const dateStr = generateDateStr();
+    const folderName = sanitizeFilename('tonton_' + (state.duoMode ? 'duo_' : '') + dateStr + '_' + generateTimeStr());
+    const folder = zip.folder(folderName);
+    const isImageMode = state.results[0] && state.results[0].type === 'image';
+    const readme = [
+        'TonTon Videos — Archive',
+        'Date     : ' + new Date().toLocaleString('fr-FR'),
+        'Éléments : ' + state.results.length,
+        'Mode     : ' + (state.duoMode ? 'Duo' : (isImageMode ? 'Image' : 'Vidéo')),
+        'Séquence : ' + (state.sequence ? state.stages + ' stades' : 'non'),
+        'Formats  : ' + Array.from(state.formats).map(RATIO_OF).join(', '),
+        'Durée    : ' + state.durationSeconds + ' s'
+    ].join('\n');
+    folder.file('README.txt', readme);
+    const total = state.results.length;
+    let success = 0, failed = 0;
+    for (let i = 0; i < total; i++) {
+        const r = state.results[i];
+        const pct = Math.round((i / total) * 100);
+        btn.textContent = '📦 ' + (i + 1) + '/' + total + ' (' + pct + '%)…';
+        setStatus('📦 Téléchargement ' + (i + 1) + '/' + total + '…');
+        try {
+            const isImg = r.type === 'image';
+            let blob = null;
+            if (isImg && r.url.startsWith('data:')) {
+                const resp = await fetch(r.url);
+                blob = await resp.blob();
+            } else {
+                const res = await downloadBlobParallel(r.url, isImg);
+                if (res) blob = res.blob;
+            }
+            if (!blob || blob.size < 500) { failed++; continue; }
+            const formatTag = RATIO_OF(r.format).replace(':', '-');
+            const ext = isImg ? '.jpg' : '.mp4';
+            const prefix = state.duoMode ? 'tonton_duo_' : 'tonton_';
+            const fileName = prefix + 'p' + String(r.imageIndex + 1).padStart(2, '0') +
+                            '_s' + String(r.stageIndex + 1).padStart(2, '0') +
+                            '_' + formatTag + ext;
+            folder.file(fileName, blob);
+            success++;
+        } catch (e) {
+            log('er', 'ZIP : élément ' + (i + 1) + ' échoué — ' + e.message);
+            failed++;
+        }
+    }
+    if (success === 0) {
+        setStatus('❌ Aucun élément n\'a pu être téléchargé', 'error');
+        btn.disabled = false; btn.textContent = origText;
+        setTimeout(() => setStatus(null), 4000);
+        return;
+    }
+    btn.textContent = '📦 Compression…';
+    setStatus('📦 Compression de l\'archive…');
+    const zipBlob = await zip.generateAsync(
+        { type: 'blob', compression: 'STORE' },
+        (meta) => { btn.textContent = '📦 Compression ' + Math.round(meta.percent) + '%'; }
+    );
+    const zipName = folderName + '.zip';
+    triggerSaveBlob(zipBlob, zipName);
+    btn.disabled = false; btn.textContent = origText;
+    const sizeMb = (zipBlob.size / 1048576).toFixed(1);
+    const msg = '✅ ' + success + ' élément' + (success > 1 ? 's' : '') + ' · ' + sizeMb + ' Mo' +
+                (failed ? ' · ' + failed + ' échec(s)' : '');
+    setStatus(msg, failed ? 'error' : 'success');
+    log('ok', 'ZIP généré : ' + zipName + ' (' + sizeMb + ' Mo · ' + success + ' succès, ' + failed + ' échecs)');
+    setTimeout(() => { if (!state.running) setStatus(null); }, 8000);
+}
+
+let currentDownloadUrl = null;
+let currentDownloadFilename = null;
+let currentDownloadIsImage = false;
+
+function showDownloadModal(url, filename, isImage) {
+    currentDownloadUrl = url;
+    currentDownloadFilename = filename;
+    currentDownloadIsImage = isImage;
+    document.getElementById('modal-dl-filename').textContent = filename;
+    document.getElementById('modal-dl-url').value = url;
+    document.getElementById('modal-dl').classList.add('visible');
+}
+document.getElementById('modal-dl-close').addEventListener('click', () => document.getElementById('modal-dl').classList.remove('visible'));
+document.getElementById('modal-dl-close-2').addEventListener('click', () => document.getElementById('modal-dl').classList.remove('visible'));
+document.getElementById('modal-dl-copy').addEventListener('click', () => {
+    const input = document.getElementById('modal-dl-url');
+    input.select(); input.setSelectionRange(0, 99999);
+    (navigator.clipboard ? navigator.clipboard.writeText(currentDownloadUrl) : Promise.reject())
+        .then(() => {
+            const btn = document.getElementById('modal-dl-copy');
+            btn.textContent = '✅ Copié !';
+            setTimeout(() => { btn.textContent = '📋 Copier'; }, 2000);
+        })
+        .catch(() => {
+            try {
+                document.execCommand('copy');
+                const btn = document.getElementById('modal-dl-copy');
+                btn.textContent = '✅ Copié !';
+                setTimeout(() => { btn.textContent = '📋 Copier'; }, 2000);
+            } catch (e) { alert('Copie manuelle : ' + currentDownloadUrl); }
+        });
+});
+document.getElementById('modal-dl-open').addEventListener('click', () => {
+    window.open(currentDownloadUrl, '_blank', 'noopener,noreferrer');
+});
+document.getElementById('modal-dl-retry').addEventListener('click', async () => {
+    const btn = document.getElementById('modal-dl-retry');
+    btn.disabled = true;
+    btn.textContent = '⏳ Nouvelle tentative…';
+    log('in', '🔄 Réessai téléchargement : ' + currentDownloadFilename);
+    const result = await downloadBlobParallel(currentDownloadUrl, currentDownloadIsImage);
+    if (result) {
+        triggerSaveBlob(result.blob, currentDownloadFilename);
+        const sizeMB = (result.blob.size / 1048576).toFixed(2);
+        log('ok', '✅ Réessai réussi (' + sizeMB + ' Mo · via ' + result.source + ')');
+        document.getElementById('modal-dl').classList.remove('visible');
+    } else {
+        log('er', '❌ Réessai échoué');
+        btn.textContent = '❌ Échec, réessayer';
+    }
+    btn.disabled = false;
+    setTimeout(() => { btn.textContent = '🔄 Réessayer les proxies'; }, 3000);
+});
+
+/* MODAL PLAYER */
+const player = { videos: [], currentIdx: 0, playing: false, loop: false, timeout: null };
+
+function openSequencePlayer(imageIndex) {
+    const byStage = {};
+    state.results.filter(r => r.imageIndex === imageIndex && r.type !== 'image').forEach(r => {
+        if (!byStage[r.stageIndex]) byStage[r.stageIndex] = r;
+    });
+    const vids = Object.keys(byStage).sort((a, b) => a - b).map(k => byStage[k]);
+    if (vids.length < 2) { alert('Il faut au moins 2 stades vidéo'); return; }
+    player.videos = vids; player.currentIdx = 0; player.playing = true;
+    const modal = document.getElementById('modal-player');
+    const video = document.getElementById('modal-video');
+    video.src = vids[0].url; video.load(); video.play().catch(() => {});
+    document.getElementById('modal-title').textContent = '🎞️ Séquence · ' + (state.duoMode ? 'Duo' : 'Portrait ' + (imageIndex + 1));
+    updatePlayerUI();
+    modal.classList.add('visible');
+    scheduleNext();
+}
+function updatePlayerUI() {
+    const v = player.videos[player.currentIdx];
+    const pct = state.sequence ? Math.round(((v.stageIndex + 1) / state.stages) * 100) : 0;
+    document.getElementById('modal-stage-label').textContent = 'Stade ' + (v.stageIndex + 1) + ' · ' + v.label + ' ' + pct + '%';
+    document.getElementById('modal-counter').textContent = (player.currentIdx + 1) + '/' + player.videos.length;
+    document.getElementById('modal-play').textContent = player.playing ? '⏸ Pause' : '▶ Reprendre';
+    document.getElementById('modal-loop').textContent = player.loop ? '🔁 Boucle ON' : '🔁 Boucle';
+}
+function scheduleNext() {
+    clearTimeout(player.timeout);
+    if (!player.playing) return;
+    const dur = state.durationSeconds;
+    player.timeout = setTimeout(() => {
+        if (!player.playing) return;
+        const next = player.currentIdx + 1;
+        if (next >= player.videos.length) {
+            if (player.loop) {
+                player.currentIdx = 0;
+                const video = document.getElementById('modal-video');
+                video.src = player.videos[0].url; video.load(); video.play().catch(() => {});
+                updatePlayerUI(); scheduleNext();
+            } else {
+                player.playing = false;
+                document.getElementById('modal-play').textContent = '↺ Rejouer';
+            }
+            return;
+        }
+        player.currentIdx = next;
+        const video = document.getElementById('modal-video');
+        video.src = player.videos[next].url; video.load(); video.play().catch(() => {});
+        updatePlayerUI(); scheduleNext();
+    }, dur * 1000);
+}
+function closeModal() {
+    player.playing = false;
+    clearTimeout(player.timeout);
+    document.getElementById('modal-video').pause();
+    document.getElementById('modal-player').classList.remove('visible');
+}
+
+const imgPlayer = { images: [], currentIdx: 0, loop: false };
+function openImageSequence(imageIndex) {
+    const byStage = {};
+    state.results.filter(r => r.imageIndex === imageIndex && r.type === 'image').forEach(r => {
+        if (!byStage[r.stageIndex]) byStage[r.stageIndex] = r;
+    });
+    const imgs = Object.keys(byStage).sort((a, b) => a - b).map(k => byStage[k]);
+    if (imgs.length < 2) { alert('Il faut au moins 2 stades image'); return; }
+    imgPlayer.images = imgs;
+    imgPlayer.currentIdx = 0;
+    showImageStep();
+    document.getElementById('modal-player').classList.add('visible');
+}
+function showImageStep() {
+    const r = imgPlayer.images[imgPlayer.currentIdx];
+    const pct = state.sequence ? Math.round(((r.stageIndex + 1) / state.stages) * 100) : 0;
+    const stage = document.querySelector('.modal-stage');
+    const videoEl = document.getElementById('modal-video');
+    videoEl.style.display = 'none';
+    let imgEl = stage.querySelector('img.modal-img');
+    if (!imgEl) {
+        imgEl = document.createElement('img');
+        imgEl.className = 'modal-img';
+        imgEl.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:contain;';
+        stage.appendChild(imgEl);
+    }
+    imgEl.src = r.url;
+    imgEl.style.display = 'block';
+    document.getElementById('modal-title').textContent = '🖼️ Séquence image · ' + (state.duoMode ? 'Duo' : 'Portrait ' + (r.imageIndex + 1));
+    document.getElementById('modal-stage-label').textContent = 'Stade ' + (r.stageIndex + 1) + ' · ' + r.label + ' ' + pct + '%';
+    document.getElementById('modal-counter').textContent = (imgPlayer.currentIdx + 1) + '/' + imgPlayer.images.length;
+    document.getElementById('modal-play').textContent = '▶ Suivant';
+    document.getElementById('modal-loop').textContent = imgPlayer.loop ? '🔁 Boucle ON' : '🔁 Boucle';
+}
+function nextImageStep() {
+    const next = imgPlayer.currentIdx + 1;
+    if (next >= imgPlayer.images.length) {
+        if (imgPlayer.loop) imgPlayer.currentIdx = 0;
+        else return false;
+    } else {
+        imgPlayer.currentIdx = next;
+    }
+    showImageStep();
+    return true;
+}
+function closeImageModal() {
+    const videoEl = document.getElementById('modal-video');
+    videoEl.style.display = 'block';
+    const imgEl = document.querySelector('.modal-stage img.modal-img');
+    if (imgEl) imgEl.remove();
+}
+
+function updateDurationFromSlider() {
+    const slider = document.getElementById('duration-range');
+    const seconds = parseInt(slider.value, 10);
+    state.durationSeconds = seconds;
+    document.getElementById('duration-val').textContent = seconds + ' s';
+    document.getElementById('duration-info').innerHTML =
+        '→ <strong>' + seconds + ' s</strong> · 720P · Agnes video (max 12 s)';
+}
+
+/* INIT */
+document.getElementById('upload-zone').addEventListener('click', () => document.getElementById('file-input').click());
+document.getElementById('file-input').addEventListener('change', e => { handleFiles(e.target.files); e.target.value = ''; });
+document.getElementById('upload-zone2').addEventListener('click', () => document.getElementById('file-input2').click());
+document.getElementById('file-input2').addEventListener('change', e => {
+    if (e.target.files[0]) handleSecondPhoto(e.target.files[0]);
+    e.target.value = '';
+});
+document.getElementById('prompt').addEventListener('input', updateButton);
+document.getElementById('prompt').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        if (!document.getElementById('generate-btn').disabled) generate();
+    }
+});
+document.getElementById('duration-range').addEventListener('input', updateDurationFromSlider);
+document.getElementById('generate-btn').addEventListener('click', generate);
+document.getElementById('stop-btn').addEventListener('click', stopGeneration);
+document.getElementById('reset-btn').addEventListener('click', emergencyReset);
+document.getElementById('duo-merge-btn').addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (state.running) { setStatus('⚠ Attends la fin du run', 'error'); return; }
+    if (!state.duoMode || !state.images[0] || !state.image2) return;
+    const btn = document.getElementById('duo-merge-btn');
+    const orig = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '⏳ Fusion en cours…';
+    await refreshDuoComposite();
+    btn.disabled = false;
+    btn.textContent = orig;
+});
+document.getElementById('toggle-duo').addEventListener('click', async () => {
+    state.duoMode = !state.duoMode;
+    document.getElementById('toggle-duo').classList.toggle('active', state.duoMode);
+    updateDuoUI();
+    log('in', '👥 Mode Duo IA ' + (state.duoMode ? 'ACTIVÉ (fusion par IA)' : 'désactivé'));
+    if (state.duoMode && state.images[0] && state.image2) {
+        await refreshDuoComposite();
+    }
+});
+document.getElementById('toggle-sequence').addEventListener('click', () => {
+    state.sequence = !state.sequence;
+    document.getElementById('toggle-sequence').classList.toggle('active', state.sequence);
+    document.getElementById('sequence-options').classList.toggle('hidden', !state.sequence);
+    if (state.sequence) renderSeqPreview();
+    updateButton();
+});
+const contToggle = document.getElementById('toggle-continuity');
+contToggle.classList.add('active');
+contToggle.addEventListener('click', () => {
+    state.strictContinuity = !state.strictContinuity;
+    contToggle.classList.toggle('active', state.strictContinuity);
+});
+const patientToggle = document.getElementById('toggle-patient');
+patientToggle.addEventListener('click', () => {
+    state.patientMode = !state.patientMode;
+    patientToggle.classList.toggle('active', state.patientMode);
+    log('in', '🐢 Mode patient ' + (state.patientMode ? 'ACTIVÉ' : 'désactivé'));
+    try { localStorage.setItem('sss_patient', state.patientMode ? '1' : '0'); } catch (e) {}
+});
+document.getElementById('stages-range').addEventListener('input', e => {
+    state.stages = parseInt(e.target.value, 10);
+    document.getElementById('stages-val').textContent = state.stages;
+    renderSeqPreview(); updateButton();
+});
+document.getElementById('modal-close-btn').addEventListener('click', () => {
+    if (imgPlayer.images.length) { closeImageModal(); imgPlayer.images = []; }
+    closeModal();
+});
+document.getElementById('modal-play').addEventListener('click', () => {
+    if (imgPlayer.images.length) { nextImageStep(); return; }
+    player.playing = !player.playing;
+    const video = document.getElementById('modal-video');
+    if (player.playing) { video.play().catch(() => {}); scheduleNext(); }
+    else { video.pause(); clearTimeout(player.timeout); }
+    updatePlayerUI();
+});
+document.getElementById('modal-loop').addEventListener('click', () => {
+    if (imgPlayer.images.length) { imgPlayer.loop = !imgPlayer.loop; showImageStep(); return; }
+    player.loop = !player.loop;
+    updatePlayerUI();
+});
+document.getElementById('keys').addEventListener('input', setKeys);
+document.getElementById('plan').addEventListener('change', setKeys);
+document.getElementById('ctog').addEventListener('click', () => toggleConsole());
+document.getElementById('cx').addEventListener('click', () => toggleConsole(false));
+document.getElementById('cpy').addEventListener('click', () => {
+    const t = state.logs.join('\n');
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).catch(() => {
+        const a = document.createElement('textarea'); a.value = t;
+        document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove();
+    });
+});
+document.getElementById('download-zip-btn').addEventListener('click', downloadAllAsZip);
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        const mdl = document.getElementById('modal-dl');
+        if (mdl && mdl.classList.contains('visible')) mdl.classList.remove('visible');
+    }
+});
+
+try {
+    const saved = localStorage.getItem('sss_keys');
+    if (saved) document.getElementById('keys').value = saved;
+    const planSaved = localStorage.getItem('sss_plan');
+    if (planSaved) document.getElementById('plan').value = planSaved;
+    const conOn = localStorage.getItem('sss_con');
+    if (conOn === '1') toggleConsole(true);
+    const patientSaved = localStorage.getItem('sss_patient');
+    if (patientSaved === '1') {
+        state.patientMode = true;
+        patientToggle.classList.add('active');
+    }
+} catch (e) {}
+
+window.addEventListener('beforeunload', e => {
+    if (state.running) { e.preventDefault(); e.returnValue = ''; }
+});
+
+renderFormatChips();
+renderModeChips();
+renderSeqPreview();
+updateDurationFromSlider();
+setKeys();
+updateDuoUI();
+updateButton();
+log('in', '🎬 TonTon Videos · Agnes · v4');
+log('in', '👥 NOUVEAU · Duo IA : 2 photos → 1 scène unifiée (pas de split-screen)');
+log('in', '🎯 Formats 9:16 / 16:9 / 1:1 · prompts + images forcés au bon ratio');
+log('in', '🔧 forceRatio + Worker-first + clamp [256, 5760]');
+log('in', '🛡 Anti-503 : 999 tentatives (jamais d\'abandon auto)');
+log('in', 'Colle au moins une clé API Agnes pour commencer.');
+</script>
+
+</body>
+</html>
